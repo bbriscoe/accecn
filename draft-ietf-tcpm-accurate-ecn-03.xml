@@ -276,7 +276,9 @@ ToDo: Why is this timescale point commented out? It means that, if successful af
 
         <t>Testing will mostly focus on fall-back strategies in case of
         middlebox interference. Current recommended strategies are specified
-        in section <xref target="accecn_Mbox_Interference"/>. The
+        in Sections <xref format="counter" target="accecn_sec_SYN_rexmt"/>,
+        <xref format="counter" target="accecn_sec_ACE_init_invalid"/> and
+        <xref format="counter" target="accecn_Mbox_Interference"/>. The
         effectiveness of these strategies depends on the actual deployment
         situation of middleboxes. Therefore experimental verification to
         confirm large-scale path traversal in the Internet is needed to
