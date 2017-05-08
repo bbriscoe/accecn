@@ -1088,22 +1088,35 @@ deliberately to reduce complexity.-->
         </section>
 
         <section anchor="accecn_sec_ACE_init_invalid"
-                 title="Testing for Invalid Initialization of the ACE Field">
-          <t>If AccECN has been successfully negotiated and if the value of
-          the ACE field on the first segment with SYN=0 in either direction is
-          anything other than 0b110 or 0b111, the Data Receiver MUST disable
-          sending ECN-capable packets for the remainder of the half-connection
-          by marking the IP/ECN field in all subsequent packets as
-          Not-ECT.</t>
+                 title="Testing for Zeroing of the ACE Field">
+          <t><xref target="accecn_ACE"/> required the Data Receiver to
+          initialize the r.cep counter to a non-zero value. Therefore, in
+          either direction the initial value of the ACE field ought to be
+          non-zero.</t>
 
-          <t>The "first segment with SYN=0" is defined as: the segment with
-          SYN=0 that i) acknowledges sequence space at least covering the
-          initial sequence number (ISN); and ii) arrives before any other
-          segments with SYN=0 so it is unlikely to be a retransmission. If no
-          such segment arrives (e.g. because it is lost and the ISN is first
-          acknowledged by a subsequent segment), no test for invalid
-          initialization can be conducted, and the half-connection will
-          continue in AccECN mode.</t>
+          <t>If AccECN has been successfully negotiated, the Data Sender
+          SHOULD check the initial value of the ACE field in the first
+          arriving segment with SYN=0. If the initial value of the ACE field
+          is zero (0b000), the Data Sender MUST disable sending ECN-capable
+          packets for the remainder of the half-connection by setting the
+          IP/ECN field in all subsequent packets to Not-ECT.</t>
+
+          <t>For example, the server checks the ACK of the SYN/ACK or the
+          first data segment from the client, while the client checks the
+          first data segment from the server. More precisely, the "first
+          segment with SYN=0" is defined as: the segment with SYN=0 that i)
+          acknowledges sequence space at least covering the initial sequence
+          number (ISN) plus 1; and ii) arrives before any other segments with
+          SYN=0 so it is unlikely to be a retransmission. If no such segment
+          arrives (e.g. because it is lost and the ISN is first acknowledged
+          by a subsequent segment), no test for invalid initialization can be
+          conducted, and the half-connection will continue in AccECN mode.</t>
+
+          <t>Note that the Data Sender MUST NOT test whether the arriving
+          counter in the initial ACE field has been initialized to a specific
+          valid value - the above check solely tests whether the ACE fields
+          have been incorrectly zeroed. This allows hosts to use different
+          initial values as an additional signalling channel in future. </t>
         </section>
 
         <section anchor="accecn_ACE_Safety"
@@ -1311,15 +1324,15 @@ deliberately to reduce complexity.-->
             <t><xref target="accecn_feedback"/> required the Data Receiver to
             initialize the r.e0b counter to a non-zero value. Therefore, in
             either direction the initial value of the EE0B field in the AccECN
-            Option (if one exists) ought to be non-zero. The behaviour of each
-            end-point is as follows:<list style="symbols">
-                <t>The TCP server SHOULD check the initial value of the EE0B
+            Option (if one exists) ought to be non-zero. If AccECN has been
+            negotiated:<list style="symbols">
+                <t>the TCP server SHOULD check the initial value of the EE0B
                 field in the first segment that acknowledges sequence space
-                that at least covers the ISN. If the initial value of the EE0B
-                field is zero, the server will switch into a mode that ignores
-                the AccECN Option for this half connection.</t>
+                that at least covers the ISN plus 1. If the initial value of
+                the EE0B field is zero, the server will switch into a mode
+                that ignores the AccECN Option for this half connection.</t>
 
-                <t>The TCP client SHOULD check the initial value of the EE0B
+                <t>the TCP client SHOULD check the initial value of the EE0B
                 field on the SYN/ACK. If the initial value of the EE0B field
                 is zero, the client will switch into a mode that ignores the
                 AccECN Option for this half connection.</t>
@@ -1331,14 +1344,14 @@ deliberately to reduce complexity.-->
 
             <t>Note that the Data Sender MUST NOT test whether the arriving
             byte counters in the initial AccECN Option have been initialized
-            to their correct values - the above checks solely test whether
+            to specific valid values - the above checks solely test whether
             these fields have been incorrectly zeroed. This allows hosts to
             use different initial values as an additional signalling channel
             in future. Also note that the initial value of either field might
             be greater than its expected initial value, because the counters
             might already have been incremented. Nonetheless, the initial
             values of the counters have been chosen so that they cannot wrap
-            to zero on these initial packets.</t>
+            to zero on these initial segments.</t>
           </section>
 
           <section title="Consistency between AccECN Feedback Fields">
