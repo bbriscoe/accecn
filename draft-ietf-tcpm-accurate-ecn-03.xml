@@ -963,10 +963,11 @@ deliberately to reduce complexity.-->
               SYN/ACK as it would have sent had it been a responding host (see
               the third block above).</t>
             </list></t>
+        </section>
 
-          <section anchor="accecn_sec_SYN_rexmt"
-                   title="Retransmission of the SYN">
-            <!--Bob: Out of scope: move to fall-back draft.
+        <section anchor="accecn_sec_SYN_rexmt"
+                 title="Retransmission of the SYN">
+          <!--Bob: Out of scope: move to fall-back draft.
         <t> In AccECN mode the originating host (A) MAY set the IP ECN field to
         ECT in the first ACK that finalizes the three way handshake (3WSH). 
         E.g. to test ECN support of the path, setting the SYN/ACK as well as
@@ -975,40 +976,37 @@ deliberately to reduce complexity.-->
         IP ECN field.</t>
 -->
 
-            <t>If the sender of an AccECN SYN times out before receiving the
-            SYN/ACK, the sender SHOULD attempt to negotiate the use of AccECN
-            at least one more time by continuing to set all three TCP ECN
-            flags on the first retransmitted SYN (using the usual
-            retransmission time-outs). If this first retransmission also fails
-            to be acknowledged, the sender SHOULD send subsequent
-            retransmissions of the SYN without any ECN flags set. This adds
-            delay, in the case where a middlebox drops an AccECN (or ECN) SYN
-            deliberately. However, current measurements imply that a drop is
-            less likely to be due to middlebox interference than other
-            intermittent causes of loss, e.g. congestion, wireless
-            interference, etc.</t>
+          <t>If the sender of an AccECN SYN times out before receiving the
+          SYN/ACK, the sender SHOULD attempt to negotiate the use of AccECN at
+          least one more time by continuing to set all three TCP ECN flags on
+          the first retransmitted SYN (using the usual retransmission
+          time-outs). If this first retransmission also fails to be
+          acknowledged, the sender SHOULD send subsequent retransmissions of
+          the SYN without any ECN flags set. This adds delay, in the case
+          where a middlebox drops an AccECN (or ECN) SYN deliberately.
+          However, current measurements imply that a drop is less likely to be
+          due to middlebox interference than other intermittent causes of
+          loss, e.g. congestion, wireless interference, etc.</t>
 
-            <t>Implementers MAY use other fall-back strategies if they are
-            found to be more effective (e.g. attempting to retransmit an
-            AccECN SYN only once or more than twice (most appropriate during
-            high levels of congestion); or falling back to classic ECN
-            feedback rather than non-ECN). Further it may make sense to also
-            remove any other experimental fields or options on the SYN in case
-            a middlebox might be blocking them, although the required
-            behaviour will depend on the specification of the other option(s)
-            and any attempt to co-ordinate fall-back between different modules
-            of the stack. In any case, the TCP initiator SHOULD cache failed
-            connection attempts. If it does, it SHOULD NOT give up attempting
-            to negotiate AccECN on the SYN of subsequent connection attempts
-            until it is clear that the blockage is persistently and
-            specifically due to AccECN. The cache should be arranged to expire
-            so that the initiator will infrequently attempt to check whether
-            the problem has been resolved.</t>
+          <t>Implementers MAY use other fall-back strategies if they are found
+          to be more effective (e.g. attempting to retransmit an AccECN SYN
+          only once or more than twice (most appropriate during high levels of
+          congestion); or falling back to classic ECN feedback rather than
+          non-ECN). Further it may make sense to also remove any other
+          experimental fields or options on the SYN in case a middlebox might
+          be blocking them, although the required behaviour will depend on the
+          specification of the other option(s) and any attempt to co-ordinate
+          fall-back between different modules of the stack. In any case, the
+          TCP initiator SHOULD cache failed connection attempts. If it does,
+          it SHOULD NOT give up attempting to negotiate AccECN on the SYN of
+          subsequent connection attempts until it is clear that the blockage
+          is persistently and specifically due to AccECN. The cache should be
+          arranged to expire so that the initiator will infrequently attempt
+          to check whether the problem has been resolved.</t>
 
-            <t>The fall-back procedure if the TCP server receives no ACK to
-            acknowledge a SYN/ACK that tried to negotiate AccECN is specified
-            in <xref target="accecn_Mbox_Interference"/>.</t>
-          </section>
+          <t>The fall-back procedure if the TCP server receives no ACK to
+          acknowledge a SYN/ACK that tried to negotiate AccECN is specified in
+          <xref target="accecn_Mbox_Interference"/>.</t>
         </section>
       </section>
 
