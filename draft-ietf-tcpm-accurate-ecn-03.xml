@@ -650,7 +650,7 @@ deliberately to reduce complexity.-->
           more accurate ECN feedback the TCP client (host A) MUST set the TCP
           flags AE=1, CWR=1 and ECE=1 in the initial SYN segment.</t>
 
-          <t>If a TCP server (B) that is AccECN enabled receives a SYN with
+          <t>If a TCP server (B) that is AccECN-enabled receives a SYN with
           the above three flags set, it MUST set both its half connections
           into AccECN mode. Then it MUST set the TCP flags CWR=1 and ECE=0 on
           its response in the SYN/ACK segment to confirm that it supports
@@ -1035,8 +1035,9 @@ deliberately to reduce complexity.-->
             <t>If the sender of an AccECN SYN times out before receiving the
             SYN/ACK, the sender SHOULD attempt to negotiate the use of AccECN
             at least one more time by continuing to set all three TCP ECN
-            flags on the first retransmitted SYN. If this first retransmission
-            also fails to be acknowledged, the sender SHOULD send subsequent
+            flags on the first retransmitted SYN (using the usual
+            retransmission time-outs). If this first retransmission also fails
+            to be acknowledged, the sender SHOULD send subsequent
             retransmissions of the SYN without any ECN flags set. This adds
             delay, in the case where a middlebox drops an AccECN (or ECN) SYN
             deliberately. However, current measurements imply that a drop is
@@ -1078,8 +1079,10 @@ deliberately to reduce complexity.-->
         first enters AccECN mode, it initialises its counters to r.cep = 6,
         r.e0b = 1 and r.ceb = r.e1b.= 0 (see <xref
         target="accecn_Algo_Not-ECT"/>). Non-zero initial values are used to
-        be distinct from cases where the fields are incorrectly zeroed (e.g.
-        by middleboxes).</t>
+        support a stateless handshake (see <xref
+        target="accecn_Interaction_SYN_Cookies"/>) and to be distinct from
+        cases where the fields are incorrectly zeroed (e.g. by middleboxes -
+        see <xref target="accecn_sec_zero_option"/>).</t>
 
         <t>A host feeds back the CE packet counter using the Accurate ECN
         (ACE) field, as explained in the next section. And it feeds back all
@@ -1090,7 +1093,7 @@ deliberately to reduce complexity.-->
 
         <section anchor="accecn_ACE" title="The ACE Field">
           <t>After AccECN has been negotiated on the SYN and SYN/ACK, both
-          hosts overload the three TCP flags NS, CWR and ECE in the main TCP
+          hosts overload the three TCP flags (AE, CWR and ECE) in the main TCP
           header as one 3-bit field. Then the field is given a new name, ACE,
           as shown in <xref target="accecn_Fig_ACE_ACK"/>.</t>
 
@@ -1111,9 +1114,9 @@ deliberately to reduce complexity.-->
           <t>The original definition of these three flags in the TCP header,
           including the addition of support for the ECN Nonce, is shown for
           comparison in <xref target="accecn_Fig_TCPHdr"/>. This specification
-          does not rename these three TCP flags, it merely overloads them with
-          another name and definition once an AccECN connection has been
-          established.</t>
+          does not rename these three TCP flags to ACE for always; it merely
+          overloads them with another name and definition once an AccECN
+          connection has been established.</t>
 
           <t>A host MUST interpret the AE, CWR and ECE flags as the 3-bit ACE
           counter on a segment with the SYN flag cleared (SYN=0) that it sends
@@ -1133,22 +1136,33 @@ deliberately to reduce complexity.-->
 
           <t>The ACE field encodes the three least significant bits of the
           r.cep counter, therefore its initial value will be 0b110 (decimal
-          6). This non-zero initialization allows a TCP server to use a
-          stateless handshake (see <xref
-          target="accecn_Interaction_SYN_Cookies"/>) but still detect from the
-          TCP client's first ACK that the client considers it has successfully
-          negotiated AccECN. If the SYN/ACK was CE marked, the client MUST
-          increase its r.cep counter before it sends its first ACK, therefore
-          the initial value of the ACE field will be 0b111 (decimal 7). These
-          values have deliberately been chosen such that they are distinct
+          6). If the SYN/ACK was CE marked, the client MUST increase its r.cep
+          counter before it sends its first ACK, therefore the initial value
+          of the ACE field will be 0b111 (decimal 7). To support a stateless
+          handshake (see <xref target="accecn_Interaction_SYN_Cookies"/>),
+          these values have been chosen deliberately so that they are distinct
           from <xref target="RFC5562"/> behaviour, where the TCP client would
           set ECE on the first ACK as feedback for a CE mark on the
           SYN/ACK.</t>
+        </section>
 
-          <t>If the value of the ACE field on the first segment with SYN=0 in
-          either direction is anything other than 0b110 or 0b111, the Data
-          Receiver MUST disable ECN for the remainder of the half-connection
-          by marking all subsequent packets as Not-ECT.</t>
+        <section anchor="accecn_sec_ACE_init_invalid"
+                 title="Testing for Invalid Initialization of the ACE Field">
+          <t>If AccECN has been successfully negotiated and if the value of
+          the ACE field on the first segment with SYN=0 in either direction is
+          anything other than 0b110 or 0b111, the Data Receiver MUST disable
+          sending ECN-capable packets for the remainder of the half-connection
+          by marking the IP/ECN field in all subsequent packets as
+          Not-ECT.</t>
+
+          <t>The "first segment with SYN=0" is defined as: the segment with
+          SYN=0 that i) acknowledges sequence space at least covering the
+          initial sequence number (ISN); and ii) arrives before any other
+          segments with SYN=0 so it is unlikely to be a retransmission. If no
+          such segment arrives (e.g. because it is lost and the ISN is first
+          acknowledged by a subsequent segment), no test for invalid
+          initialization can be conducted, and the half-connection will
+          continue in AccECN mode.</t>
         </section>
 
         <section anchor="accecn_ACE_Safety"
@@ -1254,7 +1268,7 @@ deliberately to reduce complexity.-->
             successful, it implicitly declares that the endpoints also support
             the AccECN TCP Option. A fall-back strategy for the loss of the
             SYN (possibly due to middlebox interference) is specified in <xref
-            target="accecn_Negotiation"/>.</t>
+            target="accecn_sec_SYN_rexmt"/>.</t>
 
             <t>A TCP server that confirms its support for AccECN (in response
             to an AccECN SYN from the client as described in <xref
@@ -1275,11 +1289,12 @@ deliberately to reduce complexity.-->
 
           <section anchor="accecn_AccECN_Option_Loss"
                    title="Testing for Loss of Packets Carrying the AccECN Option">
-            <t>If after the normal TCP timeout the TCP server has not received
-            an ACK to acknowledge its SYN/ACK, the SYN/ACK might just have
-            been lost, e.g. due to congestion, or a middlebox might be
-            blocking the AccECN Option. To expedite connection setup, the host
-            SHOULD fall back to AE=CWR=ECE=0 and no AccECN Option on the
+            <t><!--Should we make rexmt of SYN/ACK with AccECN flags, but not AccECN Option that default?-->If
+            after the normal TCP timeout the TCP server has not received an
+            ACK to acknowledge its SYN/ACK, the SYN/ACK might just have been
+            lost, e.g. due to congestion, or a middlebox might be blocking the
+            AccECN Option. To expedite connection setup, the TCP server SHOULD
+            fall back to AE=CWR=ECE=0 and no AccECN Option on the
             retransmission of the SYN/ACK. Implementers MAY use other
             fall-back strategies if they are found to be more effective (e.g.
             retransmitting a SYN/ACK with AccECN TCP flags but not the AccECN
@@ -1287,13 +1302,13 @@ deliberately to reduce complexity.-->
             fall-back (most appropriate during high levels of congestion); or
             falling back to classic ECN feedback rather than non-ECN).</t>
 
-            <t>Similarly, if the TCP client detects that the first data
-            segment it sent with the AccECN Option was lost, it SHOULD fall
-            back to no AccECN Option on the retransmission. Again,
-            implementers MAY use other fall-back strategies such as attempting
-            to retransmit a second segment with the AccECN Option before
-            fall-back, and/or caching whether the AccECN Option is blocked for
-            subsequent connections.</t>
+            <t>If the TCP client detects that the first data segment it sent
+            with the AccECN Option was lost, it SHOULD fall back to no AccECN
+            Option on the retransmission. Again, implementers MAY use other
+            fall-back strategies such as attempting to retransmit a second
+            segment with the AccECN Option before fall-back, and/or caching
+            whether the AccECN Option is blocked for subsequent
+            connections.</t>
 
             <t>Either host MAY include the AccECN Option in a subsequent
             segment to retest whether the AccECN Option can traverse the
@@ -1324,11 +1339,12 @@ deliberately to reduce complexity.-->
             half connection.</t>
 
             <t>Similarly, if the TCP server has successfully negotiated AccECN
-            but does not receive an AccECN Option on the first ACK or on the
-            first data segment, it switches into a mode that assumes that the
-            AccECN Option is not available for this half connection.</t>
+            but does not receive an AccECN Option on the first segment that
+            acknowledges sequence space at least covering the ISN, it switches
+            into a mode that assumes that the AccECN Option is not available
+            for this half connection.</t>
 
-            <t>While a host is in the mode that assumes incoming AccECN
+            <t>While a host is in this mode that assumes incoming AccECN
             Options are not available, it MUST adopt the conservative
             interpretation of the ACE field discussed in <xref
             target="accecn_ACE_Safety"/>. However, it cannot make any
@@ -1346,31 +1362,26 @@ deliberately to reduce complexity.-->
             Option is not available for this half connection.</t>
           </section>
 
-          <section title="Testing for Zeroing AccECN Feedback Fields">
-            <t><xref target="accecn_feedback"/> required the Data Receiver to
-            initialize the r.cep and r.e0b counters to non-zero values.
-            Therefore, the ACE field and EE0B field in the AccECN Option of
-            the first ACK in each direction ought to be non-zero. The
-            behaviour of each end-point is as follows:<list style="symbols">
-                <t>The TCP server SHOULD check these initial values in the
-                final ACK of the 3WHS. If the initial value of the EE0B field
-                is zero, the server will switch into a mode that ignores the
-                AccECN Option for this half connection. If the initial value
-                of the ACE field is zero, the server MUST reset the
-                connection, because it cannot rely on the ECN flags in the TCP
-                header.</t>
+          <section anchor="accecn_sec_zero_option"
+                   title="Test for Zeroing of the AccECN Option">
+            <t>For a related test for invalid initialization of the ACE field,
+            see <xref target="accecn_sec_ACE_init_invalid"/> </t>
 
-                <t>The TCP client SHOULD check these initial values in the ACK
-                of its first data segment. If the initial value of the EE0B
-                field is zero, the client will switch into a mode that ignores
-                the AccECN Option for this half connection. If the initial
-                value of the ACE field is zero, the client MUST reset the
-                connection, because it cannot rely on the ECN flags in the TCP
-                header. On attempting a subsequent connection, assuming the
-                client is caching problems with previous connections, it will
-                eventually fall back to disabling negotiation of any ECN
-                capability, which will avoid reliance on the ECN flags in the
-                TCP header.</t>
+            <t><xref target="accecn_feedback"/> required the Data Receiver to
+            initialize the r.e0b counter to a non-zero value. Therefore, in
+            either direction the initial value of the EE0B field in the AccECN
+            Option (if one exists) ought to be non-zero. The behaviour of each
+            end-point is as follows:<list style="symbols">
+                <t>The TCP server SHOULD check the initial value of the EE0B
+                field in the first segment that acknowledges sequence space
+                that at least covers the ISN. If the initial value of the EE0B
+                field is zero, the server will switch into a mode that ignores
+                the AccECN Option for this half connection. </t>
+
+                <t>The TCP client SHOULD check the initial value of the EE0B
+                field on the SYN/ACK. If the initial value of the EE0B field
+                is zero, the client will switch into a mode that ignores the
+                AccECN Option for this half connection. </t>
               </list></t>
 
             <t>While a host is in the mode that ignores the AccECN Option it
@@ -1378,22 +1389,22 @@ deliberately to reduce complexity.-->
             discussed in <xref target="accecn_ACE_Safety"/>.</t>
 
             <t>Note that the Data Sender MUST NOT test whether the arriving
-            byte counters in the initial ACE field and AccECN Option have been
-            initialized to their correct values - the above checks solely test
-            whether these fields have been incorrectly initialized to zero.
-            This allows different initial values to be used as an additional
-            signalling channel in future. Also note that the initial value of
-            either field might be greater than its expected initial value,
-            because the counters might already have been incremented.
-            Nonetheless, the initial values of the counters have been chosen
-            so that they cannot wrap to zero on these initial packets.</t>
+            byte counters in the initial AccECN Option have been initialized
+            to their correct values - the above checks solely test whether
+            these fields have been incorrectly zeroed. This allows hosts to
+            use different initial values as an additional signalling channel
+            in future. Also note that the initial value of either field might
+            be greater than its expected initial value, because the counters
+            might already have been incremented. Nonetheless, the initial
+            values of the counters have been chosen so that they cannot wrap
+            to zero on these initial packets.</t>
           </section>
 
           <section title="Consistency between AccECN Feedback Fields">
-            <t>Given use of the AccECN Option might be deactivated, an
-            endpoint using AccECN feedback MUST always consider the
-            information provided in the ACE field in addition to the AccECN
-            Option.</t>
+            <t>When the AccECN Option is available it supplements but does not
+            replace the ACE field. An endpoint using AccECN feedback MUST
+            always consider the information provided in the ACE field whether
+            or not the AccECN Option is also available. </t>
 
             <t>If the AccECN option is present, the s.cep counter might
             increase while the s.ceb counter does not (e.g. due to a CE-marked
@@ -1408,9 +1419,10 @@ deliberately to reduce complexity.-->
             other integrity tests (<xref target="accecn_Integrity"/>).</t>
 
             <t>If either end-point detects that the s.ceb counter has
-            increased but the s.cep has not (and it is certain that the ACE
-            field could not have wrapped), it MUST reset the connection,
-            because this indicates an invalid protocol transition.</t>
+            increased but the s.cep has not (and by testing ACK coverage it is
+            certain how much the ACE field has wrapped), it MUST reset the
+            connection, because this indicates an invalid protocol
+            transition.</t>
           </section>
         </section>
 
@@ -1423,7 +1435,9 @@ deliberately to reduce complexity.-->
               increments a different byte counter to that incremented by the
               previous packet, the Data Receiver SHOULD immediately send an
               ACK with an AccECN Option, without waiting for the next delayed
-              ACK. Certain offload hardware might not be able to support
+              ACK (this is in addition to the safety recommendation in <xref
+              target="accecn_ACE_Safety"/> against ambiguity of the ACE
+              field). Certain offload hardware might not be able to support
               change-triggered ACKs, but otherwise it is important to keep
               exceptions to this rule to a minimum so that Data Senders can
               generally rely on this behaviour;</t>
@@ -1456,11 +1470,11 @@ deliberately to reduce complexity.-->
 that the AccECN Option will be included in the next ACK, but also means that the host might send an ACK immediately after reception of the current segment and does not wait for the next delayed ACK. 
 Note that the ACK for the next segment could be delayed again if it carries the same ECN mark. -->
 
-          <t>The following example series of arriving marks illustrates when a
-          Data Receiver will emit an ACK if it is using a delayed ACK factor
-          of 2 segments and change-triggered ACKs: 01 -&gt; ACK, 01, 01 -&gt;
-          ACK, 10 -&gt; ACK, 10, 01 -&gt; ACK, 01, 11 -&gt; ACK, 01 -&gt;
-          ACK.</t>
+          <t>The following example series of arriving IP/ECN fields
+          illustrates when a Data Receiver will emit an ACK if it is using a
+          delayed ACK factor of 2 segments and change-triggered ACKs: 01 -&gt;
+          ACK, 01, 01 -&gt; ACK, 10 -&gt; ACK, 10, 01 -&gt; ACK, 01, 11 -&gt;
+          ACK, 01 -&gt; ACK.</t>
 
           <t>For the avoidance of doubt, the change-triggered ACK mechanism is
           deliberately worded to ignore the arrival of a control packet with
@@ -1575,8 +1589,9 @@ even though it uses existing TCP fields in unorthodox ways.
 
         <t>Nonetheless, such a server can determine that it negotiated AccECN
         as follows. If a TCP server using SYN Cookies supports AccECN and if
-        the first ACK it receives contains an ACE field with the value 0b110
-        or 0b111, it can assume that:<list style="symbols">
+        the first segment it receives that at least covers the ISN contains an
+        ACE field with the value 0b110 or 0b111, it can assume that:<list
+            style="symbols">
             <t>the TCP client must have requested AccECN support on the
             SYN</t>
 
@@ -1584,7 +1599,8 @@ even though it uses existing TCP fields in unorthodox ways.
             AccECN</t>
           </list>Therefore the server can switch itself into AccECN mode, and
         continue as if it had never forgotten that it switched itself into
-        AccECN mode earlier.</t>
+        AccECN mode earlier. For other values of ACE field, heuristics to
+        infer what other type of ECN the client supports are out of scope.</t>
       </section>
 
       <section anchor="accecn_Interaction_Other"
