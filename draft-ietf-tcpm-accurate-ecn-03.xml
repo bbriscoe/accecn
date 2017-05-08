@@ -689,17 +689,19 @@ deliberately to reduce complexity.-->
           stages in the evolution of ECN. <xref
           target="accecn_Tab_Negotiation"/> tabulates all the negotiation
           possibilities for ECN-related capabilities that involve at least one
-          AccECN-capable host. To compress the width of the table, the
-          headings of the first four columns have been severely abbreviated,
-          as follows: <list hangIndent="4" style="hanging">
-              <t hangText="Ac:">More *Ac*curate ECN Feedback</t>
+          AccECN-capable host. The entries in the first two columns have been
+          abbreviated, as follows: <list hangIndent="4" style="hanging">
+              <t hangText="AccECN:">More Accurate ECN Feedback (the present
+              specification)</t>
 
-              <t hangText="N:">ECN-*N*once <xref target="RFC3540"/></t>
+              <t hangText="Nonce:">ECN Nonce feedback <xref
+              target="RFC3540"/></t>
 
-              <t hangText="E:">*E*CN <xref target="RFC3168"/></t>
+              <t hangText="ECN:">'Classic' ECN feedback <xref
+              target="RFC3168"/></t>
 
-              <t hangText="I:">Not-ECN (*I*mplicit congestion notification
-              using packet drop).</t>
+              <t hangText="Drop">Not-ECN-capable. Implicit congestion
+              notification using packet drop.</t>
             </list></t>
 
           <!--Could turn first 4 columns into 2 columns headed A & B, with Ac, N, E, I within the columns.-->
@@ -708,13 +710,9 @@ deliberately to reduce complexity.-->
 
           <texttable align="center" anchor="accecn_Tab_Negotiation"
                      title="ECN capability negotiation between Client (A) and Server (B)">
-            <ttcol align="left">Ac</ttcol>
+            <ttcol align="left">A</ttcol>
 
-            <ttcol align="center">N</ttcol>
-
-            <ttcol align="center">E</ttcol>
-
-            <ttcol align="center">I</ttcol>
+            <ttcol align="left">B</ttcol>
 
             <ttcol align="center">SYN A-&gt;B</ttcol>
 
@@ -726,23 +724,15 @@ deliberately to reduce complexity.-->
 
             <c/>
 
-            <c/>
-
-            <c/>
-
             <c>AE CWR ECE</c>
 
             <c>AE CWR ECE</c>
 
             <c/>
 
-            <c>AB</c>
+            <c>AccECN</c>
 
-            <c/>
-
-            <c/>
-
-            <c/>
+            <c>AccECN</c>
 
             <c>1 &nbsp; 1 &nbsp; 1</c>
 
@@ -752,13 +742,9 @@ deliberately to reduce complexity.-->
 
             <!-- new -->
 
-            <c>AB</c>
+            <c>AccECN</c>
 
-            <c/>
-
-            <c/>
-
-            <c/>
+            <c>AccECN</c>
 
             <c>1 &nbsp; 1 &nbsp; 1</c>
 
@@ -778,17 +764,9 @@ deliberately to reduce complexity.-->
 
             <c/>
 
-            <c/>
+            <c>AccECN</c>
 
-            <c/>
-
-            <c>A</c>
-
-            <c>B</c>
-
-            <c/>
-
-            <c/>
+            <c>Nonce</c>
 
             <c>1 &nbsp; 1 &nbsp; 1</c>
 
@@ -796,13 +774,9 @@ deliberately to reduce complexity.-->
 
             <c>classic ECN</c>
 
-            <c>A</c>
+            <c>AccECN</c>
 
-            <c/>
-
-            <c>B</c>
-
-            <c/>
+            <c>ECN</c>
 
             <c>1 &nbsp; 1 &nbsp; 1</c>
 
@@ -810,13 +784,9 @@ deliberately to reduce complexity.-->
 
             <c>classic ECN</c>
 
-            <c>A</c>
+            <c>AccECN</c>
 
-            <c/>
-
-            <c/>
-
-            <c>B</c>
+            <c>Drop</c>
 
             <c>1 &nbsp; 1 &nbsp; 1</c>
 
@@ -834,17 +804,9 @@ deliberately to reduce complexity.-->
 
             <c/>
 
-            <c/>
+            <c>Nonce</c>
 
-            <c/>
-
-            <c>B</c>
-
-            <c>A</c>
-
-            <c/>
-
-            <c/>
+            <c>AccECN</c>
 
             <c>0 &nbsp; 1 &nbsp; 1</c>
 
@@ -852,13 +814,9 @@ deliberately to reduce complexity.-->
 
             <c>classic ECN</c>
 
-            <c>B</c>
+            <c>ECN</c>
 
-            <c/>
-
-            <c>A</c>
-
-            <c/>
+            <c>AccECN</c>
 
             <c>0 &nbsp; 1 &nbsp; 1</c>
 
@@ -866,23 +824,15 @@ deliberately to reduce complexity.-->
 
             <c>classic ECN</c>
 
-            <c>B</c>
+            <c>Drop</c>
 
-            <c/>
-
-            <c/>
-
-            <c>A</c>
+            <c>AccECN</c>
 
             <c>0 &nbsp; 0 &nbsp; 0</c>
 
             <c>0 &nbsp; 0 &nbsp; 0</c>
 
             <c>Not ECN</c>
-
-            <c/>
-
-            <c/>
 
             <c/>
 
@@ -896,29 +846,21 @@ deliberately to reduce complexity.-->
 
             <!-- moved -->
 
-            <c>A</c>
+            <c>AccECN</c>
 
-            <c/>
-
-            <c/>
-
-            <c>B</c>
+            <c>Broken</c>
 
             <c>1 &nbsp; 1 &nbsp; 1</c>
 
             <c>1 &nbsp; 1 &nbsp; 1</c>
 
-            <c>Not ECN (broken)</c>
+            <c>Not ECN</c>
 
             <!-- moved  end -->
 
-            <c>A</c>
+            <c>AccECN</c>
 
-            <c/>
-
-            <c/>
-
-            <c/>
+            <c>AccECN+</c>
 
             <c>1 &nbsp; 1 &nbsp; 1</c>
 
@@ -926,21 +868,17 @@ deliberately to reduce complexity.-->
 
             <c>AccECN (CU)</c>
 
-            <!-- changed to Not ECN instead of RSVD -->
+            <!-- changed to AccECN (CU) instead of RSVD -->
 
-            <c>A</c>
+            <c>AccECN</c>
 
-            <c/>
-
-            <c/>
-
-            <c/>
+            <c>AccECN+</c>
 
             <c>1 &nbsp; 1 &nbsp; 1</c>
 
             <c>1 &nbsp; 0 &nbsp; 0</c>
 
-            <!-- changed to Not ECN instead of RSVD -->
+            <!-- changed to AccECN (CU) instead of RSVD -->
 
             <c>AccECN (CU)</c>
           </texttable>
@@ -966,17 +904,18 @@ deliberately to reduce complexity.-->
               shown in the rightmost column.</t>
 
               <t>The fourth block displays combinations that are not valid or
-              currently unused. The first case (labelled `Not-ECN (broken)' is
-              where all bits set in the SYN are reflected by the receiver in
-              the SYN/ACK, which happens quite often if the TCP connection is
+              currently unused. The first case (labelled `Broken' is where all
+              bits set in the SYN are reflected by the receiver in the
+              SYN/ACK, which happens quite often if the TCP connection is
               proxied. In this case, both ends MUST fall-back to Not ECN for
               both half connections. The other two cases (labelled 'AccECN
               (CU)') are currently unassigned and available for an RFC to
-              extend TCP in future (see <xref target="accecn_Alt_Designs"/>
-              for possible uses). As soon as an AccECN-capable TCP client (A)
+              extend TCP in future, tagged as 'AccECN+' (see <xref
+              target="accecn_Alt_Designs"/> for possible uses). For forward
+              compatibility, as soon as an AccECN-capable TCP client (A)
               receives either of these SYN/ACKs it MUST set both its half
               connections into AccECN mode, as if the SYN/ACK had been AE=0,
-              CWR=1. ECE=0.<!--{ToDo: Consider using the last two cases for
+              CWR=1, ECE=0.<!--{ToDo: Consider using the last two cases for
             AccECN f/b of ECT(0) and ECT(1) on the SYN (<xref
             target="accecn_Alt_Designs"/>)}--></t>
 
@@ -1006,11 +945,13 @@ deliberately to reduce complexity.-->
 
               <t hangText="ECN Nonce:">An AccECN implementation, whether
               client or server, sender or receiver, does not need to implement
-              the ECN Nonce behaviour <xref target="RFC3540"/>, which is being
-              reclassified as historic. AccECN is compatible with an
-              alternative ECN feedback integrity approach that does not use up
-              the ECT(1) codepoint and can be implemented solely at the sender
-              (see <xref target="accecn_Integrity"/>).</t>
+              the ECN Nonce feedback mode <xref target="RFC3540"/>, which is
+              being reclassified as historic <xref
+              target="I-D.ietf-tsvwg-ecn-experimentation"/>. AccECN is
+              compatible with an alternative ECN feedback integrity approach
+              that does not use up the ECT(1) codepoint and can be implemented
+              solely at the sender (see <xref
+              target="accecn_Integrity"/>).</t>
 
               <t hangText="Simultaneous Open:">An originating AccECN Host (A),
               having sent a SYN with AE=1, CWR=1 and ECE=1, might receive
@@ -1365,7 +1306,7 @@ deliberately to reduce complexity.-->
           <section anchor="accecn_sec_zero_option"
                    title="Test for Zeroing of the AccECN Option">
             <t>For a related test for invalid initialization of the ACE field,
-            see <xref target="accecn_sec_ACE_init_invalid"/> </t>
+            see <xref target="accecn_sec_ACE_init_invalid"/></t>
 
             <t><xref target="accecn_feedback"/> required the Data Receiver to
             initialize the r.e0b counter to a non-zero value. Therefore, in
@@ -1376,12 +1317,12 @@ deliberately to reduce complexity.-->
                 field in the first segment that acknowledges sequence space
                 that at least covers the ISN. If the initial value of the EE0B
                 field is zero, the server will switch into a mode that ignores
-                the AccECN Option for this half connection. </t>
+                the AccECN Option for this half connection.</t>
 
                 <t>The TCP client SHOULD check the initial value of the EE0B
                 field on the SYN/ACK. If the initial value of the EE0B field
                 is zero, the client will switch into a mode that ignores the
-                AccECN Option for this half connection. </t>
+                AccECN Option for this half connection.</t>
               </list></t>
 
             <t>While a host is in the mode that ignores the AccECN Option it
@@ -1404,7 +1345,7 @@ deliberately to reduce complexity.-->
             <t>When the AccECN Option is available it supplements but does not
             replace the ACE field. An endpoint using AccECN feedback MUST
             always consider the information provided in the ACE field whether
-            or not the AccECN Option is also available. </t>
+            or not the AccECN Option is also available.</t>
 
             <t>If the AccECN option is present, the s.cep counter might
             increase while the s.ceb counter does not (e.g. due to a CE-marked
