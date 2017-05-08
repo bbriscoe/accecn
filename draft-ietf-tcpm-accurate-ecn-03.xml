@@ -175,7 +175,7 @@
       target="I-D.ietf-tsvwg-l4s-arch"/>; ECN-capable TCP control packets
       <xref target="I-D.bagnulo-tcpm-generalized-ecn"/>, or Alternative
       Backoff with ECN (ABE) <xref
-      target="I-D.ietf-tcpm-alternativebackoff-ecn"/>. </t>
+      target="I-D.ietf-tcpm-alternativebackoff-ecn"/>.</t>
 
       <t>It is likely (but not required) that the AccECN protocol will be
       implemented along with the following experimental additions to the
@@ -403,7 +403,7 @@ ToDo: Why is this timescale point commented out? It means that, if successful af
         <t>The last bit in byte 13 of the TCP header was defined as the Nonce
         Sum (NS) for the ECN Nonce <xref target="RFC3540"/>. RFC 3540 was
         never deployed so it is being reclassified as historic, making this
-        TCP flag available for use by the AccECN experiment instead. </t>
+        TCP flag available for use by the AccECN experiment instead.</t>
 
         <?rfc needLines="8" ?>
 
@@ -635,33 +635,37 @@ deliberately to reduce complexity.-->
     <!-- ================================================================ -->
 
     <section anchor="accecn_Spec" title="AccECN Protocol Specification">
-      <section anchor="accecn_Negotiation"
-               title="Negotiation during the TCP handshake">
-        <t>Given the ECN Nonce <xref target="RFC3540"/> is being reclassified
-        as historic, the present specification renames the TCP flag at bit 7
-        of the TCP header flags from NS (Nonce Sum) to AE (Accurate ECN) (see
-        IANA Considerations in <xref
-        target="accecn_IANA_Considerations"/>).</t>
+      <section anchor="accecn_Negotiation" title="Negotiating to use AccECN">
+        <t/>
 
-        <t>During the TCP handshake at the start of a connection, to request
-        more accurate ECN feedback the TCP client (host A) MUST set the TCP
-        flags AE=1, CWR=1 and ECE=1 in the initial SYN segment.</t>
+        <section anchor="accecn_Negotiation_3WHS"
+                 title="Negotiation during the TCP handshake">
+          <t>Given the ECN Nonce <xref target="RFC3540"/> is being
+          reclassified as historic, the present specification renames the TCP
+          flag at bit 7 of the TCP header flags from NS (Nonce Sum) to AE
+          (Accurate ECN) (see IANA Considerations in <xref
+          target="accecn_IANA_Considerations"/>).</t>
 
-        <t>If a TCP server (B) that is AccECN enabled receives a SYN with the
-        above three flags set, it MUST set both its half connections into
-        AccECN mode. Then it MUST set the flags CWR=1 and ECE=0 on its
-        response in the SYN/ACK segment to confirm that it supports AccECN.
-        The TCP server MUST NOT set this combination of flags unless the
-        preceding SYN requested support for AccECN as above.</t>
+          <t>During the TCP handshake at the start of a connection, to request
+          more accurate ECN feedback the TCP client (host A) MUST set the TCP
+          flags AE=1, CWR=1 and ECE=1 in the initial SYN segment.</t>
 
-        <t>A TCP server in AccECN mode MUST additionally set the flag AE=1 on
-        the SYN/ACK if the SYN was CE-marked (see <xref
-        target="accecn_demb_reflector"/>). If the received SYN was Not-ECT,
-        ECT(0) or ECT(1), it MUST clear AE (AE=0) on the SYN/ACK.</t>
+          <t>If a TCP server (B) that is AccECN enabled receives a SYN with
+          the above three flags set, it MUST set both its half connections
+          into AccECN mode. Then it MUST set the TCP flags CWR=1 and ECE=0 on
+          its response in the SYN/ACK segment to confirm that it supports
+          AccECN. The TCP server MUST NOT set this combination of flags unless
+          the preceding SYN requested support for AccECN as above.</t>
 
-        <!--Bob: Out of scope: move to fall-back draft.-->
+          <t>A TCP server in AccECN mode MUST additionally set the TCP flag
+          AE=1 on the SYN/ACK if the IP/ECN field of the SYN was CE-marked
+          (see <xref target="accecn_demb_reflector"/> for rationale). If the
+          IP/ECN field of the received SYN was Not-ECT, ECT(0) or ECT(1), it
+          MUST clear the TCP AE flag (AE=0) on the SYN/ACK.</t>
 
-        <!--If the sending host (A) indicated AccECN support, the receiving host (B) may set the IP ECN field of the SYN/ACK to ECT.
+          <!--Bob: Out of scope: move to fall-back draft.-->
+
+          <!--If the sending host (A) indicated AccECN support, the receiving host (B) may set the IP ECN field of the SYN/ACK to ECT.
 
  <t>If the SYN was ECT and the SYN/ACK indicates that a CE mark was received
          (NS=1), the originating host (A) MUST react to this congestion
@@ -671,342 +675,312 @@ deliberately to reduce complexity.-->
          (ECE=0 and CWR=0 in SYN/ACK), the originating host (A) SHOULD conservatively
          reduce its initial window as if the SYN had been CE-marked.</t> -->
 
-        <t>Once a TCP client (A) has sent the above SYN to declare that it
-        supports AccECN, and once it has received the above SYN/ACK segment
-        that confirms that the TCP server supports AccECN, the TCP client MUST
-        set both its half connections into AccECN mode.</t>
+          <t>Once a TCP client (A) has sent the above SYN to declare that it
+          supports AccECN, and once it has received the above SYN/ACK segment
+          that confirms that the TCP server supports AccECN, the TCP client
+          MUST set both its half connections into AccECN mode.</t>
 
-        <!--Bob: Out of scope: move to fall-back draft.
-        <t> In AccECN mode the originating host (A) MAY set the IP ECN field to
-        ECT in the first ACK that finalizes the three way handshake (3WSH). 
-        E.g. to test ECN support of the path, setting the SYN/ACK as well as
-        the first ACK to ECT allows each end to determine as soon as possible
-        whether the path passes ECT or a middlebox bleaches or overwrites the
-        IP ECN field.</t>
--->
+          <t>The procedure for the client to follow if a SYN/ACK does not
+          arrive before its retransmission timer expires is given in <xref
+          target="accecn_sec_SYN_rexmt"/>.</t>
 
-        <t>If the sender of an AccECN SYN times out before receiving the
-        SYN/ACK, the sender SHOULD attempt to negotiate the use of AccECN at
-        least one more time by continuing to set all three TCP ECN flags on
-        the first retransmitted SYN. If this first retransmission also fails
-        to be acknowledged, the sender SHOULD send subsequent retransmissions
-        of the SYN without any ECN flags set. This adds delay, in the case
-        where a middlebox drops an AccECN (or ECN) SYN deliberately. However,
-        current measurements imply that a drop is less likely to be due to
-        middlebox interference than other intermittent causes of loss, e.g.
-        congestion, wireless interference, etc.</t>
+          <t>The three flags set to 1 to indicate AccECN support on the SYN
+          have been carefully chosen to enable natural fall-back to prior
+          stages in the evolution of ECN. <xref
+          target="accecn_Tab_Negotiation"/> tabulates all the negotiation
+          possibilities for ECN-related capabilities that involve at least one
+          AccECN-capable host. To compress the width of the table, the
+          headings of the first four columns have been severely abbreviated,
+          as follows: <list hangIndent="4" style="hanging">
+              <t hangText="Ac:">More *Ac*curate ECN Feedback</t>
 
-        <t>Implementers MAY use other fall-back strategies if they are found
-        to be more effective (e.g. attempting to retransmit an AccECN SYN only
-        once or more than twice (most appropriate during high levels of
-        congestion); or falling back to classic ECN feedback rather than
-        non-ECN). Further it may make sense to also remove any other
-        experimental fields or options on the SYN in case a middlebox might be
-        blocking them, although the required behaviour will depend on the
-        specification of the other option(s) and any attempt to co-ordinate
-        fall-back between different modules of the stack. In any case, the TCP
-        initiator SHOULD cache failed connection attempts. If it does, it
-        SHOULD NOT give up attempting to negotiate AccECN on the SYN of
-        subsequent connection attempts until it is clear that the blockage is
-        persistently and specifically due to AccECN. The cache should be
-        arranged to expire so that the initiator will infrequently attempt to
-        check whether the problem has been resolved.</t>
+              <t hangText="N:">ECN-*N*once <xref target="RFC3540"/></t>
 
-        <t>The fall-back procedure if the TCP server receives no ACK to
-        acknowledge a SYN/ACK that tried to negotiate AccECN is specified in
-        <xref target="accecn_Mbox_Interference"/>.</t>
+              <t hangText="E:">*E*CN <xref target="RFC3168"/></t>
 
-        <t>The three flags set to 1 to indicate AccECN support on the SYN have
-        been carefully chosen to enable natural fall-back to prior stages in
-        the evolution of ECN. <xref target="accecn_Tab_Negotiation"/>
-        tabulates all the negotiation possibilities for ECN-related
-        capabilities that involve at least one AccECN-capable host. To
-        compress the width of the table, the headings of the first four
-        columns have been severely abbreviated, as follows: <list
-            hangIndent="4" style="hanging">
-            <t hangText="Ac:">More *Ac*curate ECN Feedback</t>
+              <t hangText="I:">Not-ECN (*I*mplicit congestion notification
+              using packet drop).</t>
+            </list></t>
 
-            <t hangText="N:">ECN-*N*once <xref target="RFC3540"/></t>
+          <!--Could turn first 4 columns into 2 columns headed A & B, with Ac, N, E, I within the columns.-->
 
-            <t hangText="E:">*E*CN <xref target="RFC3168"/></t>
+          <!-- <?rfc needLines="22" ?> -->
 
-            <t hangText="I:">Not-ECN (*I*mplicit congestion notification using
-            packet drop).</t>
-          </list></t>
+          <texttable align="center" anchor="accecn_Tab_Negotiation"
+                     title="ECN capability negotiation between Client (A) and Server (B)">
+            <ttcol align="left">Ac</ttcol>
 
-        <!-- <?rfc needLines="22" ?> -->
+            <ttcol align="center">N</ttcol>
 
-        <texttable align="center" anchor="accecn_Tab_Negotiation"
-                   title="ECN capability negotiation between Originator (A) and Responder (B)">
-          <ttcol align="left">Ac</ttcol>
+            <ttcol align="center">E</ttcol>
 
-          <ttcol align="center">N</ttcol>
+            <ttcol align="center">I</ttcol>
 
-          <ttcol align="center">E</ttcol>
+            <ttcol align="center">SYN A-&gt;B</ttcol>
 
-          <ttcol align="center">I</ttcol>
+            <ttcol align="center">SYN/ACK B-&gt;A</ttcol>
 
-          <ttcol align="center">SYN A-&gt;B</ttcol>
+            <ttcol align="left">Feedback Mode</ttcol>
 
-          <ttcol align="center">SYN/ACK B-&gt;A</ttcol>
+            <c/>
 
-          <ttcol align="left">Feedback Mode</ttcol>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c>AE CWR ECE</c>
 
-          <c/>
+            <c>AE CWR ECE</c>
 
-          <c>AE CWR ECE</c>
+            <c/>
 
-          <c>AE CWR ECE</c>
+            <c>AB</c>
 
-          <c/>
+            <c/>
 
-          <c>AB</c>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c>1 &nbsp; 1 &nbsp; 1</c>
 
-          <c/>
+            <c>0 &nbsp; 1 &nbsp; 0</c>
 
-          <c>1 &nbsp; 1 &nbsp; 1</c>
+            <c>AccECN</c>
 
-          <c>0 &nbsp; 1 &nbsp; 0</c>
+            <!-- new -->
 
-          <c>AccECN</c>
+            <c>AB</c>
 
-          <!-- new -->
+            <c/>
 
-          <c>AB</c>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c>1 &nbsp; 1 &nbsp; 1</c>
 
-          <c/>
+            <c>1 &nbsp; 1 &nbsp; 0</c>
 
-          <c>1 &nbsp; 1 &nbsp; 1</c>
+            <c>AccECN (CE on SYN)</c>
 
-          <c>1 &nbsp; 1 &nbsp; 0</c>
+            <!-- new end -->
 
-          <c>AccECN (CE on SYN)</c>
+            <c/>
 
-          <!-- new end -->
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c>A</c>
 
-          <c/>
+            <c>B</c>
 
-          <c>A</c>
+            <c/>
 
-          <c>B</c>
+            <c/>
 
-          <c/>
+            <c>1 &nbsp; 1 &nbsp; 1</c>
 
-          <c/>
+            <c>1 &nbsp; 0 &nbsp; 1</c>
 
-          <c>1 &nbsp; 1 &nbsp; 1</c>
+            <c>classic ECN</c>
 
-          <c>1 &nbsp; 0 &nbsp; 1</c>
+            <c>A</c>
 
-          <c>classic ECN</c>
+            <c/>
 
-          <c>A</c>
+            <c>B</c>
 
-          <c/>
+            <c/>
 
-          <c>B</c>
+            <c>1 &nbsp; 1 &nbsp; 1</c>
 
-          <c/>
+            <c>0 &nbsp; 0 &nbsp; 1</c>
 
-          <c>1 &nbsp; 1 &nbsp; 1</c>
+            <c>classic ECN</c>
 
-          <c>0 &nbsp; 0 &nbsp; 1</c>
+            <c>A</c>
 
-          <c>classic ECN</c>
+            <c/>
 
-          <c>A</c>
+            <c/>
 
-          <c/>
+            <c>B</c>
 
-          <c/>
+            <c>1 &nbsp; 1 &nbsp; 1</c>
 
-          <c>B</c>
+            <c>0 &nbsp; 0 &nbsp; 0</c>
 
-          <c>1 &nbsp; 1 &nbsp; 1</c>
+            <c>Not ECN</c>
 
-          <c>0 &nbsp; 0 &nbsp; 0</c>
+            <c/>
 
-          <c>Not ECN</c>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c>B</c>
 
-          <c/>
+            <c>A</c>
 
-          <c>B</c>
+            <c/>
 
-          <c>A</c>
+            <c/>
 
-          <c/>
+            <c>0 &nbsp; 1 &nbsp; 1</c>
 
-          <c/>
+            <c>0 &nbsp; 0 &nbsp; 1</c>
 
-          <c>0 &nbsp; 1 &nbsp; 1</c>
+            <c>classic ECN</c>
 
-          <c>0 &nbsp; 0 &nbsp; 1</c>
+            <c>B</c>
 
-          <c>classic ECN</c>
+            <c/>
 
-          <c>B</c>
+            <c>A</c>
 
-          <c/>
+            <c/>
 
-          <c>A</c>
+            <c>0 &nbsp; 1 &nbsp; 1</c>
 
-          <c/>
+            <c>0 &nbsp; 0 &nbsp; 1</c>
 
-          <c>0 &nbsp; 1 &nbsp; 1</c>
+            <c>classic ECN</c>
 
-          <c>0 &nbsp; 0 &nbsp; 1</c>
+            <c>B</c>
 
-          <c>classic ECN</c>
+            <c/>
 
-          <c>B</c>
+            <c/>
 
-          <c/>
+            <c>A</c>
 
-          <c/>
+            <c>0 &nbsp; 0 &nbsp; 0</c>
 
-          <c>A</c>
+            <c>0 &nbsp; 0 &nbsp; 0</c>
 
-          <c>0 &nbsp; 0 &nbsp; 0</c>
+            <c>Not ECN</c>
 
-          <c>0 &nbsp; 0 &nbsp; 0</c>
+            <c/>
 
-          <c>Not ECN</c>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <!-- moved -->
 
-          <c/>
+            <c>A</c>
 
-          <!-- moved -->
+            <c/>
 
-          <c>A</c>
+            <c/>
 
-          <c/>
+            <c>B</c>
 
-          <c/>
+            <c>1 &nbsp; 1 &nbsp; 1</c>
 
-          <c>B</c>
+            <c>1 &nbsp; 1 &nbsp; 1</c>
 
-          <c>1 &nbsp; 1 &nbsp; 1</c>
+            <c>Not ECN (broken)</c>
 
-          <c>1 &nbsp; 1 &nbsp; 1</c>
+            <!-- moved  end -->
 
-          <c>Not ECN (broken)</c>
+            <c>A</c>
 
-          <!-- moved  end -->
+            <c/>
 
-          <c>A</c>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c>1 &nbsp; 1 &nbsp; 1</c>
 
-          <c/>
+            <c>0 &nbsp; 1 &nbsp; 1</c>
 
-          <c>1 &nbsp; 1 &nbsp; 1</c>
+            <c>AccECN (CU)</c>
 
-          <c>0 &nbsp; 1 &nbsp; 1</c>
+            <!-- changed to Not ECN instead of RSVD -->
 
-          <c>Not ECN (see Appx <xref format="counter"
-          target="accecn_Alt_Designs"/>)</c>
+            <c>A</c>
 
-          <!-- changed to Not ECN instead of RSVD -->
+            <c/>
 
-          <c>A</c>
+            <c/>
 
-          <c/>
+            <c/>
 
-          <c/>
+            <c>1 &nbsp; 1 &nbsp; 1</c>
 
-          <c/>
+            <c>1 &nbsp; 0 &nbsp; 0</c>
 
-          <c>1 &nbsp; 1 &nbsp; 1</c>
+            <!-- changed to Not ECN instead of RSVD -->
 
-          <c>1 &nbsp; 0 &nbsp; 0</c>
+            <c>AccECN (CU)</c>
+          </texttable>
 
-          <!-- changed to Not ECN instead of RSVD -->
+          <t><xref target="accecn_Tab_Negotiation"/> is divided into blocks
+          each separated by an empty row.<list style="numbers">
+              <t>The top block shows the case already described where both
+              endpoints support AccECN and how the TCP server (B) indicates
+              congestion feedback.</t>
 
-          <c>Not ECN (see Appx <xref format="counter"
-          target="accecn_Alt_Designs"/>)</c>
-        </texttable>
+              <t>The second block shows the cases where the TCP client (A)
+              supports AccECN but the TCP server (B) supports some earlier
+              variant of TCP feedback, indicated in its SYN/ACK. Therefore, as
+              soon as an AccECN-capable TCP client (A) receives the SYN/ACK
+              shown it MUST set both its half connections into the feedback
+              mode shown in the rightmost column.</t>
 
-        <t><xref target="accecn_Tab_Negotiation"/> is divided into blocks each
-        separated by an empty row.<list style="numbers">
-            <t>The top block shows the case already described where both
-            endpoints support AccECN and how the TCP server (B) indicates
-            congestion feedback.</t>
+              <t>The third block shows the cases where the TCP server (B)
+              supports AccECN but the TCP client (A) supports some earlier
+              variant of TCP feedback, indicated in its SYN. Therefore, as
+              soon as an AccECN-enabled TCP server (B) receives the SYN shown,
+              it MUST set both its half connections into the feedback mode
+              shown in the rightmost column.</t>
 
-            <t>The second block shows the cases where the TCP client (A)
-            supports AccECN but the TCP server (B) supports some earlier
-            variant of TCP feedback, indicated in its SYN/ACK. Therefore, as
-            soon as an AccECN-capable TCP client (A) receives the SYN/ACK
-            shown it MUST set both its half connections into the feedback mode
-            shown in the rightmost column.</t>
-
-            <t>The third block shows the cases where the TCP server (B)
-            supports AccECN but the TCP client (A) supports some earlier
-            variant of TCP feedback, indicated in its SYN. Therefore, as soon
-            as an AccECN-enabled TCP server (B) receives the SYN shown, it
-            MUST set both its half connections into the feedback mode shown in
-            the rightmost column.</t>
-
-            <t>The fourth block displays combinations that are not valid or
-            currently unused and therefore both ends MUST fall-back to Not ECN
-            for both half connections. Especially the first case (marked
-            `broken') where all bits set in the SYN are reflected by the
-            receiver in the SYN/ACK, which happens quite often if the TCP
-            connection is proxied.<!--{ToDo: Consider using the last two cases for
+              <t>The fourth block displays combinations that are not valid or
+              currently unused. The first case (labelled `Not-ECN (broken)' is
+              where all bits set in the SYN are reflected by the receiver in
+              the SYN/ACK, which happens quite often if the TCP connection is
+              proxied. In this case, both ends MUST fall-back to Not ECN for
+              both half connections. The other two cases (labelled 'AccECN
+              (CU)') are currently unassigned and available for an RFC to
+              extend TCP in future (see <xref target="accecn_Alt_Designs"/>
+              for possible uses). As soon as an AccECN-capable TCP client (A)
+              receives either of these SYN/ACKs it MUST set both its half
+              connections into AccECN mode, as if the SYN/ACK had been AE=0,
+              CWR=1. ECE=0.<!--{ToDo: Consider using the last two cases for
             AccECN f/b of ECT(0) and ECT(1) on the SYN (<xref
             target="accecn_Alt_Designs"/>)}--></t>
 
-            <!-- <t>Forward Compatibility: The fourth block enumerates the
+              <!-- <t>Forward Compatibility: The fourth block enumerates the
             remaining combinations of AccECN-related flags that are Reserved
             for future use by AccECN ('Rsvd').<list style="symbols">
                 <t>If an originating AccECN host (A) sends AE=1, CWR=1 and
@@ -1018,34 +992,80 @@ deliberately to reduce complexity.-->
                 MUST forward these Rsvd combinations of flags unaltered (see
                 also <xref target="accecn_Mbox_Operation"/>).</t>
               </list></t>-->
-          </list></t>
+            </list></t>
 
-        <t><!--The table is self-explanatory in most respects, but --> The
-        following exceptional cases need some explanation:<list
-            style="hanging">
-            <!-- <t hangText="Not ECN (broken):"> Broken TCP server implementations exist that reflect the
+          <t><!--The table is self-explanatory in most respects, but --> The
+          following exceptional cases need some explanation:<list
+              style="hanging">
+              <!-- <t hangText="Not ECN (broken):"> Broken TCP server implementations exist that reflect the
             flags that were originally reserved in <xref target="RFC0793"/> back to the originator <xref target="RFC3168"/>.
             Therefore, if the SYN/ACK reflects the same flag settings as the preceding
             SYN, an AccECN client implementation MUST revert to Not-ECT.</t>
 
             -->
 
-            <t hangText="ECN Nonce:">An AccECN implementation, whether client
-            or server, sender or receiver, does not need to implement the ECN
-            Nonce behaviour <xref target="RFC3540"/>, which is being
-            reclassified as historic. AccECN is compatible with an alternative
-            ECN feedback integrity approach that does not use up the ECT(1)
-            codepoint and can be implemented solely at the sender (see <xref
-            target="accecn_Integrity"/>).</t>
+              <t hangText="ECN Nonce:">An AccECN implementation, whether
+              client or server, sender or receiver, does not need to implement
+              the ECN Nonce behaviour <xref target="RFC3540"/>, which is being
+              reclassified as historic. AccECN is compatible with an
+              alternative ECN feedback integrity approach that does not use up
+              the ECT(1) codepoint and can be implemented solely at the sender
+              (see <xref target="accecn_Integrity"/>).</t>
 
-            <t hangText="Simultaneous Open:">An originating AccECN Host (A),
-            having sent a SYN with AE=1, CWR=1 and ECE=1, might receive
-            another SYN from host B. Host A MUST then enter the same feedback
-            mode as it would have entered had it been a responding host and
-            received the same SYN. Then host A MUST send the same SYN/ACK as
-            it would have sent had it been a responding host (see the third
-            block above).</t>
-          </list></t>
+              <t hangText="Simultaneous Open:">An originating AccECN Host (A),
+              having sent a SYN with AE=1, CWR=1 and ECE=1, might receive
+              another SYN from host B. Host A MUST then enter the same
+              feedback mode as it would have entered had it been a responding
+              host and received the same SYN. Then host A MUST send the same
+              SYN/ACK as it would have sent had it been a responding host (see
+              the third block above).</t>
+            </list></t>
+
+          <section anchor="accecn_sec_SYN_rexmt"
+                   title="Retransmission of the SYN">
+            <!--Bob: Out of scope: move to fall-back draft.
+        <t> In AccECN mode the originating host (A) MAY set the IP ECN field to
+        ECT in the first ACK that finalizes the three way handshake (3WSH). 
+        E.g. to test ECN support of the path, setting the SYN/ACK as well as
+        the first ACK to ECT allows each end to determine as soon as possible
+        whether the path passes ECT or a middlebox bleaches or overwrites the
+        IP ECN field.</t>
+-->
+
+            <t>If the sender of an AccECN SYN times out before receiving the
+            SYN/ACK, the sender SHOULD attempt to negotiate the use of AccECN
+            at least one more time by continuing to set all three TCP ECN
+            flags on the first retransmitted SYN. If this first retransmission
+            also fails to be acknowledged, the sender SHOULD send subsequent
+            retransmissions of the SYN without any ECN flags set. This adds
+            delay, in the case where a middlebox drops an AccECN (or ECN) SYN
+            deliberately. However, current measurements imply that a drop is
+            less likely to be due to middlebox interference than other
+            intermittent causes of loss, e.g. congestion, wireless
+            interference, etc.</t>
+
+            <t>Implementers MAY use other fall-back strategies if they are
+            found to be more effective (e.g. attempting to retransmit an
+            AccECN SYN only once or more than twice (most appropriate during
+            high levels of congestion); or falling back to classic ECN
+            feedback rather than non-ECN). Further it may make sense to also
+            remove any other experimental fields or options on the SYN in case
+            a middlebox might be blocking them, although the required
+            behaviour will depend on the specification of the other option(s)
+            and any attempt to co-ordinate fall-back between different modules
+            of the stack. In any case, the TCP initiator SHOULD cache failed
+            connection attempts. If it does, it SHOULD NOT give up attempting
+            to negotiate AccECN on the SYN of subsequent connection attempts
+            until it is clear that the blockage is persistently and
+            specifically due to AccECN. The cache should be arranged to expire
+            so that the initiator will infrequently attempt to check whether
+            the problem has been resolved.</t>
+
+            <t>The fall-back procedure if the TCP server receives no ACK to
+            acknowledge a SYN/ACK that tried to negotiate AccECN is specified
+            in <xref target="accecn_Mbox_Interference"/>.</t>
+          </section>
+        </section>
       </section>
 
       <section anchor="accecn_feedback" title="AccECN Feedback">
@@ -2421,7 +2441,7 @@ sSafer|
           support while also feeding back that the arriving SYN was ECT(0) or
           ECT(1). This could be used to probe the client to server path for
           incorrect forwarding of the ECN field <xref
-          target="I-D.kuehlewind-tcpm-ecn-fallback"/>. </t>
+          target="I-D.kuehlewind-tcpm-ecn-fallback"/>.</t>
 
           <t hangText="Feedback all four ECN codepoints on the First ACK:">To
           probe the server to client path for incorrect ECN forwarding, it
@@ -2429,12 +2449,6 @@ sSafer|
           the TCP client. This could be achieved by assigning four
           combinations of the ECN flags in the main TCP header, and only
           initializing the ACE field on subsequent segments.</t>
-
-          <t hangText="Empty AccECN Option:">It might be useful to allow an
-          empty (Length=2) AccECN Option on the SYN/ACK and first ACK. Then if
-          a host had to omit the option because there was insufficient space
-          for a larger option, it would not give the impression to the other
-          end that a middlebox had stripped the option.</t>
 
           <!--
           <t hangText="Single ECT mode:">If a Data Receiver has never seen one
