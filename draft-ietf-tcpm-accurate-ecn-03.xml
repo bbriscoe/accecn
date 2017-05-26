@@ -599,8 +599,7 @@ deliberately to reduce complexity.-->
 
         <t>For this reason, AccECN is designed to be a generic reflector of
         whatever ECN markings it sees, whether or not they are compliant with
-        a current standard. Then as standards evolve (e.g. <xref
-        target="I-D.bagnulo-tcpm-generalized-ecn"/>), Data Senders can upgrade
+        a current standard. Then as standards evolve, Data Senders can upgrade
         unilaterally without any need for receivers to upgrade too. It is also
         useful to be able to rely on generic reflection behaviour when senders
         need to test for unexpected interference with markings (for instance
@@ -613,8 +612,8 @@ deliberately to reduce complexity.-->
         SYN supports future scenarios in which SYNs might be ECN-enabled
         (without prejudging whether they ought to be). For instance, <xref
         target="I-D.ietf-tsvwg-ecn-experimentation"/> updates this aspect of
-        RFC 3168 to allow experimentation with ECN-capable TCP control packets
-        (e.g. <xref target="I-D.bagnulo-tcpm-generalized-ecn"/>).</t>
+        RFC 3168 to allow experimentation with ECN-capable TCP control
+        packets.</t>
 
         <t>Even if the TCP client has set the SYN to not-ECT in compliance
         with RFC 3168, feedback on whether it has been CE-marked could still
@@ -702,7 +701,7 @@ deliberately to reduce complexity.-->
               <t hangText="ECN:">'Classic' ECN feedback <xref
               target="RFC3168"/></t>
 
-              <t hangText="Drop">Not-ECN-capable. Implicit congestion
+              <t hangText="No ECN:">Not-ECN-capable. Implicit congestion
               notification using packet drop.</t>
             </list></t>
 
@@ -788,7 +787,7 @@ deliberately to reduce complexity.-->
 
             <c>AccECN</c>
 
-            <c>Drop</c>
+            <c>No ECN</c>
 
             <c>1 &nbsp; 1 &nbsp; 1</c>
 
@@ -826,7 +825,7 @@ deliberately to reduce complexity.-->
 
             <c>classic ECN</c>
 
-            <c>Drop</c>
+            <c>No ECN</c>
 
             <c>AccECN</c>
 
@@ -1116,7 +1115,7 @@ deliberately to reduce complexity.-->
           counter in the initial ACE field has been initialized to a specific
           valid value - the above check solely tests whether the ACE fields
           have been incorrectly zeroed. This allows hosts to use different
-          initial values as an additional signalling channel in future. </t>
+          initial values as an additional signalling channel in future.</t>
         </section>
 
         <section anchor="accecn_ACE_Safety"
@@ -1248,13 +1247,17 @@ deliberately to reduce complexity.-->
             ACK to acknowledge its SYN/ACK, the SYN/ACK might just have been
             lost, e.g. due to congestion, or a middlebox might be blocking the
             AccECN Option. To expedite connection setup, the TCP server SHOULD
-            fall back to AE=CWR=ECE=0 and no AccECN Option on the
-            retransmission of the SYN/ACK. Implementers MAY use other
+            retransmit the SYN/ACK with the same TCP flags (AE, CWR and ECE)
+            but with no AccECN Option. If this retransmission times out, to
+            expedite connection setup, the TCP server SHOULD disable AccECN
+            and ECN for this connection by retransmitting the SYN/ACK with
+            AE=CWR=ECE=0 and no AccECN Option. Implementers MAY use other
             fall-back strategies if they are found to be more effective (e.g.
-            retransmitting a SYN/ACK with AccECN TCP flags but not the AccECN
-            Option; attempting to retransmit a second AccECN segment before
-            fall-back (most appropriate during high levels of congestion); or
-            falling back to classic ECN feedback rather than non-ECN).</t>
+            falling back to classic ECN feedback on the first retransmission;
+            retrying the AccECN Option for a second time before fall-back
+            (most appropriate during high levels of congestion); or falling
+            back to classic ECN feedback rather than non-ECN on the third
+            retransmission).</t>
 
             <t>If the TCP client detects that the first data segment it sent
             with the AccECN Option was lost, it SHOULD fall back to no AccECN
@@ -1364,19 +1367,20 @@ deliberately to reduce complexity.-->
             increase while the s.ceb counter does not (e.g. due to a CE-marked
             control packet). The sender's response to such a situation is out
             of scope, and needs to be dealt with in a specification that uses
-            ECN-capable control packets (e.g.<xref
-            target="I-D.bagnulo-tcpm-generalized-ecn"/>). Theoretically, this
-            situation could also occur if a middlebox mangled the AccECN
-            Option but not the ACE field. However, the Data Sender has to
-            assume that the integrity of the AccECN Option is sound, based on
-            the above test of the well-known initial values and optionally
-            other integrity tests (<xref target="accecn_Integrity"/>).</t>
+            ECN-capable control packets. Theoretically, this situation could
+            also occur if a middlebox mangled the AccECN Option but not the
+            ACE field. However, the Data Sender has to assume that the
+            integrity of the AccECN Option is sound, based on the above test
+            of the well-known initial values and optionally other integrity
+            tests (<xref target="accecn_Integrity"/>).</t>
 
             <t>If either end-point detects that the s.ceb counter has
             increased but the s.cep has not (and by testing ACK coverage it is
-            certain how much the ACE field has wrapped), it MUST reset the
-            connection, because this indicates an invalid protocol
-            transition.</t>
+            certain how much the ACE field has wrapped), this invalid protocol
+            transition has to be due to some form of feedback mangling. So,
+            the Data Sender MUST disable sending ECN-capable packets for the
+            remainder of the half-connection by setting the IP/ECN field in
+            all subsequent packets to Not-ECT.</t>
           </section>
         </section>
 
