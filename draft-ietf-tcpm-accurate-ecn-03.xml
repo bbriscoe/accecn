@@ -1831,7 +1831,8 @@ even though it uses existing TCP fields in unorthodox ways.
 
       <t>[TO BE REMOVED: This registration should take place at the following
       location:
-      https://www.iana.org/assignments/tcp-header-flags/tcp-header-flags.xhtml#tcp-header-flags-1]</t>
+      https://www.iana.org/assignments/tcp-header-flags/tcp-header-flags.xhtml#tcp-header-flags-1
+      ]</t>
 
       <t>This document also defines a new TCP option for AccECN, assigned a
       value of TBD1 (decimal) from the TCP option space. This value is defined
@@ -1857,7 +1858,8 @@ even though it uses existing TCP fields in unorthodox ways.
 
       <t>[TO BE REMOVED: This registration should take place at the following
       location:
-      http://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-1]</t>
+      http://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-1
+      ]</t>
 
       <t>Early implementation before the IANA allocation MUST follow <xref
       target="RFC6994"/> and use experimental option 254 and magic number
@@ -2425,7 +2427,7 @@ sSafer|
     <section anchor="accecn_Doc_Changes"
              title="Changes in This Version (To Be Removed Before Publication)">
       <t>The difference between any pair of versions can be displayed at
-      &lt;http://datatracker.ietf.org/doc/draft-kuehlewind-tcpm-accurate-ecn/history/&gt;</t>
+      http://datatracker.ietf.org/doc/draft-kuehlewind-tcpm-accurate-ecn/history/</t>
     </section>
   </back>
 </rfc>
