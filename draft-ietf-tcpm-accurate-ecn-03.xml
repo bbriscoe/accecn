@@ -1329,13 +1329,13 @@ deliberately to reduce complexity.-->
             either direction the initial value of the EE0B field in the AccECN
             Option (if one exists) ought to be non-zero. If AccECN has been
             negotiated:<list style="symbols">
-                <t>the TCP server SHOULD check the initial value of the EE0B
+                <t>the TCP server MAY check the initial value of the EE0B
                 field in the first segment that acknowledges sequence space
                 that at least covers the ISN plus 1. If the initial value of
                 the EE0B field is zero, the server will switch into a mode
                 that ignores the AccECN Option for this half connection.</t>
 
-                <t>the TCP client SHOULD check the initial value of the EE0B
+                <t>the TCP client MAY check the initial value of the EE0B
                 field on the SYN/ACK. If the initial value of the EE0B field
                 is zero, the client will switch into a mode that ignores the
                 AccECN Option for this half connection.</t>
