@@ -173,14 +173,14 @@
       in <xref target="I-D.ietf-tsvwg-ecn-experimentation"/>, namely: a
       TCP-based Low Latency Low Loss Scalable (L4S) congestion control <xref
       target="I-D.ietf-tsvwg-l4s-arch"/>; ECN-capable TCP control packets
-      <xref target="I-D.bagnulo-tcpm-generalized-ecn"/>, or Alternative
-      Backoff with ECN (ABE) <xref
+      <xref target="I-D.ietf-tcpm-generalized-ecn"/>, or Alternative Backoff
+      with ECN (ABE) <xref
       target="I-D.ietf-tcpm-alternativebackoff-ecn"/>.</t>
 
       <t>It is likely (but not required) that the AccECN protocol will be
       implemented along with the following experimental additions to the
       TCP-ECN protocol: ECN-capable TCP control packets and retransmissions
-      <xref target="I-D.bagnulo-tcpm-generalized-ecn"/>, which includes the
+      <xref target="I-D.ietf-tcpm-generalized-ecn"/>, which includes the
       ECN-capable SYN-ACK experiment <xref target="RFC5562"/>; and testing
       receiver non-compliance <xref
       target="I-D.moncaster-tcpm-rcv-cheat"/>.</t>
@@ -652,16 +652,19 @@ deliberately to reduce complexity.-->
 
           <t>If a TCP server (B) that is AccECN-enabled receives a SYN with
           the above three flags set, it MUST set both its half connections
-          into AccECN mode. Then it MUST set the TCP flags CWR=1 and ECE=0 on
-          its response in the SYN/ACK segment to confirm that it supports
-          AccECN. The TCP server MUST NOT set this combination of flags unless
-          the preceding SYN requested support for AccECN as above.</t>
+          into AccECN mode. Then it MUST set the TCP flags on the SYN/ACK to
+          one of the 4 values shown in the top block of <xref
+          target="accecn_Tab_Negotiation"/> to confirm that it supports
+          AccECN. The TCP server MUST NOT set one of these 4 combination of
+          flags on the SYN/ACK unless the preceding SYN requested support for
+          AccECN as above.</t>
 
-          <t>A TCP server in AccECN mode MUST additionally set the TCP flag
-          AE=1 on the SYN/ACK if the IP/ECN field of the SYN was CE-marked
-          (see <xref target="accecn_demb_reflector"/> for rationale). If the
-          IP/ECN field of the received SYN was Not-ECT, ECT(0) or ECT(1), it
-          MUST clear the TCP AE flag (AE=0) on the SYN/ACK.</t>
+          <t>A TCP server in AccECN mode MUST set the AE, CWR and ECE TCP
+          flags on the SYN/ACK to the value in <xref
+          target="accecn_Tab_Negotiation"/> that feeds back the IP-ECN field
+          that arrived on the SYN. This applies whether or not the server
+          itself supports setting the IP-ECN field on a SYN or SYN/ACK (see
+          <xref target="accecn_demb_reflector"/> for rationale).</t>
 
           <!--Bob: Out of scope: move to fall-back draft.-->
 
@@ -738,9 +741,33 @@ deliberately to reduce complexity.-->
 
             <c>0 &nbsp; 1 &nbsp; 0</c>
 
-            <c>AccECN</c>
+            <c>AccECN (Not-ECT on SYN)</c>
 
             <!-- new -->
+
+            <c>AccECN</c>
+
+            <c>AccECN+</c>
+
+            <c>1 &nbsp; 1 &nbsp; 1</c>
+
+            <c>0 &nbsp; 1 &nbsp; 1</c>
+
+            <c>AccECN (ECT1 on SYN)</c>
+
+            <!-- changed to AccECN (CU) instead of RSVD -->
+
+            <c>AccECN</c>
+
+            <c>AccECN+</c>
+
+            <c>1 &nbsp; 1 &nbsp; 1</c>
+
+            <c>1 &nbsp; 0 &nbsp; 0</c>
+
+            <!-- changed to AccECN (CU) instead of RSVD -->
+
+            <c>AccECN (ECT0 on SYN)</c>
 
             <c>AccECN</c>
 
@@ -857,30 +884,6 @@ deliberately to reduce complexity.-->
             <c>Not ECN</c>
 
             <!-- moved  end -->
-
-            <c>AccECN</c>
-
-            <c>AccECN+</c>
-
-            <c>1 &nbsp; 1 &nbsp; 1</c>
-
-            <c>0 &nbsp; 1 &nbsp; 1</c>
-
-            <c>AccECN (CU)</c>
-
-            <!-- changed to AccECN (CU) instead of RSVD -->
-
-            <c>AccECN</c>
-
-            <c>AccECN+</c>
-
-            <c>1 &nbsp; 1 &nbsp; 1</c>
-
-            <c>1 &nbsp; 0 &nbsp; 0</c>
-
-            <!-- changed to AccECN (CU) instead of RSVD -->
-
-            <c>AccECN (CU)</c>
           </texttable>
 
           <t><xref target="accecn_Tab_Negotiation"/> is divided into blocks
@@ -903,46 +906,17 @@ deliberately to reduce complexity.-->
               it MUST set both its half connections into the feedback mode
               shown in the rightmost column.</t>
 
-              <t>The fourth block displays combinations that are not valid or
-              currently unused. The first case (labelled `Broken' is where all
-              bits set in the SYN are reflected by the receiver in the
-              SYN/ACK, which happens quite often if the TCP connection is
-              proxied. In this case, both ends MUST fall-back to Not ECN for
-              both half connections. The other two cases (labelled 'AccECN
-              (CU)') are currently unassigned and available for an RFC to
-              extend TCP in future, tagged as 'AccECN+' (see <xref
-              target="accecn_Alt_Designs"/> for possible uses). For forward
-              compatibility, as soon as an AccECN-capable TCP client (A)
-              receives either of these SYN/ACKs it MUST set both its half
-              connections into AccECN mode, as if the SYN/ACK had been AE=0,
-              CWR=1, ECE=0.<!--{ToDo: Consider using the last two cases for
-            AccECN f/b of ECT(0) and ECT(1) on the SYN (<xref
-            target="accecn_Alt_Designs"/>)}--></t>
-
-              <!-- <t>Forward Compatibility: The fourth block enumerates the
-            remaining combinations of AccECN-related flags that are Reserved
-            for future use by AccECN ('Rsvd').<list style="symbols">
-                <t>If an originating AccECN host (A) sends AE=1, CWR=1 and
-                ECE=1 in the initial SYN segment and if it receives any of
-                these Reserved values in a SYN/ACK response, it MUST set both
-                its half connections into AccECN mode.</t>
-
-                <t>To comply with the present AccECN protocol, middleboxes
-                MUST forward these Rsvd combinations of flags unaltered (see
-                also <xref target="accecn_Mbox_Operation"/>).</t>
-              </list></t>-->
+              <t>The fourth block displays a combination labelled `Broken' .
+              Some older TCP server implementations incorrectly set the
+              reserved flags in the SYN/ACK by reflecting those in the SYN.
+              Such broken TCP servers (B) cannot support ECN, so as soon as an
+              AccECN-capable TCP client (A) receives such a broken SYN/ACK it
+              MUST fall-back to Not ECN mode for both its half
+              connections.</t>
             </list></t>
 
-          <t><!--The table is self-explanatory in most respects, but --> The
-          following exceptional cases need some explanation:<list
+          <t>The following exceptional cases need some explanation:<list
               style="hanging">
-              <!-- <t hangText="Not ECN (broken):"> Broken TCP server implementations exist that reflect the
-            flags that were originally reserved in <xref target="RFC0793"/> back to the originator <xref target="RFC3168"/>.
-            Therefore, if the SYN/ACK reflects the same flag settings as the preceding
-            SYN, an AccECN client implementation MUST revert to Not-ECT.</t>
-
-            -->
-
               <t hangText="ECN Nonce:">An AccECN implementation, whether
               client or server, sender or receiver, does not need to implement
               the ECN Nonce feedback mode <xref target="RFC3540"/>, which is
@@ -958,8 +932,7 @@ deliberately to reduce complexity.-->
               another SYN from host B. Host A MUST then enter the same
               feedback mode as it would have entered had it been a responding
               host and received the same SYN. Then host A MUST send the same
-              SYN/ACK as it would have sent had it been a responding host (see
-              the third block above).</t>
+              SYN/ACK as it would have sent had it been a responding host.</t>
             </list></t>
         </section>
 
@@ -980,14 +953,14 @@ deliberately to reduce complexity.-->
           the first retransmitted SYN (using the usual retransmission
           time-outs). If this first retransmission also fails to be
           acknowledged, the sender SHOULD send subsequent retransmissions of
-          the SYN without any ECN flags set. This adds delay, in the case
+          the SYN without any TCP-ECN flags set. This adds delay, in the case
           where a middlebox drops an AccECN (or ECN) SYN deliberately.
           However, current measurements imply that a drop is less likely to be
           due to middlebox interference than other intermittent causes of
           loss, e.g. congestion, wireless interference, etc.</t>
 
           <t>Implementers MAY use other fall-back strategies if they are found
-          to be more effective (e.g. attempting to retransmit an AccECN SYN
+          to be more effective (e.g. attempting to negotiate AccECN on the SYN
           only once or more than twice (most appropriate during high levels of
           congestion); or falling back to classic ECN feedback rather than
           non-ECN). Further it may make sense to also remove any other
@@ -1009,16 +982,16 @@ deliberately to reduce complexity.-->
       </section>
 
       <section anchor="accecn_feedback" title="AccECN Feedback">
-        <t>Each Data Receiver maintains four counters, r.cep, r.ceb, r.e0b and
-        r.e1b. The CE packet counter (r.cep), counts the number of packets the
-        host receives with the CE code point in the IP ECN field, including CE
-        marks on control packets without data. r.ceb, r.e0b and r.e1b count
-        the number of TCP payload bytes in packets marked respectively with
-        the CE, ECT(0) and ECT(1) codepoint in their IP-ECN field. When a host
-        first enters AccECN mode, it initialises its counters to r.cep = 6,
-        r.e0b = 1 and r.ceb = r.e1b.= 0 (see <xref
-        target="accecn_Algo_Not-ECT"/>). Non-zero initial values are used to
-        support a stateless handshake (see <xref
+        <t>Each Data Receiver of each half connection maintains four counters,
+        r.cep, r.ceb, r.e0b and r.e1b. The CE packet counter (r.cep), counts
+        the number of packets the host receives with the CE code point in the
+        IP ECN field, including CE marks on control packets without data.
+        r.ceb, r.e0b and r.e1b count the number of TCP payload bytes in
+        packets marked respectively with the CE, ECT(0) and ECT(1) codepoint
+        in their IP-ECN field. When a host first enters AccECN mode, it
+        initializes its counters to r.cep = 5, r.e0b = 1 and r.ceb = r.e1b.= 0
+        (see <xref target="accecn_Algo_Not-ECT"/>). Non-zero initial values
+        are used to support a stateless handshake (see <xref
         target="accecn_Interaction_SYN_Cookies"/>) and to be distinct from
         cases where the fields are incorrectly zeroed (e.g. by middleboxes -
         see <xref target="accecn_sec_zero_option"/>).</t>
@@ -1028,7 +1001,22 @@ deliberately to reduce complexity.-->
         the byte counters using the AccECN TCP Option, as specified in <xref
         target="accecn_option"/>. Whenever a host feeds back the value of any
         counter, it MUST report the most recent value, no matter whether it is
-        in a pure ACK, an ACK with new payload data or a retransmission.</t>
+        in a pure ACK, an ACK with new payload data or a retransmission.
+        Therefore the feedback carried on a retransmitted packet is unlikely
+        to be the same as the feedback on the original packet.</t>
+
+        <section title="Initialization of Feedback Counters at the Data Sender">
+          <t>Each Data Sender of each half connection maintains four counters,
+          s.cep, s.ceb, s.e0b and s.e1b intended to track the equivalent
+          counters at the Data Receiver. When a host enters AccECN mode, it
+          initializes them to s.cep = 5, s.e0b = 1 and s.ceb = s.e1b.= 0.</t>
+
+          <t>If a TCP client (A) in AccECN mode receives a SYN/ACK with CE
+          feedback, i.e. AE=1, CWR=1, ECE=0, it increments s.cep to 6.
+          Otherwise, for any of the 3 other combinations of the 3 ECN TCP
+          flags (the top 3 rows in <xref target="accecn_Tab_Negotiation"/>),
+          s.cep remains initialized to 5.</t>
+        </section>
 
         <section anchor="accecn_ACE" title="The ACE Field">
           <t>After AccECN has been negotiated on the SYN and SYN/ACK, both
@@ -1073,16 +1061,103 @@ deliberately to reduce complexity.-->
           SYN/ACKs after AccECN support has been successfully negotiated
           during a simultaneous open).</t>
 
-          <t>The ACE field encodes the three least significant bits of the
-          r.cep counter, therefore its initial value will be 0b110 (decimal
-          6). If the SYN/ACK was CE marked, the client MUST increase its r.cep
-          counter before it sends its first ACK, therefore the initial value
-          of the ACE field will be 0b111 (decimal 7). To support a stateless
-          handshake (see <xref target="accecn_Interaction_SYN_Cookies"/>),
-          these values have been chosen deliberately so that they are distinct
-          from <xref target="RFC5562"/> behaviour, where the TCP client would
-          set ECE on the first ACK as feedback for a CE mark on the
-          SYN/ACK.</t>
+          <t>In general, on any packet with the SYN flag cleared (SYN=0), the
+          Data Receiver MUST encode the three least significant bits of its
+          r.cep counter in the ACE field it feeds back to the Data Sender.
+          {ToDo: instead of making the definition of the ACE field on packets
+          with SYN=0, we could define the ACE field on any packet not part of
+          the 3WHS, but I think that's not precise enough to cover
+          unconventional appearances of SYN=1 packets.}</t>
+
+          <t>There is only one exception to this rule: On the final ACK of the
+          3WHS, a TCP client (A) in AccECN mode MUST use the ACE field to feed
+          back which of the 4 possible values of the IP-ECN field were on the
+          SYN/ACK (the binary encoding is the same as that used on the
+          SYN/ACK). <xref target="accecn_Tab_SYN-ACK_fb"/> shows the meaning
+          of each possible value of the ACE field on the ACK of the SYN/ACK
+          and the value that an AccECN server MUST set s.cep to as a
+          result.</t>
+
+          <texttable anchor="accecn_Tab_SYN-ACK_fb"
+                     title="Meaning of the ACE field on the ACK of the SYN/ACK">
+            <ttcol>ACE on ACK of SYN/ACK</ttcol>
+
+            <ttcol>IP-ECN codepoint on SYN/ACK inferred by server</ttcol>
+
+            <ttcol>Server's initial s.cep</ttcol>
+
+            <c>0b000</c>
+
+            <c>CU {Notes 1, 2, 3}</c>
+
+            <c>Disable ECN</c>
+
+            <c>0b001</c>
+
+            <c>CU {Notes 2, 3}</c>
+
+            <c>5</c>
+
+            <c>0b010</c>
+
+            <c>Not-ECT</c>
+
+            <c>5</c>
+
+            <c>0b011</c>
+
+            <c>ECT(1)</c>
+
+            <c>5</c>
+
+            <c>0b100</c>
+
+            <c>ECT(0)</c>
+
+            <c>5</c>
+
+            <c>0b101</c>
+
+            <c>CU {Note 3}</c>
+
+            <c>5</c>
+
+            <c>0b110</c>
+
+            <c>CE</c>
+
+            <c>6</c>
+
+            <c>0b111</c>
+
+            <c>CU {Note 3}</c>
+
+            <c>5</c>
+          </texttable>
+
+          <t>{Note 1}: If the server is in AccECN mode, the value of zero
+          raises suspicion of zeroing of the ACE field on the path (see <xref
+          target="accecn_sec_ACE_init_invalid"/>).</t>
+
+          <t>{Note 2}: If a server is in AccECN mode, there ought to be no
+          valid case where the ACE field on the last ACK of the 3WHS has a
+          value of 0b000 or 0b001, so these values are tagged as currently
+          unused (CU). </t>
+
+          <t>However, in the case where a server that implements AccECN is
+          also using SYN cookies with a stateless handshake (see <xref
+          target="accecn_Interaction_SYN_Cookies"/>), these values are not CU.
+          This is because the AccECN server will not remember whether it is in
+          AccECN mode (but it does know that it implements AccECN). In such a
+          case, these values indicate that the client did not request support
+          for AccECN and therefore the server is not in AccECN mode. Further,
+          0b001 on the ACK implies that the server sent an ECN-capable
+          SYN-ACK, which was marked CE in the network, and the non-AccECN
+          client fed this back by setting ECE on the ACK of the SYN-ACK.</t>
+
+          <t>{Note 3}: If the server is in AccECN mode, these values are
+          currently unused (CU) but the AccECN server's behaviour is still
+          defined for forward compatibility.</t>
         </section>
 
         <section anchor="accecn_sec_ACE_init_invalid"
@@ -1547,8 +1622,8 @@ even though it uses existing TCP fields in unorthodox ways.
         <t>Nonetheless, such a server can determine that it negotiated AccECN
         as follows. If a TCP server using SYN Cookies supports AccECN and if
         the first segment it receives that at least covers the ISN contains an
-        ACE field with the value 0b110 or 0b111, it can assume that:<list
-            style="symbols">
+        ACE field with the value 0b010 to 0b111 (decimal 2 to 7), it can
+        assume that:<list style="symbols">
             <t>the TCP client must have requested AccECN support on the
             SYN</t>
 
@@ -1984,7 +2059,7 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
 
       <?rfc include="reference.I-D.ietf-tcpm-dctcp" ?>
 
-      <?rfc include="reference.I-D.bagnulo-tcpm-generalized-ecn" ?>
+      <?rfc include="reference.I-D.ietf-tcpm-generalized-ecn" ?>
 
       <?rfc include="reference.I-D.ietf-tsvwg-ecn-experimentation" ?>
 
@@ -2348,7 +2423,7 @@ sSafer|
     </section>
 
     <section anchor="accecn_Alt_Designs"
-             title="Alternative Design Choices (To Be Removed Before Publication)">
+             title="Alternative Design Choices {ToDo Delete before draft-04}">
       <t>This appendix is informative, not normative. It records alternative
       designs that the authors chose not to include in the normative
       specification, but which the IETF might wish to consider for
@@ -2412,8 +2487,9 @@ sSafer|
           ACKs, or was this just one of many reasons? The choice between MUST
           and SHOULD here is critical. Before that choice is made, a clear
           use-case for certainty of timing and ordering information is needed,
-          plus well-informed discussion about hardware offload
-          constraints.</t>
+          plus well-informed discussion about hardware offload constraints.
+          {ToDo:describe circumstances under which the MUST applies, and
+          otherwise when it is a SHOULD.}</t>
 
           <t>There is possibly a concern that a receiver could deliberately
           omit the AccECN Option pretending that it had been stripped by a
