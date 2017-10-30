@@ -148,14 +148,17 @@
       the TCP header to provide more than one feedback signal per RTT. It will
       be called the more accurate ECN feedback scheme, or AccECN for short. If
       AccECN progresses from experimental to the standards track, it is
-      intended to be a complete replacement for classic ECN feedback, not a
-      fork in the design of TCP. Thus, the applicability of AccECN is intended
-      to include all public and private IP networks (and even any non-IP
-      networks over which TCP is used today). Until the AccECN experiment
-      succeeds, <xref target="RFC3168"/> will remain as the standards track
-      specification for adding ECN to TCP. To avoid confusion, in this
-      document we use the term 'classic ECN' for the pre-existing ECN
-      specification <xref target="RFC3168"/>.</t>
+      intended to be a complete replacement for classic TCP/ECN feedback, not
+      a fork in the design of TCP. AccECN feedback complements TCP's loss
+      feedback and it supplements classic TCP/ECN feedback, so its
+      applicability is intended to include all public and private IP networks
+      (and even any non-IP networks over which TCP is used today), whether or
+      not any nodes on the path support ECN of whatever flavour.</t>
+
+      <t>Until the AccECN experiment succeeds, <xref target="RFC3168"/> will
+      remain as the standards track specification for adding ECN to TCP. To
+      avoid confusion, in this document we use the term 'classic ECN' for the
+      pre-existing ECN specification <xref target="RFC3168"/>.</t>
 
       <t>AccECN feedback overloads flags and fields in the main TCP header
       with new definitions, so both ends have to support the new wire protocol
@@ -259,8 +262,8 @@
         between the conflicting requirements of resilience, integrity and
         minimisation of overhead. It also requires that it is not unduly
         complex, and that it is compatible with prevalent equipment behaviours
-        in the current Internet, whether or not they comply with
-        standards.</t>
+        in the current Internet (e.g. hardware offloading and middleboxes),
+        whether or not they comply with standards.</t>
 
         <!-- <t hangText="Duration: ">To be credible, the experiment will need
             to last at least 12 months from publication of the present
@@ -275,8 +278,9 @@ ToDo: Why is this timescale point commented out? It means that, if successful af
         <t>Testing will mostly focus on fall-back strategies in case of
         middlebox interference. Current recommended strategies are specified
         in Sections <xref format="counter" target="accecn_sec_SYN_rexmt"/>,
-        <xref format="counter" target="accecn_sec_ACE_init_invalid"/> and
-        <xref format="counter" target="accecn_Mbox_Interference"/>. The
+        <xref format="counter" target="accecn_sec_ACE_init_invalid"/>, <xref
+        format="counter" target="accecn_sec_ecn-mangling"/> and <xref
+        format="counter" target="accecn_Mbox_Interference"/>. The
         effectiveness of these strategies depends on the actual deployment
         situation of middleboxes. Therefore experimental verification to
         confirm large-scale path traversal in the Internet is needed before
@@ -615,21 +619,23 @@ deliberately to reduce complexity.-->
         RFC 3168 to allow experimentation with ECN-capable TCP control
         packets.</t>
 
-        <t>Even if the TCP client has set the SYN to not-ECT in compliance
-        with RFC 3168, feedback on whether it has been CE-marked could still
-        be useful, because middleboxes have been known to overwrite the ECN IP
-        field as if it is still part of the old Type of Service (ToS) field.
-        If a TCP client has set the SYN to Not-ECT, but receives CE feedback,
-        it can detect such middlebox interference and send Not-ECT for the
-        rest of the connection (see <xref
+        <t>Even if the TCP client (or server) has set the SYN (or SYN/ACK) to
+        not-ECT in compliance with RFC 3168, feedback on the state of the ECN
+        field when it arrives at the receiver could still be useful, because
+        middleboxes have been known to overwrite the ECN IP field as if it is
+        still part of the old Type of Service (ToS) field <xref
+        target="Mandalari18"/>. If a TCP client has set the SYN to Not-ECT,
+        but receives CE feedback, it can detect such middlebox interference
+        and send Not-ECT for the rest of the connection (see <xref
         target="I-D.kuehlewind-tcpm-ecn-fallback"/>). Today, if a TCP server
-        receives CE on a SYN, it cannot know whether it is invalid (or valid)
-        because only the TCP client knows whether it originally marked the SYN
-        as Not-ECT (or ECT). Therefore, prior to AccECN, the server's only
-        safe course of action was to disable ECN for the connection. Instead,
-        the AccECN protocol allows the server to feed back the CE marking to
-        the client, which then has all the information to decide whether the
-        connection has to fall-back from supporting ECN (or not).</t>
+        receives ECT or CE on a SYN, it cannot know whether it is invalid (or
+        valid) because only the TCP client knows whether it originally marked
+        the SYN as Not-ECT (or ECT). Therefore, prior to AccECN, the server's
+        only safe course of action was to disable ECN for the connection.
+        Instead, the AccECN protocol allows the server to feed back the
+        received ECN field to the client, which then has all the information
+        to decide whether the connection has to fall-back from supporting ECN
+        (or not).</t>
       </section>
     </section>
 
@@ -748,7 +754,7 @@ deliberately to reduce complexity.-->
 
             <c>AccECN</c>
 
-            <c>AccECN+</c>
+            <c>AccECN</c>
 
             <c>1 &nbsp; 1 &nbsp; 1</c>
 
@@ -760,7 +766,7 @@ deliberately to reduce complexity.-->
 
             <c>AccECN</c>
 
-            <c>AccECN+</c>
+            <c>AccECN</c>
 
             <c>1 &nbsp; 1 &nbsp; 1</c>
 
@@ -1042,9 +1048,9 @@ deliberately to reduce complexity.-->
           <t>The original definition of these three flags in the TCP header,
           including the addition of support for the ECN Nonce, is shown for
           comparison in <xref target="accecn_Fig_TCPHdr"/>. This specification
-          does not rename these three TCP flags to ACE for always; it merely
-          overloads them with another name and definition once an AccECN
-          connection has been established.</t>
+          does not rename these three TCP flags to ACE unconditionally; it
+          merely overloads them with another name and definition once an
+          AccECN connection has been established.</t>
 
           <t>A host MUST interpret the AE, CWR and ECE flags as the 3-bit ACE
           counter on a segment with the SYN flag cleared (SYN=0) that it sends
@@ -1082,17 +1088,17 @@ deliberately to reduce complexity.-->
 
             <ttcol>IP-ECN codepoint on SYN/ACK inferred by server</ttcol>
 
-            <ttcol>Server's initial s.cep</ttcol>
+            <ttcol>Initial s.cep of server in AccECN mode</ttcol>
 
             <c>0b000</c>
 
-            <c>CU {Notes 1, 2, 3}</c>
+            <c>{Notes 1, 2}</c>
 
             <c>Disable ECN</c>
 
             <c>0b001</c>
 
-            <c>CU {Notes 2, 3}</c>
+            <c>{Notes 2, 3}</c>
 
             <c>5</c>
 
@@ -1116,7 +1122,7 @@ deliberately to reduce complexity.-->
 
             <c>0b101</c>
 
-            <c>CU {Note 3}</c>
+            <c>Currently Unused {Note 3}</c>
 
             <c>5</c>
 
@@ -1128,7 +1134,7 @@ deliberately to reduce complexity.-->
 
             <c>0b111</c>
 
-            <c>CU {Note 3}</c>
+            <c>Currently Unused {Note 3}</c>
 
             <c>5</c>
           </texttable>
@@ -1139,23 +1145,17 @@ deliberately to reduce complexity.-->
 
           <t>{Note 2}: If a server is in AccECN mode, there ought to be no
           valid case where the ACE field on the last ACK of the 3WHS has a
-          value of 0b000 or 0b001, so these values are tagged as currently
-          unused (CU). </t>
+          value of 0b000 or 0b001. </t>
 
           <t>However, in the case where a server that implements AccECN is
-          also using SYN cookies with a stateless handshake (see <xref
-          target="accecn_Interaction_SYN_Cookies"/>), these values are not CU.
-          This is because the AccECN server will not remember whether it is in
-          AccECN mode (but it does know that it implements AccECN). In such a
-          case, these values indicate that the client did not request support
-          for AccECN and therefore the server is not in AccECN mode. Further,
-          0b001 on the ACK implies that the server sent an ECN-capable
-          SYN/ACK, which was marked CE in the network, and the non-AccECN
-          client fed this back by setting ECE on the ACK of the SYN/ACK.</t>
+          also using a stateless handshake (termed a SYN cookie) it will not
+          remember whether it entered AccECN mode. Then these two values
+          remind it that it did not enter AccECN mode (see <xref
+          target="accecn_Interaction_SYN_Cookies"/> for details). </t>
 
           <t>{Note 3}: If the server is in AccECN mode, these values are
-          currently unused (CU) but the AccECN server's behaviour is still
-          defined for forward compatibility.</t>
+          Currently Unused but the AccECN server's behaviour is still defined
+          for forward compatibility.</t>
         </section>
 
         <section anchor="accecn_sec_ACE_init_invalid"
@@ -1188,6 +1188,49 @@ deliberately to reduce complexity.-->
           valid value - the above check solely tests whether the ACE fields
           have been incorrectly zeroed. This allows hosts to use different
           initial values as an additional signalling channel in future.</t>
+        </section>
+
+        <section anchor="accecn_sec_ecn-mangling"
+                 title="Testing for Mangling of the IP/ECN Field">
+          <t>The value of the ACE field on the SYN/ACK indicates the value of
+          the IP/ECN field when the SYN arrived at the server. The client can
+          compare this with how it originally set the IP/ECN field on the SYN.
+          If this comparison implies an unsafe transition of the IP/ECN field,
+          for the remainder of the connection the client MUST NOT send
+          ECN-capable packets, but it MUST continue to feed back any ECN
+          markings on arriving packets. </t>
+
+          <t>The value of the ACE field on the last ACK of the 3WHS indicates
+          the value of the IP/ECN field when the SYN/ACK arrived at the
+          client. The server can compare this with how it originally set the
+          IP/ECN field on the SYN/ACK. If this comparison implies an unsafe
+          transition of the IP/ECN field, for the remainder of the connection
+          the server MUST NOT send ECN-capable packets, but it MUST continue
+          to feedback any ECN markings on arriving packets.</t>
+
+          <t>Invalid transitions of the IP/ECN field are defined in <xref
+          target="RFC3168"/> and repeated here for convenience:<list
+              style="symbols">
+              <t>the not-ECT codepoint changes;</t>
+
+              <t>either ECT codepoint transitions to not-ECT;</t>
+
+              <t>the CE codepoint changes.</t>
+            </list>RFC 3168 says that a router that changes ECT to not-ECT is
+          invalid but safe. However, from a host's viewpoint, this transition
+          is unsafe because it could be the result of two transitions at
+          different routers on the path: ECT to CE (safe) then CE to not-ECT
+          (unsafe). This scenario could well happen where an ECN-enabled home
+          router congests its upstream mobile broadband bottleneck link, then
+          the ingress to the mobile network clears the ECN field <xref
+          target="Mandalari18"/>.</t>
+
+          <t>The above fall-back behaviours are necessary in case mangling of
+          the IP/ECN field is asymmetric, which is currently common over some
+          mobile networks <xref target="Mandalari18"/>. Then one end might see
+          no unsafe transition and continue sending ECN-capable packets, while
+          the other end sees an unsafe transition and stops sending
+          ECN-capable packets.</t>
         </section>
 
         <section anchor="accecn_ACE_Safety"
@@ -1277,8 +1320,10 @@ deliberately to reduce complexity.-->
           accommodate the 16-bit magic number.</t>
 
           <t>All implementations of a Data Sender MUST be able to read in
-          AccECN Options of any of the above lengths. They MUST ignore an
-          AccECN Option of any other length.</t>
+          AccECN Options of any of the above lengths. If the AccECN Option is
+          of any other length, implementations MUST use those whole 3 octet
+          fields that fit within the length and ignore the remainder of the
+          option.</t>
         </section>
 
         <section anchor="accecn_Mbox_Interference"
@@ -1630,9 +1675,9 @@ even though it uses existing TCP fields in unorthodox ways.
 
         <t>Nonetheless, such a server can determine that it negotiated AccECN
         as follows. If a TCP server using SYN Cookies supports AccECN and if
-        the first segment it receives that at least covers the ISN contains an
-        ACE field with the value 0b010 to 0b111 (decimal 2 to 7), it can
-        assume that:<list style="symbols">
+        it receives a pure ACK that acknowledges an ISN that is a valid SYN
+        cookie, and if the ACK contains an ACE field with the value 0b010 to
+        0b111 (decimal 2 to 7), it can assume that:<list style="symbols">
             <t>the TCP client must have requested AccECN support on the
             SYN</t>
 
@@ -1640,8 +1685,15 @@ even though it uses existing TCP fields in unorthodox ways.
             AccECN</t>
           </list>Therefore the server can switch itself into AccECN mode, and
         continue as if it had never forgotten that it switched itself into
-        AccECN mode earlier. For other values of ACE field, heuristics to
-        infer what other type of ECN the client supports are out of scope.</t>
+        AccECN mode earlier. </t>
+
+        <t>If the pure ACK that acknowledges a SYN cookie contains an ACE
+        field with the value 0b000 or 0b001, these values indicate that the
+        client did not request support for AccECN and therefore the server
+        does not enter AccECN mode for this connection. Further, 0b001 on the
+        ACK implies that the server sent an ECN-capable SYN/ACK, which was
+        marked CE in the network, and the non-AccECN client fed this back by
+        setting ECE on the ACK of the SYN/ACK.</t>
       </section>
 
       <section anchor="accecn_Interaction_Other"
@@ -1740,7 +1792,7 @@ even though it uses existing TCP fields in unorthodox ways.
           <t hangText="Ordering:">The order in which marks arrive at the Data
           Receiver is preserved in AccECN feedback, because the Data Receiver
           is expected to send an ACK immediately whenever a different mark
-          arrives.</t>
+          arrives. </t>
 
           <!-- <t hangText="Overhead:">Two alternative locations for the
            supplementary protocol field are proposed:<list style="numbers">
@@ -2011,8 +2063,9 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
     <!-- ================================================================ -->
 
     <section anchor="accecn_Acknowledgements" title="Acknowledgements">
-      <t>We want to thank Koen De Schepper, Praveen Balasubramanian and
-      Michael Welzl for their input and discussion. The idea of using the
+      <t>We want to thank Koen De Schepper, Praveen Balasubramanian, Michael
+      Welzl, Gorry Fairhurst, David Black, Spencer Dawkins, Michael Scharf and
+      Michael Tuexen for their input and discussion. The idea of using the
       three ECN-related TCP flags as one field for more accurate TCP-ECN
       feedback was first introduced in the re-ECN protocol that was the
       ancestor of ConEx.</t>
@@ -2020,14 +2073,15 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
       <t>Bob Briscoe was part-funded by the European Community under its
       Seventh Framework Programme through the Reducing Internet Transport
       Latency (RITE) project (ICT-317700) and through the Trilogy 2 project
-      (ICT-317756). The views expressed here are solely those of the
-      authors.</t>
+      (ICT-317756). He was also part-funded by the Research Council of Norway
+      through the TimeIn project. The views expressed here are solely those of
+      the authors.</t>
 
-      <t>This work is partly supported by the European Commission under
-      Horizon 2020 grant agreement no. 688421 Measurement and Architecture for
-      a Middleboxed Internet (MAMI), and by the Swiss State Secretariat for
-      Education, Research, and Innovation under contract no. 15.0268. This
-      support does not imply endorsement.</t>
+      <t>Mirja Kuehlewind was partly supported by the European Commission
+      under Horizon 2020 grant agreement no. 688421 Measurement and
+      Architecture for a Middleboxed Internet (MAMI), and by the Swiss State
+      Secretariat for Education, Research, and Innovation under contract no.
+      15.0268. This support does not imply endorsement.</t>
     </section>
 
     <!-- ================================================================ -->
@@ -2082,6 +2136,131 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
       <?rfc include="reference.I-D.ietf-tcpm-alternativebackoff-ecn" ?>
 
       <?rfc include="reference.I-D.ietf-tsvwg-l4s-arch" ?>
+
+      <reference anchor="Mandalari18">
+        <front>
+          <title>Measuring ECN++: Good News for ++, Bad News for ECN over
+          Mobile</title>
+
+          <author fullname="Anna Mandalari" initials="A." surname="Mandalari">
+            <organization>UC3M</organization>
+          </author>
+
+          <author fullname="Andra Lutu" initials="A." surname="Lutu">
+            <organization>Simula</organization>
+
+            <address>
+              <postal>
+                <street/>
+
+                <city/>
+
+                <region/>
+
+                <code/>
+
+                <country/>
+              </postal>
+
+              <phone/>
+
+              <facsimile/>
+
+              <email/>
+
+              <uri/>
+            </address>
+          </author>
+
+          <author fullname="Bob Briscoe" initials="B." surname="Briscoe">
+            <organization>Simula</organization>
+
+            <address>
+              <postal>
+                <street/>
+
+                <city/>
+
+                <region/>
+
+                <code/>
+
+                <country/>
+              </postal>
+
+              <phone/>
+
+              <facsimile/>
+
+              <email/>
+
+              <uri/>
+            </address>
+          </author>
+
+          <author fullname="Marcelo Bagnulo" initials="M." surname="Bagnulo">
+            <organization>UC3M</organization>
+
+            <address>
+              <postal>
+                <street/>
+
+                <city/>
+
+                <region/>
+
+                <code/>
+
+                <country/>
+              </postal>
+
+              <phone/>
+
+              <facsimile/>
+
+              <email/>
+
+              <uri/>
+            </address>
+          </author>
+
+          <author fullname="&Ouml;zg&uuml; Alay" initials="&Ouml;."
+                  surname="Alay">
+            <organization>Simula</organization>
+
+            <address>
+              <postal>
+                <street/>
+
+                <city/>
+
+                <region/>
+
+                <code/>
+
+                <country/>
+              </postal>
+
+              <phone/>
+
+              <facsimile/>
+
+              <email/>
+
+              <uri/>
+            </address>
+          </author>
+
+          <date month="March" year="2018"/>
+        </front>
+
+        <seriesInfo name="IEEE Communications Magazine" value=""/>
+
+        <format target="http://www.it.uc3m.es/amandala/ecn++/ecn_commag_2018.html"
+                type="PDF"/>
+
+        <annotation>(to appear)</annotation>
+      </reference>
     </references>
 
     <!-- <section anchor="accecn_Algo_Examples" title="Example Algorithms">
