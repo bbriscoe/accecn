@@ -1208,6 +1208,8 @@ deliberately to reduce complexity.-->
           the server MUST NOT send ECN-capable packets, but it MUST continue
           to feedback any ECN markings on arriving packets.</t>
 
+        <t>The ACK of the SYN/ACK is not reliably delivered (nonetheless, the count of CE marks is still eventually delivered reliably). If this ACK does not arrive, the server has to continue to send ECN-capable packets without having tested for mangling of the IP/ECN field on the SYN/ACK. Experiments with AccECN deployment will assess whether this limitation has any effect in practice.</t>
+
           <t>Invalid transitions of the IP/ECN field are defined in <xref
           target="RFC3168"/> and repeated here for convenience:<list
               style="symbols">
@@ -1710,8 +1712,6 @@ even though it uses existing TCP fields in unorthodox ways.
         target="accecn_option_usage"/> provides guidance on how important it
         is to send an AccECN Option and whether it needs to be a full-length
         option.</t>
-
-        <t>With TFO, the ACK of the SYN/ACK is not reliably delivered (nonetheless, the count of CE marks is still eventually delivered reliably). If this ACK does not arrive, the server has to continue to send ECN-capable packets without having tested for mangling of the IP/ECN field on the SYN/ACK. Experiments with AccECN deployment will assess whether this potential interaction with the TFO experiment has any effect in practice.</t>
       </section>
 
       <section anchor="accecn_Integrity"
