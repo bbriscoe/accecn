@@ -33,7 +33,7 @@
 <!-- HTML formatting control -->
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
-<rfc category="exp" docName="draft-ietf-tcpm-accurate-ecn-04"
+<rfc category="exp" docName="draft-ietf-tcpm-accurate-ecn-05"
      ipr="trust200902" updates="">
   <front>
     <title abbrev="Accurate TCP-ECN Feedback">More Accurate ECN Feedback in
@@ -1080,7 +1080,7 @@ deliberately to reduce complexity.-->
           SYN/ACK). <xref target="accecn_Tab_SYN-ACK_fb"/> shows the meaning
           of each possible value of the ACE field on the ACK of the SYN/ACK
           and the value that an AccECN server MUST set s.cep to as a
-          result.</t>
+          result. The encoding in <xref target="accecn_Tab_SYN-ACK_fb"/> is solely applicable on a packet in the client-server direction with an acknowledgement number 1 greater than the Initial Sequence Number (ISN) that was used by the server.</t>
 
           <texttable anchor="accecn_Tab_SYN-ACK_fb"
                      title="Meaning of the ACE field on the ACK of the SYN/ACK">
@@ -1519,7 +1519,7 @@ deliberately to reduce complexity.-->
               been raised that certain offload hardware needed for high
               performance might not be able to support change-triggered ACKs,
               although high performance protocols such as DCTCP successfully
-              use change-triggered ACKs. One possible compromise would be for
+              use change-triggered ACKs. One possible experimental compromise would be for
               the receiver to heuristically detect whether the sender is in
               slow-start, then to implement change-triggered ACKs in software
               while the sender is in slow-start, and offload to hardware
@@ -1710,6 +1710,8 @@ even though it uses existing TCP fields in unorthodox ways.
         target="accecn_option_usage"/> provides guidance on how important it
         is to send an AccECN Option and whether it needs to be a full-length
         option.</t>
+
+        <t>With TFO, the ACK of the SYN/ACK is not reliably delivered (nonetheless, the count of CE marks is still eventually delivered reliably). If this ACK does not arrive, the server has to continue to send ECN-capable packets without having tested for mangling of the IP/ECN field on the SYN/ACK. Experiments with AccECN deployment will assess whether this potential interaction with the TFO experiment has any effect in practice.</t>
       </section>
 
       <section anchor="accecn_Integrity"
