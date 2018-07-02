@@ -120,8 +120,11 @@
       feedback information whenever more than one marking is received in one
       RTT. This document specifies an experimental scheme to provide more than
       one feedback signal per RTT in the TCP header. Given TCP header space is
-      scarce, it overloads the three existing ECN-related flags in the TCP
-      header and provides additional information in a new TCP option.</t>
+      scarce, it allocates a reserved header bit, that was previously used for
+      ECN-Nonce which was recently declared historic, and overloads the
+      two existing ECN flags in the TCP header. Further, additional
+      information can be provided in a new TCP option that however is not used
+      on the TCP SYN.</t>
     </abstract>
   </front>
 
@@ -139,9 +142,10 @@
       signal can be transmitted per Round-Trip Time (RTT). Recently, proposed
       mechanisms like Congestion Exposure (ConEx <xref target="RFC7713"/>),
       DCTCP <xref target="RFC8257"/> or L4S <xref
-      target="I-D.ietf-tsvwg-l4s-arch"/> need more accurate ECN feedback
-      information than provided by the feedback scheme as specified in
-      <xref target="RFC3168"/> whenever more than one marking is received in one RTT.
+      target="I-D.ietf-tsvwg-l4s-arch"/> need to know when more than one
+      marking is received in one RTT which is
+      information that cannot be provided by the feedback scheme as specified in
+      <xref target="RFC3168"/>.
       This document specifies an alternative feedback scheme that provides more
       accurate information and could be used by these new TCP extensions. A
       fuller treatment of the motivation for this specification is given in
@@ -163,12 +167,15 @@
       avoid confusion, in this document we use the term 'classic ECN' for the
       pre-existing ECN specification <xref target="RFC3168"/>.</t>
 
-      <t>AccECN feedback overloads the two existing ECN flags as well as the
-      currently reserved and previously called NS flag in the main TCP header
-      with new definitions, so both ends have to support the new wire protocol
-      before it can be used. Therefore during the TCP handshake the two ends
-      use the three ECN-related flags in the TCP header to negotiate the most
-      advanced feedback protocol that they can both support.</t>
+    <t>AccECN feedback overloads the two existing ECN flags and
+    allocates the currently reserved and previously called NS flag in the
+    TCP header, to be used as one field indicating the number of congestion
+    experienced marked packets. Given the new definitions of these three bits,
+    both ends     have to support the new wire protocol before it can be used.
+    Therefore during the TCP handshake the two ends use these three bit in
+    the TCP header to negotiate the most advanced feedback protocol
+    that they can both support in a backward compatible way to 
+    <xref target="RFC3168"/>.</t>
 
       <t>AccECN is solely an (experimental) change to the TCP wire protocol;
       it only specifies the negotiation and signaling of more accurate ECN
@@ -256,8 +263,8 @@
         robustness and interoperability (with itself and with previous version
         of ECN and TCP).</t>
 
-        <t><!-- <list style="hanging">
-            <t hangText="Success criteria: "> -->The experimental protocol
+        <!--<t> <list style="hanging">
+            <t hangText="Success criteria: "> The experimental protocol
         will be considered successful if it is deployed and if it satisfies
         the requirements of <xref target="RFC7560"/> in the consensus opinion
         of the IETF tcpm working group. In short, this requires that it
@@ -267,7 +274,7 @@
         minimisation of overhead. It also requires that it is not unduly
         complex, and that it is compatible with prevalent equipment behaviours
         in the current Internet (e.g. hardware offloading and middleboxes),
-        whether or not they comply with standards.</t>
+        whether or not they comply with standards.</t>-->
 
         <!-- <t hangText="Duration: ">To be credible, the experiment will need
             to last at least 12 months from publication of the present
@@ -279,7 +286,9 @@
 ToDo: Why is this timescale point commented out? It means that, if successful after 12 months, the chairs cannot delay moving from expt to stds track. But we are still allowed to take longer to be successful.
 -->
 
-        <t>Testing will mostly focus on fall-back strategies in case of
+        <t>The experimental protocol will be considered successful if
+  		testing confirms that the proposed mechanism can be deployed at large
+		scale. Testing will mostly focus on fall-back strategies in case of
         middlebox interference. Current recommended strategies are specified
         in Sections <xref format="counter" target="accecn_sec_SYN_rexmt"/>,
         <xref format="counter" target="accecn_sec_ACE_init_invalid"/>, <xref
@@ -663,9 +672,11 @@ deliberately to reduce complexity.-->
         <section anchor="accecn_Negotiation_3WHS"
                  title="Negotiation during the TCP handshake">
           <t>Given the ECN Nonce <xref target="RFC3540"/> has been
-          reclassified as historic <xref target="RFC8311"/>, the present specification renames the TCP
-          flag at bit 7 of the TCP header flags from NS (Nonce Sum) to AE
-          (Accurate ECN) (see IANA Considerations in <xref
+          reclassified as historic <xref target="RFC8311"/>, the present specification 		
+          re-allocates the TCP
+          flag at bit 7of the TCP header flags, which was previously called NS
+          (Nonce Sum), as the AE
+          (Accurate ECN) flag (see IANA Considerations in <xref
           target="accecn_IANA_Considerations"/>).</t>
 
           <t>During the TCP handshake at the start of a connection, to request
@@ -1590,9 +1601,13 @@ Note that the ACK for the next segment could be delayed again if it carries the 
           deliberately worded to ignore the arrival of a control packet with
           no payload, which therefore does not alter any byte counters,
           because it is important that TCP does not acknowledge pure ACKs. The
-          change-triggered ACK approach will lead to some additional ACKs but
+          change-triggered ACK approach can lead to some additional ACKs but
           it feeds back the timing and the order in which ECN marks are
-          received with minimal additional complexity.</t>
+          received with minimal additional complexity. Especially, if only few
+          CE marks occurred or multiple marks in a row, the additional load will
+          be low. Other, unexpected marking pattern could increase the load
+          significantly, however, investigating the additional load it part
+          of the proposed experimentation.</t>
 
           <t>Implementation note: sending an AccECN Option each time a
           different counter changes and including a full-length AccECN Option
@@ -1991,9 +2006,9 @@ even though it uses existing TCP fields in unorthodox ways.
         <c>RFC XXXX</c>
       </texttable>
 
-      <t>[TO BE REMOVED: This registration should take place at the following
-      location:
-      https://www.iana.org/assignments/tcp-header-flags/tcp-header-flags.xhtml#tcp-header-flags-1
+      <t>[TO BE REMOVED: IANA is requested to update the existing entry in the Transmission Control Protocol (TCP) Header Flags registration (https://www.iana.org/assignments/tcp-header-flags/tcp-header-flags.xhtml#tcp-header-flags-1) for Bit 7 to "AE (Accurate ECN), previously used by Historic as NS (Nonce Sum) [RFC3540, RFC8311]" and change the reference to this RFC-to-be instead of RFC8311.]
+
+      
       ]</t>
 
       <t>This document also defines a new TCP option for AccECN, assigned a
