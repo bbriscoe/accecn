@@ -191,12 +191,11 @@
       target="I-D.ietf-tcpm-generalized-ecn"/>, or Alternative Backoff with
       ECN (ABE) <xref target="I-D.ietf-tcpm-alternativebackoff-ecn"/>.</t>
 
-      <t>It is RECOMMENDED that the AccECN protocol is implemented along with
+      <t>It is recommended that the AccECN protocol is implemented alongside
       the experimental ECN++ protocol <xref
-      target="I-D.ietf-tcpm-generalized-ecn"/>. <xref
-      target="I-D.ietf-tcpm-generalized-ecn"/> is a proposed alternative to
-      another experimental scheme <xref target="RFC5562"/> so there is no need
-      to implement RFC 5562 along with AccECN.</t>
+      target="I-D.ietf-tcpm-generalized-ecn"/>. Therefore, this specification
+      does not discuss implementing AccECN alongside the earlier experimental
+      alternative to ECN++ in <xref target="RFC5562"/>.</t>
 
       <section title="Document Roadmap">
         <t>The following introductory sections outline the goals of AccECN
