@@ -33,7 +33,7 @@
 <!-- HTML formatting control -->
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
-<rfc category="exp" docName="draft-ietf-tcpm-accurate-ecn-07"
+<rfc category="exp" docName="draft-ietf-tcpm-accurate-ecn-08"
      ipr="trust200902" updates="">
   <front>
     <title abbrev="Accurate TCP-ECN Feedback">More Accurate ECN Feedback in
