@@ -636,10 +636,10 @@ deliberately to reduce complexity.-->
         target="I-D.moncaster-tcpm-rcv-cheat"/>).</t>
 
         <t>The initial SYN is the most critical control packet, so AccECN
-        provides feedback on whether it is CE marked. Although RFC 3168
-        prohibits an ECN-capable SYN, providing feedback of CE marking on the
-        SYN supports future scenarios in which SYNs might be ECN-enabled
-        (without prejudging whether they ought to be). For instance, <xref
+        provides feedback on its ECN marking. Although RFC 3168 prohibits an
+        ECN-capable SYN, providing feedback of ECN marking on the SYN supports
+        future scenarios in which SYNs might be ECN-enabled (without
+        prejudging whether they ought to be). For instance, <xref
         target="RFC8311"/> updates this aspect of RFC 3168 to allow
         experimentation with ECN-capable TCP control packets.</t>
 
@@ -1098,14 +1098,14 @@ deliberately to reduce complexity.-->
           Data Sender.</t>
 
           <t>There is only one exception to this rule: On the final ACK of the
-          3WHS, a TCP client (A) in AccECN mode MUST use the ACE field to feed
-          back which of the 4 possible values of the IP-ECN field were on the
-          SYN/ACK (the binary encoding is the same as that used on the
-          SYN/ACK). <xref target="accecn_Tab_SYN-ACK_fb"/> shows the meaning
-          of each possible value of the ACE field on the ACK of the SYN/ACK
-          and the value that an AccECN server MUST set s.cep to as a result.
-          The encoding in <xref target="accecn_Tab_SYN-ACK_fb"/> is solely
-          applicable on a packet in the client-server direction with an
+          3-way handshake (3WHS), a TCP client (A) in AccECN mode MUST use the
+          ACE field to feed back which of the 4 possible values of the IP-ECN
+          field were on the SYN/ACK (the binary encoding is the same as that
+          used on the SYN/ACK). <xref target="accecn_Tab_SYN-ACK_fb"/> shows
+          the meaning of each possible value of the ACE field on the ACK of
+          the SYN/ACK and the value that an AccECN server MUST set s.cep to as
+          a result. The encoding in <xref target="accecn_Tab_SYN-ACK_fb"/> is
+          solely applicable on a packet in the client-server direction with an
           acknowledgement number 1 greater than the Initial Sequence Number
           (ISN) that was used by the server.</t>
 
@@ -2741,17 +2741,38 @@ sSafer|
         protocol, either if the experiment proves that a variant of AccECN is
         required, or if a completely different ECN feedback approach is
         needed:<list style="hanging">
-            <t hangText="Future AccECN variants:">The requirement not to
-            reject unexpected initial values of the ACE counter (in the main
-            TCP header) in the last para of <xref
+            <t hangText="Future AccECN variants:">When the AccECN capability
+            is negotiated during TCP's 3WHS, the rows in <xref
+            target="accecn_Tab_Negotiation"/> tagged as 'Nonce' and 'Broken'
+            in the column for the capability of node B are unused by any
+            current protocol in the RFC series. These could be used by TCP
+            servers in future to indicate a variant of the AccECN protocol. In
+            recent measurement studies in which the response of large numbers
+            of servers to an AccECN SYN has been tested, e.g. <xref
+            target="Mandalari18"/>, a very small number of SYN/ACKs arrive
+            with the pattern tagged as 'Nonce', and a small but more
+            significant number arrive with the pattern tagged as 'Broken'. The
+            'Nonce' pattern could be a sign that a few servers have
+            implemented the ECN Nonce <xref target="RFC3540"/>, which has now
+            been reclassified as historic <xref target="RFC8311"/>, or it
+            could be the random result of some unknown middlebox behaviour.
+            The greater prevalence of the 'Broken' pattern suggests that some
+            instances still exist of the broken code that reflects the
+            reserved flags on the SYN.<vspace blankLines="1"/>The requirement
+            not to reject unexpected initial values of the ACE counter (in the
+            main TCP header) in the last para of <xref
             target="accecn_sec_ACE_init_invalid"/> ensures that 5 unused
-            codepoints on the final ACK of the 3-way handshake and 7 unused
-            values on the first data packet from the server could be used to
-            negotiate future variants of the AccECN protocol between the
-            endpoints. Also, a similar requirement not to reject unexpected
-            initial values in the TCP option is for the same purpose. If
-            traversal of the TCP option were reliable, this would have enabled
-            a far wider range of future variation.</t>
+            codepoints on the final ACK of the 3WHS and 7 unused values on the
+            first data packet from the server could be used to declare future
+            variants of the AccECN protocol. However, at this late stage in
+            the 3WHS, it would only be possible to declare a variant because
+            it is too late for a negotiation between the endpoints to be
+            completed. A similar requirement not to reject unexpected initial
+            values in the TCP option is for the same purpose. If traversal of
+            the TCP option were reliable, this would have enabled a far wider
+            range of future variation of the whole AccECN protocol.
+            Nonetheless, it could be used to reliably negotiate a wide range
+            of variation in the semantics of the AccECN Option.</t>
 
             <t hangText="Future non-AccECN variants:">Five codepoints out of
             the 8 possible in the 3 TCP header flags used by AccECN are unused
