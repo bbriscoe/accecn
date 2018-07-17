@@ -191,13 +191,12 @@
       target="I-D.ietf-tcpm-generalized-ecn"/>, or Alternative Backoff with
       ECN (ABE) <xref target="I-D.ietf-tcpm-alternativebackoff-ecn"/>.</t>
 
-      <t>It is likely (but not required) that the AccECN protocol will be
-      implemented along with the following experimental additions to the
-      TCP-ECN protocol: ECN-capable TCP control packets and retransmissions
-      <xref target="I-D.ietf-tcpm-generalized-ecn"/>, which includes the
-      ECN-capable SYN/ACK experiment <xref target="RFC5562"/>; and testing
-      receiver non-compliance <xref
-      target="I-D.moncaster-tcpm-rcv-cheat"/>.</t>
+      <t>It is RECOMMENDED that the AccECN protocol is implemented along with
+      the experimental ECN++ protocol <xref
+      target="I-D.ietf-tcpm-generalized-ecn"/>. <xref
+      target="I-D.ietf-tcpm-generalized-ecn"/> is a proposed alternative to
+      another experimental scheme <xref target="RFC5562"/> so there is no need
+      to implement RFC 5562 along with AccECN.</t>
 
       <section title="Document Roadmap">
         <t>The following introductory sections outline the goals of AccECN
@@ -952,7 +951,7 @@ deliberately to reduce complexity.-->
               style="hanging">
               <t hangText="ECN Nonce:">With AccECN implementation, there is no
               need for the ECN Nonce feedback mode <xref target="RFC3540"/>,
-              which has also been reclassified as historic <xref
+              which has been reclassified as historic <xref
               target="RFC8311"/>, as AccECN is compatible with an alternative
               ECN feedback integrity approach that does not use up the ECT(1)
               codepoint and can be implemented solely at the sender (see <xref
@@ -1222,10 +1221,10 @@ deliberately to reduce complexity.-->
           <t>The value of the ACE field on the SYN/ACK indicates the value of
           the IP/ECN field when the SYN arrived at the server. The client can
           compare this with how it originally set the IP/ECN field on the SYN.
-          If this comparison implies an unsafe transition of the IP/ECN field,
-          for the remainder of the connection the client MUST NOT send
-          ECN-capable packets, but it MUST continue to feed back any ECN
-          markings on arriving packets.</t>
+          If this comparison implies an unsafe transition (see below) of the
+          IP/ECN field, for the remainder of the connection the client MUST
+          NOT send ECN-capable packets, but it MUST continue to feed back any
+          ECN markings on arriving packets.</t>
 
           <t>The value of the ACE field on the last ACK of the 3WHS indicates
           the value of the IP/ECN field when the SYN/ACK arrived at the
@@ -1326,7 +1325,7 @@ deliberately to reduce complexity.-->
           AccECN Option, and for the Data Sender to decode the AccECN Option
           fields into its byte counters.</t>
 
-          <t>Note that there is no field to feedback Not-ECT bytes.
+          <t>Note that there is no field to feed back Not-ECT bytes.
           Nonetheless an algorithm for the Data Sender to calculate the number
           of payload bytes received as Not-ECT is given in <xref
           target="accecn_Algo_Not-ECT"/>.</t>
@@ -1359,12 +1358,12 @@ deliberately to reduce complexity.-->
           fields that fit within the length and ignore the remainder of the
           option.</t>
 
-          <t>The use of the AccECN option is optional for the Data Receiver.
-          If the Data Receiver intents to use the AccECN option at any time
-          during the rest of the connection it strongly recommended to also
-          test its path traversal by including it in the SYN/ACK as specified
-          in the next section. By default the use of the AccECN option is
-          RECOMMENDED.</t>
+          <t>The use of the AccECN Option is optional for the Data Receiver.
+          If the Data Receiver intends to use the AccECN Option at any time
+          during the rest of the connection it is strongly recommended to also
+          test path traversal of the AccECN Option by including it in the
+          SYN/ACK as specified in the next section. By default the use of the
+          AccECN option is RECOMMENDED.</t>
         </section>
 
         <section anchor="accecn_Mbox_Interference"
