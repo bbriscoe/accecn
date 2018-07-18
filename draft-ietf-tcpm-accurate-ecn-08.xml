@@ -194,8 +194,9 @@
       <t>It is recommended that the AccECN protocol is implemented alongside
       the experimental ECN++ protocol <xref
       target="I-D.ietf-tcpm-generalized-ecn"/>. Therefore, this specification
-      does not discuss implementing AccECN alongside the earlier experimental
-      alternative to ECN++ in <xref target="RFC5562"/>.</t>
+      does not discuss implementing AccECN alongside <xref target="RFC5562"/>,
+      which was an earlier experimental protocol with narrower scope than
+      ECN++.</t>
 
       <section title="Document Roadmap">
         <t>The following introductory sections outline the goals of AccECN
