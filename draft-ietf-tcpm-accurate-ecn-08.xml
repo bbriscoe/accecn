@@ -89,7 +89,7 @@
       </address>
     </author>
 
-    <date year="2018"/>
+    <date year="2019"/>
 
     <area>Transport</area>
 
@@ -115,7 +115,7 @@
       congestion to the end-points. Receivers with an ECN-capable transport
       protocol feed back this information to the sender. ECN is specified for
       TCP in such a way that only one feedback signal can be transmitted per
-      Round-Trip Time (RTT). Recently, new TCP mechanisms like Congestion
+      Round-Trip Time (RTT). Recent new TCP mechanisms like Congestion
       Exposure (ConEx), Data Center TCP (DCTCP) or Low Latency Low Loss
       Scalable Throughput (L4S) need more accurate ECN feedback information
       whenever more than one marking is received in one RTT. This document
@@ -1374,17 +1374,25 @@ even if the server does not disable sending ECN-capable packets"--></t>
           initial experiments, the Length field MUST be 2 greater to
           accommodate the 16-bit magic number.</t>
 
-          <t>All implementations of a Data Sender that reads any AccECN Option
+          <t>All implementations of a Data Sender that read any AccECN Option
           MUST be able to read in AccECN Options of any of the above lengths.
           If the AccECN Option is of any other length, implementations MUST
           use those whole 3 octet fields that fit within the length and ignore
           the remainder of the option.<!--ToDo: I'm sure we can make this more flexible, so we can introduce a 1 byte initial field later.--></t>
 
-          <t>Use of the AccECN Option has to be optional, because it might not
-          traverse certain network paths. Even if a host does not send the
-          AccECN Option it is RECOMMENDED that it still implements logic to
-          receive and understand any AccECN Options sent by its remote peer.
-          If a Data Receiver intends to send the AccECN Option at any time
+          <t>The AccECN Option has to be optional to implement, because both
+          sender and receiver have to be able to cope without the option
+          anyway - in cases where it does not traverse a network path. It is
+          RECOMMENDED to implement both sending and receiving of the AccECN
+          Option. If sending of the AccECN Option is implemented, the
+          fall-backs described in this document will need to be implemented as
+          well (unless solely for a controlled environment where path
+          traversal is not considered a problem). Even if a developer does not
+          implement sending of the AccECN Option, it is RECOMMENDED that they
+          still implement logic to receive and understand any AccECN Options
+          sent by remote peers.</t>
+
+          <t>If a Data Receiver intends to send the AccECN Option at any time
           during the rest of the connection it is strongly recommended to also
           test path traversal of the AccECN Option as specified in the next
           section. </t>
@@ -1724,6 +1732,26 @@ even though it uses existing TCP fields in unorthodox ways.
         hardware could comply and still serve its function. Nonetheless, such
         hardware SHOULD also preserve the timing of each ACK (for example, if
         it coalesced ACKs it would not be AccECN-compliant).</t>
+
+        <t>The ACE field changes with every received CE marking, so today's
+        receive offloading could lead to many interrupts in high congestion
+        situations. Although that would be useful (because congestion
+        information is received sooner), it could also significantly increase
+        processor load, particularly in scenarios such as DCTCP or L4S where
+        the marking rate is generally higher. </t>
+
+        <t>In data centres it has been fortunate for offload hardware that
+        DCTCP-style feedback changes less often when there are long sequences
+        of CE marks, which is more common with a step marking threshold. In
+        order to enable DCTCP to improve its responsiveness, DCs will need to
+        move beyond step marking. Before this can happen, offload hardware
+        will have to explicitly address the variability of ECN feedback.</t>
+
+        <t>ECN encodes a varying signal in the ACK stream, so it is inevitable
+        that offload hardware will ultimately need to handle any form of ECN
+        feedback exceptionally. The purpose of working towards standardized
+        TCP ECN feedback is to reduce the risk for hardware developers, who
+        will have to choose which scheme is likely to become dominant. </t>
       </section>
     </section>
 
