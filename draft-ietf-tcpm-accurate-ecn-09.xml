@@ -59,33 +59,37 @@
 
     <author fullname="Mirja K&uuml;hlewind" initials="M."
             surname="K&uuml;hlewind">
-      <organization>ETH Zurich</organization>
+      <organization>Ericsson</organization>
 
       <address>
         <postal>
           <street/>
 
-          <city>Zurich</city>
-
-          <country>Switzerland</country>
+          <country>Germany</country>
         </postal>
 
-        <email>mirja.kuehlewind@tik.ee.ethz.ch</email>
+        <email>ietf@kuehlewind.net</email>
       </address>
     </author>
 
     <author fullname="Richard Scheffenegger" initials="R."
             surname="Scheffenegger">
+      <organization>NetApp</organization>
+
       <address>
         <postal>
           <street/>
 
           <city>Vienna</city>
 
+          <region/>
+
+          <code/>
+
           <country>Austria</country>
         </postal>
 
-        <email>rscheff@gmx.at</email>
+        <email>Richard.Scheffenegger@netapp.com</email>
       </address>
     </author>
 
