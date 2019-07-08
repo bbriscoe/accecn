@@ -607,9 +607,9 @@ deliberately to reduce complexity.-->
         while the CE byte counter solely includes marked payload bytes. If
         both are present, the byte counter in the option will provide the more
         accurate information needed for modern congestion control and policing
-        schemes, such as DCTCP or ConEx. If the option is stripped, a simple
-        algorithm to estimate the number of marked bytes from the ACE field is
-        given in <xref target="accecn_Algo_ACE_Bytes"/>.</t>
+        schemes, such as L4S, DCTCP or ConEx. If the option is stripped, a
+        simple algorithm to estimate the number of marked bytes from the ACE
+        field is given in <xref target="accecn_Algo_ACE_Bytes"/>.</t>
 
         <t>Feedback in bytes is recommended in order to protect against the
         receiver using attacks similar to 'ACK-Division' to artificially
@@ -1114,15 +1114,17 @@ deliberately to reduce complexity.-->
 
           <t>There is only one exception to this rule: On the final ACK of the
           3-way handshake (3WHS), a TCP client (A) in AccECN mode MUST use the
-          ACE field to feed back which of the 4 possible values of the IP-ECN
-          field were on the SYN/ACK (the binary encoding is the same as that
-          used on the SYN/ACK). <xref target="accecn_Tab_SYN-ACK_fb"/> shows
-          the meaning of each possible value of the ACE field on the ACK of
-          the SYN/ACK and the value that an AccECN server MUST set s.cep to as
-          a result. The encoding in <xref target="accecn_Tab_SYN-ACK_fb"/> is
-          solely applicable on a packet in the client-server direction with an
-          acknowledgement number 1 greater than the Initial Sequence Number
-          (ISN) that was used by the server.</t>
+          appropriate values of the ACE field in <xref
+          target="accecn_Tab_SYN-ACK_fb"/> to feed back which of the 4
+          possible values of the IP-ECN field were on the SYN/ACK (the binary
+          encoding is the same as that used on the SYN/ACK). <xref
+          target="accecn_Tab_SYN-ACK_fb"/> shows the meaning of each possible
+          value of the ACE field on the ACK of the SYN/ACK and the value that
+          an AccECN server MUST set s.cep to as a result. The encoding in
+          <xref target="accecn_Tab_SYN-ACK_fb"/> is solely applicable on a
+          packet in the client-server direction with an acknowledgement number
+          1 greater than the Initial Sequence Number (ISN) that was used by
+          the server.</t>
 
           <texttable anchor="accecn_Tab_SYN-ACK_fb"
                      title="Meaning of the ACE field on the ACK of the SYN/ACK">
@@ -1134,7 +1136,7 @@ deliberately to reduce complexity.-->
 
             <c>0b000</c>
 
-            <c>{Notes 1, 2}</c>
+            <c>{Notes 1, 3}</c>
 
             <c>Disable ECN</c>
 
@@ -1164,7 +1166,7 @@ deliberately to reduce complexity.-->
 
             <c>0b101</c>
 
-            <c>Currently Unused {Note 3}</c>
+            <c>Currently Unused {Note 2}</c>
 
             <c>5</c>
 
@@ -1176,7 +1178,7 @@ deliberately to reduce complexity.-->
 
             <c>0b111</c>
 
-            <c>Currently Unused {Note 3}</c>
+            <c>Currently Unused {Note 2}</c>
 
             <c>5</c>
           </texttable>
@@ -1185,19 +1187,26 @@ deliberately to reduce complexity.-->
           raises suspicion of zeroing of the ACE field on the path (see <xref
           target="accecn_sec_ACE_init_invalid"/>).</t>
 
-          <t>{Note 2}: If a server is in AccECN mode, there ought to be no
-          valid case where the ACE field on the last ACK of the 3WHS has a
-          value of 0b000 or 0b001.</t>
+          <t>{Note 2}: If the server is in AccECN mode, these values are
+          Currently Unused but the AccECN server's behaviour is still defined
+          for forward compatibility. Then the designer of a future protocol
+          can know for certain what AccECN servers will do with these
+          codepoints.</t>
 
-          <t>However, in the case where a server that implements AccECN is
+          <t>{Note 3}: In the case where a server that implements AccECN is
           also using a stateless handshake (termed a SYN cookie) it will not
-          remember whether it entered AccECN mode. Then these two values
-          remind it that it did not enter AccECN mode (see <xref
+          remember whether it entered AccECN mode. The values 0b000 or 0b001
+          will remind it that it did not enter AccECN mode, because AccECN
+          does not use them (see <xref
           target="accecn_Interaction_SYN_Cookies"/> for details).</t>
 
-          <t>{Note 3}: If the server is in AccECN mode, these values are
-          Currently Unused but the AccECN server's behaviour is still defined
-          for forward compatibility.</t>
+          <t>If a stateless server that implements AccECN receives either of
+          these two values in the ACK, its action is implementation-dependent
+          and outside the scope of this spec, It will certainly not take the
+          action in the third column because, after it receives either of
+          these values, it is not in AccECN mode. I.e., it will not disable
+          ECN (at least not just because ACE is 0b000) and it will not set
+          s.cep.</t>
         </section>
 
         <section anchor="accecn_sec_ACE_init_invalid"
@@ -1271,7 +1280,9 @@ even if the server does not disable sending ECN-capable packets"--></t>
               <t>either ECT codepoint transitions to not-ECT;</t>
 
               <t>the CE codepoint changes.</t>
-            </list>RFC 3168 says that a router that changes ECT to not-ECT is
+            </list></t>
+
+          <t>RFC 3168 says that a router that changes ECT to not-ECT is
           invalid but safe. However, from a host's viewpoint, this transition
           is unsafe because it could be the result of two transitions at
           different routers on the path: ECT to CE (safe) then CE to not-ECT
@@ -2163,11 +2174,11 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
 
     <section anchor="accecn_Acknowledgements" title="Acknowledgements">
       <t>We want to thank Koen De Schepper, Praveen Balasubramanian, Michael
-      Welzl, Gorry Fairhurst, David Black, Spencer Dawkins, Michael Scharf and
-      Michael Tuexen for their input and discussion. The idea of using the
-      three ECN-related TCP flags as one field for more accurate TCP-ECN
-      feedback was first introduced in the re-ECN protocol that was the
-      ancestor of ConEx.</t>
+      Welzl, Gorry Fairhurst, David Black, Spencer Dawkins, Michael Scharf,
+      Michael Tuexen and Yuchung Cheng for their input and discussion. The
+      idea of using the three ECN-related TCP flags as one field for more
+      accurate TCP-ECN feedback was first introduced in the re-ECN protocol
+      that was the ancestor of ConEx.</t>
 
       <t>Bob Briscoe was part-funded by the European Community under its
       Seventh Framework Programme through the Reducing Internet Transport
@@ -2402,7 +2413,7 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
         the amount of new data that the ACK acknowledges in bytes. If
         newlyAckedB is negative it means that a more up to date ACK has
         already been processed, so this ACK has been superseded and the Data
-        Sender has to ignore the AccECN Option. Then the Data Sender
+        Sender has to ignore the AccECN Option. Otherwise, the Data Sender
         calculates the minimum difference d.ceb between the ECEB field and its
         local s.ceb counter, using modulo arithmetic as follows:</t>
 
@@ -2810,7 +2821,7 @@ sSafer|
             reserved flags on the SYN.<vspace blankLines="1"/>The requirement
             not to reject unexpected initial values of the ACE counter (in the
             main TCP header) in the last para of <xref
-            target="accecn_sec_ACE_init_invalid"/> ensures that 5 unused
+            target="accecn_sec_ACE_init_invalid"/> ensures that 3 unused
             codepoints on the final ACK of the 3WHS and 7 unused values on the
             first data packet from the server could be used to declare future
             variants of the AccECN protocol. The word 'declare' is used rather
