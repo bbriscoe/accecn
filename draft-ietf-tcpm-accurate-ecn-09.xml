@@ -680,7 +680,20 @@ deliberately to reduce complexity.-->
           specification re-allocates the TCP flag at bit 7 of the TCP header,
           which was previously called NS (Nonce Sum), as the AE (Accurate ECN)
           flag (see IANA Considerations in <xref
-          target="accecn_IANA_Considerations"/>).</t>
+          target="accecn_IANA_Considerations"/>) as shown below.</t>
+             
+          <figure align="center" anchor="accecn_Fig_TCPHdr_AE"
+                title="The (post-AccECN) definition of the TCP header flags 
+                during the TCP handshake">
+          <artwork align="center"><![CDATA[             
+  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
++---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+|               |           | A | C | E | U | A | P | R | S | F |
+| Header Length | Reserved  | E | W | C | R | C | S | S | Y | I |
+|               |           |   | R | E | G | K | H | T | N | N |
++---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+]]></artwork>
+        </figure>
 
           <t>During the TCP handshake at the start of a connection, to request
           more accurate ECN feedback the TCP client (host A) MUST set the TCP
@@ -1466,7 +1479,8 @@ even if the server does not disable sending ECN-capable packets"--></t>
             fall-back strategies such as attempting to retransmit a second
             segment with the AccECN Option before fall-back, and/or caching
             whether the AccECN Option is blocked for subsequent
-            connections.</t>
+            connections. <xref target="I-D.ietf-tcpm-2140bis"/> further
+            discusses caching of TCP parameters and status information.</t>
 
             <t>Either host MAY include the AccECN Option in a subsequent
             segment to retest whether the AccECN Option can traverse the
@@ -1590,13 +1604,14 @@ even if the data sender does not disable sending ECN-capable packets."--></t>
 
         <section anchor="accecn_option_usage"
                  title="Usage of the AccECN TCP Option">
-          <t>The following rules determine when a Data Receiver in AccECN mode
-          sends the AccECN TCP Option, and which fields to include:<list
+          <t>If the Data Receiver intends to use the AccECN Option to provide 
+          feedback, the following rules determine when a Data Receiver in AccECN mode
+          sends the AccECN TCP Option, and which fields to include, :<list
               style="hanging">
               <t hangText="Change-Triggered ACKs:">If an arriving packet
               increments a different byte counter to that incremented by the
               previous packet, the Data Receiver MUST immediately send an ACK
-              with an AccECN Option, without waiting for the next delayed ACK
+              (respectively with an AccECN Option), without waiting for the next delayed ACK
               (this is in addition to the safety recommendation in <xref
               target="accecn_ACE_Safety"/> against ambiguity of the ACE
               field).<vspace blankLines="1"/>This is stated as a "MUST" so
@@ -2246,6 +2261,8 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
       <?rfc include="reference.I-D.kuehlewind-tcpm-ecn-fallback" ?>
 
       <?rfc include="reference.I-D.ietf-tcpm-generalized-ecn" ?>
+         
+      <?rfc include="reference.I-D.ietf-tcpm-2149bis" ?>
 
       <?rfc include="reference.RFC.8511" ?>
 
