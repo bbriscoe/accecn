@@ -1072,11 +1072,17 @@ deliberately to reduce complexity.-->
         field are not consumed unnecessarily, given they can be used to
         negotiate variants of the AccECN protocol.</t>
 
-        <section title="Initialization of Feedback Counters at the Data Sender">
+        <section anchor="accecn_init_counters"
+                 title="Initialization of Feedback Counters at the Data Sender">
           <t>Each Data Sender of each half connection maintains four counters,
           s.cep, s.ceb, s.e0b and s.e1b intended to track the equivalent
-          counters at the Data Receiver. When a host enters AccECN mode, it
-          initializes them to s.cep = 5, s.e0b = 1 and s.ceb = s.e1b.= 0.</t>
+          counters at the Data Receiver. When a host enters AccECN mode, the
+          initial values of s.cep and s.ceb are always 0. The initial values
+          of the other two byte counters depend on whether it will feedback
+          ECT(0) feedback more often (Type 0) or ECT(1) (Type 1). If type 0,
+          it will initialize the remaining counters to s.e0b = 1 and s.e1b.=
+          0. If type 1, it will initialize them to s.e0b = 0 and s.e1b.=
+          0x800001.</t>
 
           <t>If a TCP client (A) in AccECN mode receives a SYN/ACK with CE
           feedback, i.e. AE=1, CWR=1, ECE=0, it increments s.cep to 6.
@@ -1361,7 +1367,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
           successfully use change-triggered ACKs). One possible experimental
           compromise would be for the receiver to heuristically detect whether
           the sender is in slow-start, then to implement change-triggered ACKs
-          while the sender is in slow-start, and offload otherwise. </t>
+          while the sender is in slow-start, and offload otherwise.</t>
 
           <t>If the Data Sender has not received AccECN TCP Options to give it
           more dependable information, and it detects that the ACE field could
@@ -1382,10 +1388,16 @@ even if the server does not disable sending ECN-capable packets"--></t>
 
         <section anchor="accecn_option" title="The AccECN Option">
           <t>The AccECN Option is defined as shown below in <xref
-          target="accecn_Fig_TCPopt"/>. It consists of three 24-bit fields
-          that provide the 24 least significant bits of the r.e0b, r.ceb and
-          r.e1b counters, respectively. The initial 'E' of each field name
-          stands for 'Echo'.</t>
+          target="accecn_Fig_TCPopt"/>. There are two types of option; type 0
+          and type 1. They both consists of three 24-bit fields. Type 0
+          provides the 24 least significant bits of the r.e0b, r.ceb and r.e1b
+          counters, respectively. Type 1 provides the 24 least significant
+          bits of the r.e1b, r.ceb and r.e0b counters, respectively. The
+          initial 'E' of each field name stands for 'Echo'. On the initial
+          option of a connection, it can be seen from <xref
+          target="accecn_init_counters"/> that the value of the first field
+          after the length determines which order the fields are in (type 0 or
+          type, 1).</t>
 
           <figure align="center" anchor="accecn_Fig_TCPopt"
                   title="The AccECN Option">
@@ -1396,8 +1408,19 @@ even if the server does not disable sending ECN-capable packets"--></t>
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 | EE0B (cont'd) |           ECEB field                          |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                  EE1B field                   |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+]]></artwork>
+|                  EE1B field                   |                  Type 0
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  Kind = TBD1  |  Length = 11  |          EE1B field           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| EE1B (cont'd) |           ECEB field                          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                  EE0B field                   |                  Type 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+]]></artwork>
           </figure>
 
           <t>When a Data Receiver sends an AccECN Option, it MUST set the Kind
@@ -1417,20 +1440,44 @@ even if the server does not disable sending ECN-capable packets"--></t>
           target="accecn_Algo_Not-ECT"/>.</t>
 
           <t>Whenever a Data Receiver sends an AccECN Option, the rules in
-          <xref target="accecn_option_usage"/> expect it to always send a
+          <xref target="accecn_option_usage"/> expect it to usually send a
           full-length option. To cope with option space limitations, it can
           omit unchanged fields from the tail of the option, as long as it
           preserves the order of the remaining fields and includes any field
           that has changed. The length field MUST indicate which fields are
-          present as follows:<list style="hanging">
-              <t hangText="Length=11:">EE0B, ECEB, EE1B</t>
+          present as follows:</t>
 
-              <t hangText="Length=8:">EE0B, ECEB</t>
+          <texttable>
+            <ttcol>Length</ttcol>
 
-              <t hangText="Length=5:">EE0B</t>
+            <ttcol> Type 0</ttcol>
 
-              <t hangText="Length=2:">(empty)</t>
-            </list></t>
+            <ttcol>Type 1</ttcol>
+
+            <c>11</c>
+
+            <c>EE0B, ECEB, EE1B</c>
+
+            <c>EE1B, ECEB, EE0B</c>
+
+            <c>8</c>
+
+            <c>EE0B, ECEB</c>
+
+            <c>EE1B, ECEB</c>
+
+            <c>5</c>
+
+            <c>EE0B</c>
+
+            <c>EE1B</c>
+
+            <c>2</c>
+
+            <c>(empty)</c>
+
+            <c>(empty)</c>
+          </texttable>
 
           <t>The empty option of Length=2 is provided to allow for a case
           where an AccECN Option has to be sent (e.g. on the SYN/ACK to test
@@ -1703,7 +1750,7 @@ Note that the ACK for the next segment could be delayed again if it carries the 
           change-triggered ACKs). One possible experimental compromise would
           be for the receiver to heuristically detect whether the sender is in
           slow-start, then to implement change-triggered ACKs while the sender
-          is in slow-start, and offload otherwise. </t>
+          is in slow-start, and offload otherwise.</t>
 
           <t>For the avoidance of doubt, this change-triggered ACK mechanism
           is deliberately worded to ignore the arrival of a control packet
