@@ -1067,6 +1067,11 @@ deliberately to reduce complexity.-->
         Therefore the feedback carried on a retransmitted packet is unlikely
         to be the same as the feedback on the original packet.</t>
 
+        <t>If a CE mark is fed back on the 3-way handshake, r.cep is not
+        incremented as well. This ensures that different initial values of ACE
+        field are not consumed unnecessarily, given they can be used to
+        negotiate variants of the AccECN protocol.</t>
+
         <section title="Initialization of Feedback Counters at the Data Sender">
           <t>Each Data Sender of each half connection maintains four counters,
           s.cep, s.ceb, s.e0b and s.e1b intended to track the equivalent
@@ -2298,7 +2303,7 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
 
       <?rfc include="reference.I-D.ietf-tcpm-generalized-ecn" ?>
 
-      <?rfc include="reference.I-D.ietf-tcpm-2149bis" ?>
+      <?rfc include="reference.I-D.ietf-tcpm-2140bis" ?>
 
       <?rfc include="reference.RFC.8511" ?>
 
