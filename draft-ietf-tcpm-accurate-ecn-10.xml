@@ -1408,7 +1408,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 | EE0B (cont'd) |           ECEB field                          |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                  EE1B field                   |                  Type 0
+|                  EE1B field                   |              Type 0
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
  0                   1                   2                   3
@@ -1418,7 +1418,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 | EE1B (cont'd) |           ECEB field                          |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                  EE0B field                   |                  Type 1
+|                  EE0B field                   |              Type 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ]]></artwork>
           </figure>
