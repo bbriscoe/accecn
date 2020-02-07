@@ -2656,12 +2656,16 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
         timestamps (if present) to work out newlyAckedT, the amount of new
         time that the ACK acknowledges. Otherwise, the Data Sender
         calculates the minimum difference d.ceb between the ECEB field and its
-        local s.ceb counter, using modulo arithmetic as follows:</t>
+        local s.ceb counter, using modulo arithmetic.
+        The d.ceb difference is then interpreted as a signed 24-bit delta
+        to allow backtrack for a counter that has been overestimated (if
+        ACK losses concealed AccECN Option indicating a counter switch).
+        The algorithm implementing these steps is as follows:</t>
 
         <figure>
           <artwork><![CDATA[   if ((newlyAckedB > 0) || (newlyAckedB == 0 && newlyAckedT > 0)) {
        d.ceb = (ECEB + DIVOPT - (s.ceb % DIVOPT)) % DIVOPT
-       s.ceb += d.ceb
+       s.ceb += sign_extend_from_24bit(d.ceb)
    }
 ]]></artwork>
         </figure>
