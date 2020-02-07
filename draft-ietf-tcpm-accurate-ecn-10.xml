@@ -1843,6 +1843,12 @@ See emails with Ilpo, 3/1/20.
               the r.ceb counter has incremented and it MAY include an AccECN
               Option if r.ec0b or r.ec1b has incremented;</t>
 
+              <t hangText="Preventing Counter Overflows:">It SHOULD, however,
+              send an AccECN TCP Option at least once for every 2^22 bytes
+              received to prevent overflowing the currently incrementing byte
+              counter during continual repetition.
+              </t>
+
               <t hangText="Full-Length Options Preferred:">It SHOULD always
               use full-length AccECN Options. It MAY use shorter AccECN
               Options if space is limited, but it MUST include the counter(s)
@@ -2649,16 +2655,23 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
         <t>On the arrival of an AccECN Option, the Data Sender uses the TCP
         acknowledgement number and any SACK options to calculate newlyAckedB,
         the amount of new data that the ACK acknowledges in bytes. If
-        newlyAckedB is negative it means that a more up to date ACK has
+        newlyAckedB is zero it may mean that a more up to date ACK has
         already been processed, so this ACK has been superseded and the Data
-        Sender has to ignore the AccECN Option. Otherwise, the Data Sender
+        Sender has to ignore the AccECN Option.
+        When newlyAckedB is zero, to break the tie the Data Sender could use
+        timestamps (if present) to work out newlyAckedT, the amount of new
+        time that the ACK acknowledges. Otherwise, the Data Sender
         calculates the minimum difference d.ceb between the ECEB field and its
-        local s.ceb counter, using modulo arithmetic as follows:</t>
+        local s.ceb counter, using modulo arithmetic.
+        The d.ceb difference is then interpreted as a signed 24-bit delta
+        to allow backtrack for a counter that has been overestimated (if
+        ACK losses concealed AccECN Option indicating a counter switch).
+        The algorithm implementing these steps is as follows:</t>
 
         <figure>
-          <artwork><![CDATA[   if (newlyAckedB >= 0) {
+          <artwork><![CDATA[   if ((newlyAckedB > 0) || (newlyAckedB == 0 && newlyAckedT > 0)) {
        d.ceb = (ECEB + DIVOPT - (s.ceb % DIVOPT)) % DIVOPT
-       s.ceb += d.ceb
+       s.ceb += sign_extend_from_24bit(d.ceb)
    }
 ]]></artwork>
         </figure>
