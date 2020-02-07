@@ -1843,6 +1843,12 @@ See emails with Ilpo, 3/1/20.
               the r.ceb counter has incremented and it MAY include an AccECN
               Option if r.ec0b or r.ec1b has incremented;</t>
 
+              <t hangText="Preventing Counter Overflows:">It SHOULD, however,
+              send an AccECN TCP Option at least once for every 2^22 bytes
+              received to prevent overflowing the currently incrementing byte
+              counter during continual repetition.
+              </t>
+
               <t hangText="Full-Length Options Preferred:">It SHOULD always
               use full-length AccECN Options. It MAY use shorter AccECN
               Options if space is limited, but it MUST include the counter(s)
