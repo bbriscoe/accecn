@@ -1137,10 +1137,10 @@ deliberately to reduce complexity.-->
         counters at the Data Receiver.</t>
 
         <t>A Data Receiver feeds back the CE packet counter using the Accurate
-        ECN (ACE) field, as explained in Sections <xref
-        target="accecn_init_counters"/> to <xref target="accecn_ACE_Safety"/>.
-        And it feeds back all the byte counters using the AccECN TCP Option,
-        as specified in <xref target="accecn_option"/>.</t>
+        ECN (ACE) field, as explained in <xref target="accecn_init_counters"/>
+        to <xref target="accecn_ACE_Safety"/>. And it feeds back all the byte
+        counters using the AccECN TCP Option, as specified in <xref
+        target="accecn_option"/>.</t>
 
         <t>Whenever a host feeds back the value of any counter, it MUST report
         the most recent value, no matter whether it is in a pure ACK, an ACK
