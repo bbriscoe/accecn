@@ -553,8 +553,8 @@ ToDo: Why is this timescale point commented out? It means that, if successful af
         <t>Each ACK carries the three least significant bits (LSBs) of the
         packet-based CE counter using the ECN bits in the TCP header, now
         renamed the Accurate ECN (ACE) field (see <xref
-        target="accecn_Fig_ACE_ACK"/> later). The LSBs of each of the three
-        byte counters are carried in the AccECN Option.</t>
+        target="accecn_Fig_ACE_ACK"/> later). The 24 LSBs of each byte counter
+        are carried in the AccECN Option.</t>
       </section>
 
       <section title="Delayed ACKs and Resilience Against ACK Loss">
@@ -961,7 +961,12 @@ deliberately to reduce complexity.-->
               shown it MUST set both its half connections into the feedback
               mode shown in the rightmost column. If it has set itself into
               classic ECN feedback mode it MUST then comply with <xref
-              target="RFC3168"/>.</t>
+              target="RFC3168"/>.<vspace blankLines="1"/>For an AccECN
+              implementation, there is no need to recognize or support ECN
+              Nonce feedback <xref target="RFC3540"/>, which has been
+              reclassified as historic <xref target="RFC8311"/>. AccECN is
+              compatible with alternative ECN feedback integrity approaches
+              (see <xref target="accecn_Integrity"/>).</t>
 
               <t>The third block shows the cases where the TCP server (B)
               supports AccECN but the TCP client (A) supports some earlier
@@ -992,15 +997,8 @@ deliberately to reduce complexity.-->
               connections.</t>
             </list></t>
 
-          <t>The following exceptional cases need some explanation:<list
-              style="hanging">
-              <t hangText="ECN Nonce:">For an AccECN implementation, there is
-              no need to recognize or support ECN Nonce feedback <xref
-              target="RFC3540"/>, which has been reclassified as historic
-              <xref target="RFC8311"/>. AccECN is compatible with alternative
-              ECN feedback integrity approaches (see <xref
-              target="accecn_Integrity"/>).</t>
-
+          <t>The following additional rule does not fit the structure of the
+          table, but complements it:<list style="hanging">
               <t hangText="Simultaneous Open:">An originating AccECN Host (A),
               having sent a SYN with AE=1, CWR=1 and ECE=1, might receive
               another SYN from host B. Host A MUST then enter the same
@@ -1019,11 +1017,9 @@ deliberately to reduce complexity.-->
           other combinations on a SYN can rely on consistent behaviour from
           the installed base of AccECN servers.</t>
 
-          <t>For the avoidance of doubt, the negotiation tabulated in <xref
-          target="accecn_Tab_Negotiation"/> solely concerns the three TCP
-          header flags shown (AE, CWR and ECE). The behaviour described in the
-          present specification SHALL apply irrespective of the settings of
-          the three remaining reserved TCP header flags on all packets.</t>
+          <t>For the avoidance of doubt, the behaviour described in the
+          present specification applies whether or not the three remaining
+          reserved TCP header flags are zero.</t>
         </section>
 
         <section anchor="accecn_sec_SYN_rexmt"
@@ -1222,18 +1218,18 @@ deliberately to reduce complexity.-->
           Data Sender.</t>
 
           <t>There is only one exception to this rule: On the final ACK of the
-          3-way handshake (3WHS), a TCP client (A) in AccECN mode MUST use the
-          appropriate values of the ACE field in <xref
-          target="accecn_Tab_SYN-ACK_fb"/> to feed back which of the 4
-          possible values of the IP-ECN field were on the SYN/ACK (the binary
-          encoding is the same as that used on the SYN/ACK). <xref
-          target="accecn_Tab_SYN-ACK_fb"/> shows the meaning of each possible
-          value of the ACE field on the ACK of the SYN/ACK and the value that
-          an AccECN server MUST set s.cep to as a result. The encoding in
-          <xref target="accecn_Tab_SYN-ACK_fb"/> is solely applicable on a
-          packet in the client-server direction with an acknowledgement number
-          1 greater than the Initial Sequence Number (ISN) that was used by
-          the server.</t>
+          3-way handshake (3WHS), a TCP client (A) in AccECN mode MUST feed
+          back which of the 4 possible values of the IP-ECN field were on the
+          SYN/ACK using the same binary encoding as that used on the SYN/ACK
+          (see <xref target="accecn_Tab_Negotiation"/>).</t>
+
+          <t><xref target="accecn_Tab_SYN-ACK_fb"/> shows the meaning of each
+          possible value of the ACE field on the ACK of the SYN/ACK and the
+          value that an AccECN server MUST set s.cep to as a result. The
+          encoding in <xref target="accecn_Tab_SYN-ACK_fb"/> is solely
+          applicable on a packet in the client-server direction with an
+          acknowledgement number 1 greater than the Initial Sequence Number
+          (ISN) that was used by the server.</t>
 
           <texttable anchor="accecn_Tab_SYN-ACK_fb"
                      title="Meaning of the ACE field on the ACK of the SYN/ACK">
@@ -2001,7 +1997,8 @@ even though it uses existing TCP fields in unorthodox ways.
         that offload hardware will ultimately need to handle any form of ECN
         feedback exceptionally. The purpose of working towards standardized
         TCP ECN feedback is to reduce the risk for hardware developers, who
-        will have to choose which scheme is likely to become dominant.</t>
+        would otherwise have to guess which scheme is likely to become
+        dominant.</t>
       </section>
     </section>
 
@@ -2164,9 +2161,10 @@ even though it uses existing TCP fields in unorthodox ways.
           <t hangText="Timeliness vs Overhead:">Change-Triggered ACKs are
           intended to enable latency-sensitive uses of ECN feedback by
           capturing the timing of transitions but not wasting resources while
-          the state of the signalling system is stable. The receiver can
-          control how frequently it sends the AccECN TCP Option and therefore
-          it can control the overhead induced by AccECN.</t>
+          the state of the signalling system is stable. WIthin the constraints
+          of the change-triggered ACK rules, the receiver can control how
+          frequently it sends the AccECN TCP Option and therefore to some
+          extent it can control the overhead induced by AccECN.</t>
 
           <!-- <t hangText="Timeliness:">{ToDo: Add improved timeliness if the
            Delayed ACK Control (DAC) feature is included.}</t> -->
@@ -2174,7 +2172,9 @@ even though it uses existing TCP fields in unorthodox ways.
           <t hangText="Resilience:">All information is provided based on
           counters. Therefore if ACKs are lost, the counters on the first ACK
           following the losses allows the Data Sender to immediately recover
-          the number of the ECN markings that it missed.</t>
+          the number of the ECN markings that it missed. And if data or ACKs
+          are reordered, stale congestion information can be identified and
+          ignored.</t>
 
           <t hangText="Resilience against Bias:">Because feedback is based on
           repetition of counters, random losses do not remove any information,
@@ -2183,18 +2183,20 @@ even though it uses existing TCP fields in unorthodox ways.
           the different ECN markings in the feedback.</t>
 
           <t hangText="Resilience vs Overhead:">If space is limited in some
-          segments (e.g. because more option are need on some segments, such
-          as the SACK option after loss), the Data Receiver can send AccECN
-          Options less frequently or truncate fields that have not changed,
-          usually down to as little as 5 bytes. However, it has to send a
-          full-sized AccECN Option at least three times per RTT, which the
-          Data Sender can rely on as a regular beacon or checkpoint.</t>
+          segments (e.g. because more options are needed on some segments,
+          such as the SACK option after loss), the Data Receiver can send
+          AccECN Options less frequently or truncate fields that have not
+          changed, usually down to as little as 5 bytes. However, it has to
+          send a full-sized AccECN Option at least three times per RTT, which
+          the Data Sender can rely on as a regular beacon or checkpoint.</t>
 
           <t hangText="Resilience vs Timeliness and Ordering:">Ordering
           information and the timing of transitions cannot be communicated in
           three cases: i) during ACK loss; ii) if something on the path strips
           the AccECN Option; or iii) if the Data Receiver is unable to support
-          Change-Triggered ACKs.</t>
+          Change-Triggered ACKs. Following ACK reordering, the Data Sender can
+          reconstruct the order in which feedback was sent, but not until all
+          the missing feedback has arrived.</t>
 
           <!-- reworked end -->
 
@@ -2283,9 +2285,13 @@ even though it uses existing TCP fields in unorthodox ways.
 
           <t hangText="Forward Compatibility:">The behaviour of endpoints and
           middleboxes is carefully defined for all reserved or currently
-          unused codepoints in the scheme, to ensure that any blocking of
-          anomalous values is always at least under reversible policy
-          control.</t>
+          unused codepoints in the scheme. Then, the designers of security
+          devices can understand which currently unused values might appear in
+          future. So, even if they choose to treat such values as anomalous
+          while they are not widely used, any blocking will at least be under
+          policy control not hard-coded. Then, if previously unused values
+          start to appear on the Internet (or in standards), such policies
+          could be quickly reversed.</t>
         </list></t>
     </section>
 
@@ -2810,8 +2816,8 @@ See emails 3/1/20.-->
           <figure>
             <artwork><![CDATA[   SAFETY_FACTOR = 2
    if (dSafer.cep > d.cep) {
-       s = d.ceb/d.cep
-       if (s <= MSS) {
+       s = d.ceb/d.cep        % The next line alone would avoid DBZ
+       if (s <= MSS) {        % if (d.ceb <= MSS * d.cep) {
           sSafer = d.ceb/dSafer.cep
           if (sSafer < MSS/SAFETY_FACTOR)
               dSafer.cep = d.cep    % d.cep is a safe enough estimate
@@ -2827,37 +2833,37 @@ See emails 3/1/20.-->
           of CE-marked packets:</t>
 
           <figure>
-            <artwork><![CDATA[      ^
-sSafer|
-      |
-   MSS+
-      |
-      |         dSafer.cep
-      |                  is
- MSS/2+--------------+    safest
-      |              |
-      | d.cep is safe|
-      |    enough    |
-      +-------------------->
-                    MSS   s
+            <artwork><![CDATA[                 ^
+           sSafer|
+                 |
+              MSS+
+                 |
+                 |         dSafer.cep
+                 |                  is
+MSS/SAFETY_FACTOR+--------------+    safest
+                 |              |
+                 | d.cep is safe|
+                 |    enough    |
+                 +-------------------->
+                               MSS   s
 
 ]]></artwork>
           </figure>
 
           <t>The following examples give the reasoning behind the algorithm,
-          assuming MSS=1,460 [B]:<list style="symbols">
-              <t>if d.cep=0, dSafer.cep=8 and d.ceb=1,460, then s=infinity and
+          assuming MSS=1460 [B]:<list style="symbols">
+              <t>if d.cep=0, dSafer.cep=8 and d.ceb=1460, then s=infinity and
               sSafer=182.5.<vspace blankLines="0"/>Therefore even though the
               average size of 8 data segments is unlikely to have been as
               small as MSS/8, d.cep cannot have been correct, because it would
               imply an average segment size greater than the MSS.</t>
 
-              <t>if d.cep=2, dSafer.cep=10 and d.ceb=1,460, then s=730 and
+              <t>if d.cep=2, dSafer.cep=10 and d.ceb=1460, then s=730 and
               sSafer=146.<vspace blankLines="0"/>Therefore d.cep is safe
               enough, because the average size of 10 data segments is unlikely
               to have been as small as MSS/10.</t>
 
-              <t>if d.cep=7, dSafer.cep=15 and d.ceb=10,200, then s=1,457 and
+              <t>if d.cep=7, dSafer.cep=15 and d.ceb=10200, then s=1457 and
               sSafer=680.<vspace blankLines="0"/>Therefore d.cep is safe
               enough, because the average data segment size is more likely to
               have been just less than one MSS, rather than below MSS/2.</t>
@@ -2884,8 +2890,8 @@ sSafer|
         packets), and recalculate s_ave on every ACK. However it would be
         simpler to merely maintain a counter packets_in_flight for the number
         of packets in flight (including control packets), which it could
-        update once per RTT. Either way, it would estimate s_ave as:<list
-            style="empty">
+        update once per RTT. <!--ToDo: Delete ", which it could update once per RTT"?-->Either
+        way, it would estimate s_ave as:<list style="empty">
             <t>s_ave ~= flightsize / packets_in_flight,</t>
           </list>where flightsize is the variable that TCP already maintains
         for the number of bytes in flight. To avoid floating point arithmetic,
@@ -2955,7 +2961,7 @@ sSafer|
         (unnecessary) retransmissions do not lead to double counting. This
         assumption is currently correct, given that RFC 3168 requires that the
         Data Sender marks retransmitted segments as Not-ECT. However, the
-        converse is not true; necessary transmissions will result in
+        converse is not true; necessary retransmissions will result in
         under-counting.</t>
 
         <t>However, such precision is unlikely to be necessary. The only known
