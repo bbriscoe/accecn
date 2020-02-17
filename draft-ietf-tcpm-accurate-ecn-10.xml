@@ -2883,15 +2883,16 @@ MSS/SAFETY_FACTOR+--------------+    safest
         arrives, to convert this into an estimate of CE-marked bytes, it needs
         an average of the segment size, s_ave. Then it can add or subtract
         s_ave from the value of d.ceb as the value of d.cep increments or
-        decrements.</t>
+        decrements. Some possible ways to calculate s_ave are outlined below.
+        The precise details will depend on why an estimate of marked bytes is
+        needed.</t>
 
-        <t>To calculate s_ave, it could keep a record of the byte numbers of
-        all the boundaries between packets in flight (including control
-        packets), and recalculate s_ave on every ACK. However it would be
-        simpler to merely maintain a counter packets_in_flight for the number
-        of packets in flight (including control packets), which it could
-        update once per RTT. <!--ToDo: Delete ", which it could update once per RTT"?-->Either
-        way, it would estimate s_ave as:<list style="empty">
+        <t>The implementation could keep a record of the byte numbers of all
+        the boundaries between packets in flight (including control packets),
+        and recalculate s_ave on every ACK. However it would be simpler to
+        merely maintain a counter packets_in_flight for the number of packets
+        in flight (including control packets), which is reset once per RTT.
+        Either way, it would estimate s_ave as:<list style="empty">
             <t>s_ave ~= flightsize / packets_in_flight,</t>
           </list>where flightsize is the variable that TCP already maintains
         for the number of bytes in flight. To avoid floating point arithmetic,
