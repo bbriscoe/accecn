@@ -1051,11 +1051,12 @@ deliberately to reduce complexity.-->
           the first retransmitted SYN (using the usual retransmission
           time-outs). If this first retransmission also fails to be
           acknowledged, the sender SHOULD send subsequent retransmissions of
-          the SYN without any TCP-ECN flags set. This adds delay, in the case
-          where a middlebox drops an AccECN (or ECN) SYN deliberately.
-          However, current measurements imply that a drop is less likely to be
-          due to middlebox interference than other intermittent causes of
-          loss, e.g. congestion, wireless interference, etc.</t>
+          the SYN with the three TCP-ECN flags cleared (AE=CWR=ECE=0). This
+          adds delay, in the case where a middlebox drops an AccECN (or ECN)
+          SYN deliberately. However, current measurements imply that a drop is
+          less likely to be due to middlebox interference than other
+          intermittent causes of loss, e.g. congestion, wireless interference,
+          etc.</t>
 
           <t>Implementers MAY use other fall-back strategies if they are found
           to be more effective (e.g. attempting to negotiate AccECN on the SYN
@@ -1112,8 +1113,7 @@ deliberately to reduce complexity.-->
               <t>Switching feedback negotiation (e.g. fall-back):<list
                   style="symbols">
                   <t>It SHOULD NOT set ECT on any packet if it has received at
-                  least one non-ECN-setup SYN or non-ECN-setup SYN/ACK, as
-                  defined in <xref target="RFC3168"/>.</t>
+                  least one SYN or SYN/ACK with AE=CWR=ECE=0.</t>
 
                   <t>It MUST NOT send an ECN-setup SYN <xref
                   target="RFC3168"/> within the same connection as it has sent
@@ -1133,14 +1133,14 @@ deliberately to reduce complexity.-->
               <t>Congestion response:<list style="symbols">
                   <t>It MUST respond appropriately to AccECN feedback with
                   congestion indications on packets it had previously sent, as
-                  previously defined in Section 6.1 of <xref
-                  target="RFC3168"/> as updated by Sections 2.1 and 4.1 of
-                  <xref target="RFC8311"/>.</t>
+                  defined in Section 6.1 of <xref target="RFC3168"/> and
+                  updated by Sections 2.1 and 4.1 of <xref
+                  target="RFC8311"/>.</t>
 
                   <t>The commitment to respond appropriately to incoming
                   indications of congestion remains even if it sends a SYN
-                  packet without AE, CWR or ECE set, in a later transmission
-                  within the same TCP connection.</t>
+                  packet with AE=CWR=ECE=0, in a later transmission within the
+                  same TCP connection.</t>
 
                   <t>Unlike an RFC 3168 data sender, it MUST NOT set CWR to
                   indicate it has received and responded to indications of
@@ -1160,6 +1160,12 @@ deliberately to reduce complexity.-->
               receives a SYN requesting AccECN feedback or a SYN/ACK agreeing
               to use AccECN feedback, it MUST reset the connection with a RST
               packet.</t>
+
+              <t>it MUST NOT use reception of packets with ECT set in the
+              IP-ECN field as an implicit signal that the peer is ECN-capable.
+              Reason: ECT at the IP layer does not explicitly confirm the peer
+              has the correct ECN feedback logic, and the packets could have
+              been mangled at the IP layer.</t>
             </list></t>
         </section>
       </section>
