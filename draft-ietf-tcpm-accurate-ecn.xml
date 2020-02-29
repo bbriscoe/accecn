@@ -2182,7 +2182,47 @@ even though it uses existing TCP fields in unorthodox ways.
     </section>
 
     <section anchor="accecn_3168_updates" title="Updates to RFC 3168">
-      <t>{ToDo}</t>
+      <t>{ToDo: The following is transcribed from my email drafting this
+      section. It will need to refer to the section of the AccECN draft that
+      updates each aspect, And it will need to be checked for gaps.}</t>
+
+      <t>The following sections of RFC3168 would be updated by the AccECN
+      specification, if it were stds track: <list style="symbols">
+          <t>The Introduction to Section "6. Support from the Transport
+          Protocol" that summarizes the way TCP feeds back ECN markings</t>
+
+          <t>The whole of "6.1.1 TCP Initialization" </t>
+
+          <t>The whole of "6.1.2. The TCP Sender" except the second, third and
+          last paras still apply to RFC5681 congestion control, but not
+          necessarily to other experimental forms of ECN congestion control
+          allowed by RFC8311 (specified by a suitable experimental RFC). </t>
+
+          <t>The whole of "6.1.3. The TCP Receiver" except the last two
+          sentences still stand (which are incidentally in the wrong section,
+          because they relate to TCP sender behaviour): <vspace
+          blankLines="1"/>"Some care is required if the TCP sender is to avoid
+          unnecessary reductions of the congestion window when a window of
+          data includes both dropped packets and (marked) CE packets. This is
+          illustrated in [Floyd98]." </t>
+
+          <t>The following text within "6.1.5. Retransmitted TCP packets" is
+          updated as follows: <list style="symbols">
+              <t>CURRENT:<vspace blankLines="0"/>"the TCP data receiver SHOULD
+              ignore the ECN field on arriving data packets that are outside
+              of the receiver's current window." </t>
+
+              <t>UPDATED:<vspace blankLines="0"/>"The TCP data receiver MUST
+              ignore the CE codepoint on incoming segments that fail any
+              validity check. The validity check in section 5.2 of [RFC5961]
+              is RECOMMENDED." </t>
+            </list></t>
+
+          <t>Section "5.2 Dropped or Corrupted Packets" of RFC3168 says
+          '"pure" ACK packets MUST NOT indicate ECN-Capability.' The AccECN
+          draft does not update this aspect, but it does say what TCP should
+          do if it receives an ECN-capable pure ACK.</t>
+        </list></t>
     </section>
 
     <section anchor="accecn_Interact_Variants"
