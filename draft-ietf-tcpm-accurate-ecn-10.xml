@@ -1155,10 +1155,10 @@ deliberately to reduce complexity.-->
               IP-ECN field on incoming packets using Accurate ECN feedback, as
               specified in <xref target="accecn_feedback"/> below.</t>
 
-              <t>if it receives a Classic ECN-setup SYN or ECN-setup SYN/ACK
-              <xref target="RFC3168"/> during the same connection as it
-              receives a SYN requesting AccECN feedback or a SYN/ACK agreeing
-              to use AccECN feedback, it MUST reset the connection with a RST
+              <t>if it receives an ECN-setup SYN or ECN-setup SYN/ACK <xref
+              target="RFC3168"/> during the same connection as it receives a
+              SYN requesting AccECN feedback or a SYN/ACK agreeing to use
+              AccECN feedback, it MUST reset the connection with a RST
               packet.</t>
 
               <t>it MUST NOT use reception of packets with ECT set in the
@@ -2051,14 +2051,13 @@ See emails with Ilpo, 3/1/20.
                 <t hangText="Change-Triggered ACKs:">If an arriving packet
                 increments a different byte counter to that incremented by the
                 previous packet, the Data Receiver SHOULD immediately send an
-                ACK (respectively with an AccECN Option), without waiting for
-                the next delayed ACK (this is in addition to the safety
-                recommendation in <xref target="accecn_ACE_Safety"/> against
-                ambiguity of the ACE field). <vspace blankLines="1"/>Even
-                though this bullet is stated as a "SHOULD", it is important
-                for a transition to immediately trigger an ACK if at all
-                possible, as already argued when when specifying
-                change-triggered ACKs for the ACE.</t>
+                ACK with an AccECN Option, without waiting for the next
+                delayed ACK (this is in addition to the safety recommendation
+                in <xref target="accecn_ACE_Safety"/> against ambiguity of the
+                ACE field). <vspace blankLines="1"/>Even though this bullet is
+                stated as a "SHOULD", it is important for a transition to
+                immediately trigger an ACK if at all possible, as already
+                argued when specifying change-triggered ACKs for the ACE.</t>
 
                 <t hangText="Continual Repetition:">Otherwise, if arriving
                 packets continue to increment the same byte counter, the Data
