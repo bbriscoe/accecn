@@ -33,7 +33,7 @@
 <!-- HTML formatting control -->
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
-<rfc category="exp" docName="draft-ietf-tcpm-accurate-ecn-10"
+<rfc category="std" docName="draft-ietf-tcpm-accurate-ecn-11"
      ipr="trust200902" updates="">
   <front>
     <title abbrev="Accurate TCP-ECN Feedback">More Accurate ECN Feedback in
@@ -1064,7 +1064,7 @@ deliberately to reduce complexity.-->
           congestion). However, other fall-back strategies will need to follow
           all the rules in <xref target="accecn_implications_accecn_mode"/>,
           which concern behaviour when SYNs or SYN/ACKs negotiating different
-          types of feedback have been sent within the same connection. </t>
+          types of feedback have been sent within the same connection.</t>
 
           <t>Further it may make sense to also remove any other experimental
           fields or options on the SYN in case a middlebox might be blocking
@@ -1906,7 +1906,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
               need to follow all the rules in <xref
               target="accecn_implications_accecn_mode"/>, which concern
               behaviour when SYNs or SYN/ACKs negotiating different types of
-              feedback have been sent within the same connection. </t>
+              feedback have been sent within the same connection.</t>
 
               <t>If the TCP client detects that the first data segment it sent
               with the AccECN Option was lost, it SHOULD fall back to no
