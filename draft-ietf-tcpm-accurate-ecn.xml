@@ -34,7 +34,7 @@
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
 <rfc category="std" docName="draft-ietf-tcpm-accurate-ecn-11"
-     ipr="trust200902" updates="">
+     ipr="trust200902" updates="3168">
   <front>
     <title abbrev="Accurate TCP-ECN Feedback">More Accurate ECN Feedback in
     TCP</title>
@@ -93,7 +93,7 @@
       </address>
     </author>
 
-    <date year="2019"/>
+    <date year="2020"/>
 
     <area>Transport</area>
 
@@ -123,14 +123,14 @@
       Exposure (ConEx), Data Center TCP (DCTCP) or Low Latency Low Loss
       Scalable Throughput (L4S) need more accurate ECN feedback information
       whenever more than one marking is received in one RTT. This document
-      specifies an experimental scheme to provide more than one feedback
-      signal per RTT in the TCP header. Given TCP header space is scarce, it
-      allocates a reserved header bit, that was previously used for the
-      ECN-Nonce which has now been declared historic. It also overloads the
-      two existing ECN flags in the TCP header. The resulting extra space is
-      exploited to feed back the IP-ECN field received during the 3-way
-      handshake as well. Supplementary feedback information can optionally be
-      provided in a new TCP option, which is never used on the TCP SYN.</t>
+      specifies a scheme to provide more than one feedback signal per RTT in
+      the TCP header. Given TCP header space is scarce, it allocates a
+      reserved header bit, that was previously used for the ECN-Nonce which
+      has now been declared historic. It also overloads the two existing ECN
+      flags in the TCP header. The resulting extra space is exploited to feed
+      back the IP-ECN field received during the 3-way handshake as well.
+      Supplementary feedback information can optionally be provided in a new
+      TCP option, which is never used on the TCP SYN.</t>
     </abstract>
   </front>
 
@@ -144,57 +144,64 @@
       mechanism where network nodes can mark IP packets instead of dropping
       them to indicate incipient congestion to the end-points. Receivers with
       an ECN-capable transport protocol feed back this information to the
-      sender. ECN is specified for TCP in such a way that only one feedback
-      signal can be transmitted per Round-Trip Time (RTT). Recently, proposed
-      mechanisms like Congestion Exposure (ConEx <xref target="RFC7713"/>),
-      DCTCP <xref target="RFC8257"/> or L4S <xref
+      sender. In RFC 3168, ECN was specified for TCP in such a way that only
+      one feedback signal could be transmitted per Round-Trip Time (RTT).
+      Recently, proposed mechanisms like Congestion Exposure (ConEx <xref
+      target="RFC7713"/>), DCTCP <xref target="RFC8257"/> or L4S <xref
       target="I-D.ietf-tsvwg-l4s-arch"/> need to know when more than one
       marking is received in one RTT which is information that cannot be
       provided by the feedback scheme as specified in <xref
-      target="RFC3168"/>. This document specifies an alternative feedback
-      scheme that provides more accurate information and could be used by
-      these new TCP extensions. A fuller treatment of the motivation for this
-      specification is given in the associated requirements document <xref
-      target="RFC7560"/>.</t>
+      target="RFC3168"/>. This document specifies an update to the ECN
+      feedback scheme of RFC 3168 that provides more accurate information and
+      could be used by these and potentially other future TCP extensions. A
+      fuller treatment of the motivation for this specification is given in
+      the associated requirements document <xref target="RFC7560"/>.</t>
 
-      <t>This documents specifies an experimental scheme for ECN feedback in
+      <t>This documents specifies a standards track scheme for ECN feedback in
       the TCP header to provide more than one feedback signal per RTT. It will
-      be called the more accurate ECN feedback scheme, or AccECN for short. If
-      AccECN progresses from experimental to the standards track, it is
-      intended to be a complete replacement for classic TCP/ECN feedback, not
-      a fork in the design of TCP. AccECN feedback complements TCP's loss
-      feedback and it supplements classic TCP/ECN feedback, so its
-      applicability is intended to include all public and private IP networks
-      (and even any non-IP networks over which TCP is used today), whether or
-      not any nodes on the path support ECN of whatever flavour.</t>
+      be called the more accurate ECN feedback scheme, or AccECN for short.
+      This document updates RFC 3168 with respect to negotiation and use of
+      the feedback scheme for TCP. All aspects of RFC 3168 other than the TCP
+      feedback scheme, in particular the definition of ECN at the IP layer,
+      remain unchanged by this specification. <xref
+      target="accecn_3168_updates"/> gives a more detailed specification of
+      exactly which aspects of RFC 3168 this document updates.</t>
 
-      <t>Until the AccECN experiment succeeds, <xref target="RFC3168"/> will
-      remain as the only standards track specification for adding ECN to TCP.
-      To avoid confusion, in this document we use the term 'classic ECN' for
-      the pre-existing ECN specification <xref target="RFC3168"/>.</t>
+      <t>AccECN is intended to be a complete replacement for classic TCP/ECN
+      feedback, not a fork in the design of TCP. AccECN feedback complements
+      TCP's loss feedback and it can coexist alongside 'classic' <xref
+      target="RFC3168"/> TCP/ECN feedback. So its applicability is intended to
+      include all public and private IP networks (and even any non-IP networks
+      over which TCP is used today), whether or not any nodes on the path
+      support ECN, of whatever flavour. This document uses the term Classic
+      ECN when it needs to distinguish the RFC 3168 ECN TCP feedback scheme
+      from the AccECN TCP feedback scheme.</t>
 
-      <t>AccECN feedback overloads the two existing ECN flags and allocates
-      the currently reserved flag (previously called NS) in the TCP header, to
-      be used as one field indicating the number of congestion experienced
-      marked packets. Given the new definitions of these three bits, both ends
-      have to support the new wire protocol before it can be used. Therefore
-      during the TCP handshake the two ends use these three bits in the TCP
-      header to negotiate the most advanced feedback protocol that they can
-      both support, in a way that is backward compatible with <xref
-      target="RFC3168"/>.</t>
+      <t>AccECN feedback overloads the two existing ECN flags in the TCP
+      header and allocates the currently reserved flag (previously called NS)
+      in the TCP header, to be used as one three-bit counter field indicating
+      the number of congestion experienced marked packets. Given the new
+      definitions of these three bits, both ends have to support the new wire
+      protocol before it can be used. Therefore during the TCP handshake the
+      two ends use these three bits in the TCP header to negotiate the most
+      advanced feedback protocol that they can both support, in a way that is
+      backward compatible with <xref target="RFC3168"/>.</t>
 
-      <t>AccECN is solely an (experimental) change to the TCP wire protocol;
-      it only specifies the negotiation and signaling of more accurate ECN
-      feedback from a TCP Data Receiver to a Data Sender. It is completely
-      independent of how TCP might respond to congestion feedback, which is
-      out of scope. For that we refer to <xref target="RFC3168"/> or any RFC
-      that specifies a different response to TCP ECN feedback, for example:
-      <xref target="RFC8257"/>; or ECN experiments such as those referred to
-      in <xref target="RFC8311"/>, namely: a TCP-based Low Latency Low Loss
-      Scalable (L4S) congestion control <xref
-      target="I-D.ietf-tsvwg-l4s-arch"/>; ECN-capable TCP control packets
-      <xref target="I-D.ietf-tcpm-generalized-ecn"/>, or Alternative Backoff
-      with ECN (ABE) <xref target="RFC8511"/>.</t>
+      <t>AccECN is solely a change to the TCP wire protocol; it covers the
+      negotiation and signaling of more accurate ECN feedback from a TCP Data
+      Receiver to a Data Sender. It is completely independent of how TCP might
+      respond to congestion feedback, which is out of scope, but ultimately
+      the motivation for accurate ECN feedback. Like Classic ECN feedback,
+      AccECN can be used by standard Reno congestion control <xref
+      target="RFC5681"/> to respond to the existence of at least one
+      congestion notification within a round trip. Or, unlike Reno, AccECN can
+      be used to respond to the extent of congestion notification over a round
+      trip, as for example DCTCP does in controlled environments <xref
+      target="RFC8257"/>. For congestion response, this specification refers
+      to RFC 3168, or ECN experiments such as those referred to in <xref
+      target="RFC8311"/>, namely: a TCP-based Low Latency Low Loss Scalable
+      (L4S) congestion control <xref target="I-D.ietf-tsvwg-l4s-arch"/>; or
+      Alternative Backoff with ECN (ABE) <xref target="RFC8511"/>.</t>
 
       <t>It is recommended that the AccECN protocol is implemented alongside
       the experimental ECN++ protocol <xref
@@ -205,16 +212,16 @@
       narrower scope than ECN++.</t>
 
       <section title="Document Roadmap">
-        <t>The following introductory sections outline the goals of AccECN
-        (<xref target="accecn_Goals"/>) and the goal of experiments with ECN
-        (<xref target="accecn_Expt_Goals"/>) so that it is clear what success
-        would look like. Then terminology is defined (<xref
+        <t>The following introductory section outlines the goals of AccECN
+        (<xref target="accecn_Goals"/>). Then terminology is defined (<xref
         target="accecn_Terminology"/>) and a recap of existing prerequisite
         technology is given (<xref target="accecn_Recap"/>).</t>
 
         <t><xref target="accecn_Overview"/> gives an informative overview of
         the AccECN protocol. Then <xref target="accecn_Spec"/> gives the
-        normative protocol specification. <xref
+        normative protocol specification, and <xref
+        target="accecn_3168_updates"/> clarifies which aspects of RFC 3168 are
+        updated by this specification. <xref
         target="accecn_Interact_Variants"/> assesses the interaction of AccECN
         with commonly used variants of TCP, whether standardized or not. <xref
         target="accecn_Properties"/> summarizes the features and properties of
@@ -226,18 +233,9 @@
         protocol that will be of interest to the security community.</t>
 
         <t><xref target="accecn_Algo_Examples"/> gives pseudocode examples for
-        the various algorithms that AccECN uses.</t>
-
-        <!-- <t>Three further appendices are included for use during document development {Delete this list before publication}:<list style="symbols">
-            <t><xref target="accecn_Alt_Designs"/>: Protocol design
-            alternatives that could be considered for inclusion in the main
-            specification;</t>
-
-            <t><xref target="accecn_Open_Issues"/>: a 'To Do' list of open
-            protocol design issues;</t>
-
-            <t><xref target="accecn_Doc_Changes"/>: Document change log.</t>
-          </list></t>-->
+        the various algorithms that AccECN uses and <xref
+        target="accecn_flags_rationale"/> explains why AccECN uses flags in
+        the main TCP header and quantifies the space left for future use.</t>
       </section>
 
       <section anchor="accecn_Goals" title="Goals">
@@ -256,63 +254,6 @@
         Therefore an AccECN receiver aims to act as a generic (dumb) reflector
         of congestion information so that in future new sender behaviours can
         be deployed unilaterally.</t>
-      </section>
-
-      <section anchor="accecn_Expt_Goals" title="Experiment Goals">
-        <t>TCP is critical to the robust functioning of the Internet,
-        therefore any proposed modifications to TCP need to be thoroughly
-        tested. The present specification describes an experimental protocol
-        that adds more accurate ECN feedback to the TCP protocol. The
-        intention is to specify the protocol sufficiently so that more than
-        one implementation can be built in order to test its function,
-        robustness and interoperability (with itself and with previous version
-        of ECN and TCP).</t>
-
-        <!--<t> <list style="hanging">
-            <t hangText="Success criteria: "> The experimental protocol
-        will be considered successful if it is deployed and if it satisfies
-        the requirements of <xref target="RFC7560"/> in the consensus opinion
-        of the IETF tcpm working group. In short, this requires that it
-        improves the accuracy and timeliness of TCP's ECN feedback, as claimed
-        in <xref target="accecn_Properties"/>, while striking a balance
-        between the conflicting requirements of resilience, integrity and
-        minimization of overhead. It also requires that it is not unduly
-        complex, and that it is compatible with prevalent equipment behaviours
-        in the current Internet (e.g. hardware offloading and middleboxes),
-        whether or not they comply with standards.</t>-->
-
-        <!-- <t hangText="Duration: ">To be credible, the experiment will need
-            to last at least 12 months from publication of the present
-            specification. At that time, a report on the experiment will be
-            written up. If successful, it would then be appropriate to work on
-            a standards track specification that adds more accurate ECN
-            feedback to TCP.</t>
-          </list></t>
-ToDo: Why is this timescale point commented out? It means that, if successful after 12 months, the chairs cannot delay moving from expt to stds track. But we are still allowed to take longer to be successful.
--->
-
-        <t>The experimental protocol will be considered successful if testing
-        confirms that the proposed mechanism can be deployed at large scale.
-        Testing will mostly focus on fall-back strategies in case of middlebox
-        interference. Current recommended strategies are specified in Sections
-        <xref format="counter" target="accecn_sec_SYN_rexmt"/>, <xref
-        format="counter" target="accecn_sec_ACE_init_invalid"/>, <xref
-        format="counter" target="accecn_sec_ecn-mangling"/> and <xref
-        format="counter" target="accecn_Mbox_Interference"/>. The
-        effectiveness of these strategies depends on the actual deployment
-        situation of middleboxes. Therefore experimental verification to
-        confirm large-scale path traversal in the Internet is needed before
-        finalizing this specification on the Standards Track.</t>
-
-        <t>Another experimentation focus is the implementation feasibiliy of
-        change-triggered ACKs as described in section <xref format="counter"
-        target="accecn_option_usage"/>. While on average this should not lead
-        to a higher ACK rate, it changes the ACK pattern which can
-        particularly have an impact on hardware offload. It is currently
-        specified as a hard requirement, because the sender can exploit the
-        predictability of the receiver's behaviour. However, further
-        experimentation is needed to advise if will have to become just
-        preferred behavior.</t>
       </section>
 
       <section anchor="accecn_Terminology" title="Terminology">
@@ -1066,9 +1007,9 @@ deliberately to reduce complexity.-->
           which concern behaviour when SYNs or SYN/ACKs negotiating different
           types of feedback have been sent within the same connection.</t>
 
-          <t>Further it may make sense to also remove any other experimental
-          fields or options on the SYN in case a middlebox might be blocking
-          them, although the required behaviour will depend on the
+          <t>Further it may make sense to also remove any other new or
+          experimental fields or options on the SYN in case a middlebox might
+          be blocking them, although the required behaviour will depend on the
           specification of the other option(s) and any attempt to co-ordinate
           fall-back between different modules of the stack.</t>
 
@@ -1584,9 +1525,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
             the count of CE marks is still eventually delivered reliably). If
             this ACK does not arrive, the server can continue to send
             ECN-capable packets without having tested for mangling of the
-            IP/ECN field on the SYN/ACK. Experiments with AccECN deployment
-            will assess whether this limitation has any effect in
-            practice.</t>
+            IP/ECN field on the SYN/ACK.</t>
 
             <t>Invalid transitions of the IP/ECN field are defined in <xref
             target="RFC3168"/> and repeated here for convenience:<list
@@ -1647,8 +1586,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
               which ECN marks are received with minimal additional complexity.
               If only CE marks are infrequent, or there are multiple marks in
               a row, the additional load will be low. Other marking patterns
-              could increase the load significantly, Investigating the
-              additional load is a goal of the proposed experiment.</t>
+              could increase the load significantly.</t>
 
               <t>Even though the first bullet is stated as a "SHOULD", it is
               important for a transition to immediately trigger an ACK if at
@@ -1658,10 +1596,10 @@ even if the server does not disable sending ECN-capable packets"--></t>
               be relaxed if certain offload hardware needed for high
               performance cannot support change-triggered ACKs (although high
               performance protocols such as DCTCP already successfully use
-              change-triggered ACKs). One possible experimental compromise
-              would be for the receiver to heuristically detect whether the
-              sender is in slow-start, then to implement change-triggered ACKs
-              while the sender is in slow-start, and offload otherwise.</t>
+              change-triggered ACKs). One possible compromise would be for the
+              receiver to heuristically detect whether the sender is in
+              slow-start, then to implement change-triggered ACKs while the
+              sender is in slow-start, and offload otherwise.</t>
             </section>
 
             <section anchor="accecn_ACE_Safety_S"
@@ -1719,8 +1657,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
           <t>When a Data Receiver sends an AccECN Option, it MUST set the Kind
           field to TBD1, which is registered in <xref
           target="accecn_IANA_Considerations"/> as a new TCP option Kind
-          called AccECN. An experimental TCP option with Kind=254 MAY be used
-          for initial experiments, with magic number 0xACCE.</t>
+          called AccECN. </t>
 
           <t><xref target="accecn_Fig_TCPopt"/> shows two option field orders;
           order 0 and order 1. They both consists of three 24-bit fields.
@@ -1801,9 +1738,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
 
           <t>The empty option of Length=2 is provided to allow for a case
           where an AccECN Option has to be sent (e.g. on the SYN/ACK to test
-          the path), but there is very limited space for the option. For
-          initial experiments, the Length field MUST be 2 greater to
-          accommodate the 16-bit magic number.</t>
+          the path), but there is very limited space for the option. </t>
 
           <t>All implementations of a Data Sender that read any AccECN Option
           MUST be able to read in AccECN Options of any of the above lengths.
@@ -2246,8 +2181,12 @@ even though it uses existing TCP fields in unorthodox ways.
       </section>
     </section>
 
+    <section anchor="accecn_3168_updates" title="Updates to RFC 3168">
+      <t>{ToDo}</t>
+    </section>
+
     <section anchor="accecn_Interact_Variants"
-             title="Interaction with Other TCP Variants">
+             title="Interaction with TCP Variants">
       <t>This section is informative, not normative.</t>
 
       <section anchor="accecn_Interaction_SYN_Cookies"
@@ -2285,7 +2224,7 @@ even though it uses existing TCP fields in unorthodox ways.
       </section>
 
       <section anchor="accecn_Interaction_Other"
-               title="Compatibility with Other TCP Options and Experiments">
+               title="Compatibility with TCP Experiments and Common TCP Options">
         <t>AccECN is compatible (at least on paper) with the most commonly
         used TCP options: MSS, time-stamp, window scaling, SACK and TCP-AO. It
         is also compatible with the recent promising experimental TCP options
@@ -2602,11 +2541,6 @@ even though it uses existing TCP fields in unorthodox ways.
       location:
       http://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-1
       ]</t>
-
-      <t>Early implementation before the IANA allocation MUST follow <xref
-      target="RFC6994"/> and use experimental option 254 and magic number
-      0xACCE (16 bits), then migrate to the new option after the
-      allocation.</t>
     </section>
 
     <!-- ================================================================ -->
@@ -2711,8 +2645,6 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
       <?rfc include="reference.RFC.3168" ?>
 
       <?rfc include="reference.RFC.5681" ?>
-
-      <?rfc include="reference.RFC.6994" ?>
 
       <?rfc include="reference.RFC.8174" ?>
     </references>
@@ -3233,7 +3165,8 @@ MSS/SAFETY_FACTOR+--------------+    safest
       </section>
     </section>
 
-    <section title="Rationale for Usage of TCP Header Flags">
+    <section anchor="accecn_flags_rationale"
+             title="Rationale for Usage of TCP Header Flags">
       <section title="Three TCP Header Flags in the SYN-SYN/ACK Handshake">
         <t>AccECN uses a rather unorthodox approach to negotiate the highest
         version TCP ECN feedback scheme that both ends support, as justified
