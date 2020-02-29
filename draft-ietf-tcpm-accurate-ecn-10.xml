@@ -1334,6 +1334,11 @@ deliberately to reduce complexity.-->
             also shows the value that an AccECN server MUST set s.cep to as a
             result.</t>
 
+            <t>Given this encoding of the ACE field on the ACK of a SYN/ACK is
+            exceptional, an AccECN server using large receive offload (LRO)
+            might prefer to disable LRO until such an ACK has transitioned it
+            out of SYN-RCVD state.</t>
+
             <texttable anchor="accecn_Tab_SYN-ACK_fb"
                        title="Meaning of the ACE field on the ACK of the SYN/ACK">
               <ttcol>ACE on ACK of SYN/ACK</ttcol>
@@ -2072,11 +2077,16 @@ See emails with Ilpo, 3/1/20.
 
                 <t hangText="Full-Length Options Preferred:">It SHOULD always
                 use full-length AccECN Options. It MAY use shorter AccECN
-                Options if space is limited, but it MUST include the
-                counter(s) that have incremented since the previous AccECN
-                Option and it MUST only truncate fields from the right-hand
-                tail of the option to preserve the order of the remaining
-                fields (see <xref target="accecn_option"/>);</t>
+                Options if space is limited, but {ToDo: Proposed change to
+                text so far in this bullet: "Necessary Option Length: It MAY
+                exclude counter(s) that have not changed for the whole
+                connection (but beacons still include all fields - see below).
+                It SHOULD include counter(s) that have incremented at some
+                time during the connection."} it MUST include the counter(s)
+                that have incremented since the previous AccECN Option and it
+                MUST only truncate fields from the right-hand tail of the
+                option to preserve the order of the remaining fields (see
+                <xref target="accecn_option"/>);</t>
 
                 <t hangText="Beaconing Full-Length Options:">Nonetheless, it
                 MUST include a full-length AccECN TCP Option on at least three
