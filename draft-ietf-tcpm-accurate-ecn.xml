@@ -1611,10 +1611,10 @@ even if the server does not disable sending ECN-capable packets"--></t>
                      title="Data Sender Safety Procedures">
               <t>If the Data Sender has not received AccECN TCP Options to
               give it more dependable information, and it detects that the ACE
-              field could have cycled under the prevailing conditions, it
-              SHOULD deem whether it cycled by taking the most likely case. It
-              can detect if the counter could have cycled by using the jump in
-              the acknowledgement number since the last ACK to calculate or
+              field could have cycled, it SHOULD deem whether it cycled by
+              taking the safest likely case under the prevailing conditions.
+              It can detect if the counter could have cycled by using the jump
+              in the acknowledgement number since the last ACK to calculate or
               estimate how many segments could have been acknowledged. An
               example algorithm to implement this policy is given in <xref
               target="accecn_Algo_ACE_Wrap"/>. An implementer MAY develop an
@@ -2921,17 +2921,23 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
 
         <t>where '%' is the remainder operator.</t>
 
-        <t>On the arrival of an AccECN Option, the Data Sender uses the TCP
-        acknowledgement number and any SACK options to calculate newlyAckedB,
-        the amount of new data that the ACK acknowledges in bytes. If
-        newlyAckedB is negative it means that a more up to date ACK has
-        already been processed, so this ACK has been superseded and the Data
-        Sender has to ignore the AccECN Option. Otherwise, the Data Sender
-        calculates the minimum difference d.ceb between the ECEB field and its
-        local s.ceb counter, using modulo arithmetic as follows:</t>
+        <t>On the arrival of an AccECN Option, the Data Sender first makes
+        sure the ACK has not been superseded in order to avoid winding the
+        s.ceb counter backwards. It uses the TCP acknowledgement number and
+        any SACK options to calculate newlyAckedB, the amount of new data that
+        the ACK acknowledges in bytes (newlyAckedB can be zero but not
+        negative). If newlyAckedB is zero, either the ACK has been superseded
+        or CE-marked packet(s) without data could have arrived. To break the
+        tie for the latter case, the Data Sender could use timestamps (if
+        present) to work out newlyAckedT, the amount of new time that the ACK
+        acknowledges. If the Data Sender determines that the ACK has been
+        superseded it ignores the AccECN Option. Otherwise, the Data Sender
+        calculates the minimum non-negative difference d.ceb between the ECEB
+        field and its local s.ceb counter, using modulo arithmetic as
+        follows:</t>
 
         <figure>
-          <artwork><![CDATA[   if (newlyAckedB >= 0) {
+          <artwork><![CDATA[   if ((newlyAckedB > 0) || (newlyAckedT > 0)) {
        d.ceb = (ECEB + DIVOPT - (s.ceb % DIVOPT)) % DIVOPT
        s.ceb += d.ceb
    }
@@ -2986,45 +2992,41 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
           <t>If the Data Sender received an earlier value of the counter that
           had been delayed due to ACK reordering, it might incorrectly
           calculate that the ACE field had wrapped. Therefore, on the arrival
-          of every ACK, the Data Sender uses the TCP acknowledgement number
-          and any SACK options to calculate newlyAckedB, the amount of new
-          data that the ACK acknowledges. If newlyAckedB is negative it means
-          that a more up to date ACK has already been processed, so this ACK
-          has been superseded and the Data Sender has to ignore the ACE field.
-          If newlyAckedB is zero, CE-marked packet(s) without data could have
-          arrived so, to break the tie, the Data Sender could use timestamps
-          (if present) to work out newlyAckedT, the amount of new time that
-          the ACK acknowledges. (Note: the tie breaker is only required to
-          calculate CE-marked packets, not CE-marked bytes as in <xref
-          target="accecn_Algo_Option_Coding"/>.) Then the Data Sender
-          calculates the minimum difference d.cep between the ACE field and
-          its local s.cep counter, using modulo arithmetic as follows:</t>
+          of every ACK, the Data Sender ensures the ACK has not been
+          superseded using the TCP acknowledgement number, any SACK options
+          and timestamps (if available) to calculate newlyAckedB, as in <xref
+          target="accecn_Algo_Option_Coding"/>. If the ACK has not been
+          superseded, the Data Sender calculates the minimum difference d.cep
+          between the ACE field and its local s.cep counter, using modulo
+          arithmetic as follows:</t>
 
           <figure>
-            <artwork><![CDATA[   if ((newlyAckedB > 0) || (newlyAckedB == 0 && newlyAckedT > 0))
+            <artwork><![CDATA[   if ((newlyAckedB > 0) || (newlyAckedT > 0))
        d.cep = (ACE + DIVACE - (s.cep % DIVACE)) % DIVACE
 ]]></artwork>
           </figure>
 
-          <t><xref target="accecn_ACE_Safety"/> requires the Data Sender to
-          assume that the ACE field did cycle if it could have cycled under
-          prevailing conditions. The 3-bit ACE field in an arriving ACK could
-          have cycled and become ambiguous to the Data Sender if a row of ACKs
-          goes missing that covers a stream of data long enough to contain 8
-          or more CE marks. We use the word `missing' rather than `lost',
-          because some or all the missing ACKs might arrive eventually, but
-          out of order. Even if some of the lost ACKs are piggy-backed on data
-          (i.e. not pure ACKs) retransmissions will not repair the lost AccECN
-          information, because AccECN requires retransmissions to carry the
-          latest AccECN counters, not the original ones.</t>
+          <t><xref target="accecn_ACE_Safety"/> expects the Data Sender to
+          assume that the ACE field cycled if it is the safest likely case
+          under prevailing conditions. The 3-bit ACE field in an arriving ACK
+          could have cycled and become ambiguous to the Data Sender if a row
+          of ACKs goes missing that covers a stream of data long enough to
+          contain 8 or more CE marks. We use the word `missing' rather than
+          `lost', because some or all the missing ACKs might arrive
+          eventually, but out of order. Even if some of the missing ACKs were
+          piggy-backed on data (i.e. not pure ACKs) retransmissions will not
+          repair the lost AccECN information, because AccECN requires
+          retransmissions to carry the latest AccECN counters, not the
+          original ones.</t>
 
-          <t>The phrase `under prevailing conditions' allows the Data Sender
-          to take account of the prevailing size of data segments and the
-          prevailing CE marking rate just before the sequence of ACK losses.
-          However, we shall start with the simplest algorithm, which assumes
-          segments are all full-sized and ultra-conservatively it assumes that
-          ECN marking was 100% on the forward path when ACKs on the reverse
-          path started to all be dropped. Specifically, if newlyAckedB is the
+          <t>The phrase `under prevailing conditions' allows for
+          implementation-dependent interpretation. A Data Sender might take
+          account of the prevailing size of data segments and the prevailing
+          CE marking rate just before the sequence of missing ACKs. However,
+          we shall start with the simplest algorithm, which assumes segments
+          are all full-sized and ultra-conservatively it assumes that ECN
+          marking was 100% on the forward path when ACKs on the reverse path
+          started to all be dropped. Specifically, if newlyAckedB is the
           amount of data that an ACK acknowledges since the previous ACK, then
           the Data Sender could assume that this acknowledges newlyAckedPkt
           full-sized segments, where newlyAckedPkt = newlyAckedB/MSS. Then it
@@ -3042,6 +3044,15 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
           10 full-sized segments, then it would be necessary to assume that
           there could have been 10 CE marks (because 10 - ((10-2) % 8) =
           10).</t>
+
+          <t>ACKs that acknowledge a large stretch of packets might be common
+          in data centres to achieve a high packet rate or might be due to ACK
+          thinning by a middlebox. In these cases, cycling of the ACE field
+          would often appear to have been possible, so the above algorithm
+          would be over-conservative, leading to a false high marking rate and
+          poor performance. Therefore it would be reasonable to only use
+          dSafer.cep rather than d.cep if the moving average of newlyAckedPkt
+          was well below 8.</t>
 
           <t>Implementers could build in more heuristics to estimate
           prevailing average segment size and prevailing ECN marking. For
