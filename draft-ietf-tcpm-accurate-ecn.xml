@@ -1047,10 +1047,10 @@ deliberately to reduce complexity.-->
                   if it has reason to believe such a packet would be
                   blocked).</t>
 
-                  <t>If for any reason it is not willing to use ECN on a
-                  particular TCP connection, it SHOULD clear the AE, CWR and
-                  ECE flags in all SYN and/or SYN/ACK packets that it sends to
-                  indicate this unwillingness.</t>
+                  <t>If for any reason it is not willing to provide ECN
+                  feedback on a particular TCP connection, to indicate this
+                  unwillingness it SHOULD clear the AE, CWR and ECE flags in
+                  all SYN and/or SYN/ACK packets that it sends.</t>
                 </list></t>
 
               <t>Switching feedback negotiation (e.g. fall-back):<list
@@ -1076,11 +1076,11 @@ deliberately to reduce complexity.-->
               it.</t>
 
               <t>Congestion response:<list style="symbols">
-                  <t>It MUST respond appropriately to AccECN feedback with
-                  congestion indications on packets it had previously sent, as
-                  defined in Section 6.1 of <xref target="RFC3168"/> and
-                  updated by Sections 2.1 and 4.1 of <xref
-                  target="RFC8311"/>.</t>
+                  <t>It is still obliged to respond appropriately to AccECN
+                  feedback with congestion indications on packets it had
+                  previously sent, as defined in Section 6.1 of <xref
+                  target="RFC3168"/> and updated by Sections 2.1 and 4.1 of
+                  <xref target="RFC8311"/>.</t>
 
                   <t>The commitment to respond appropriately to incoming
                   indications of congestion remains even if it sends a SYN
