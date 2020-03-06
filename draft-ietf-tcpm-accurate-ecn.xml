@@ -2619,6 +2619,17 @@ even though it uses existing TCP fields in unorthodox ways.
       location:
       http://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-1
       ]</t>
+
+      <t>Early implementations using experimental option 254 per <xref
+      target="RFC6994"/> with magic number 0xACCE (16 bits), as allocated in
+      the IANA "TCP Experimental Option Experiment Identifiers (TCP ExIDs)"
+      registry, SHOULD migrate to use this new option kind (TBD1). </t>
+
+      <t>[TO BE REMOVED: The description of the 0xACCE value in the TCP ExIDs
+      registry should be changed to "AccECN (current and new implementations
+      SHOULD use option kind TBD1)" at the following location:
+      https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-exids
+      ]</t>
     </section>
 
     <!-- ================================================================ -->
@@ -2741,6 +2752,8 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
       <?rfc include="reference.RFC.5961" ?>
 
       <?rfc include="reference.RFC.6824" ?>
+
+      <?rfc include="reference.RFC.6994" ?>
 
       <?rfc include="reference.RFC.7560" ?>
 
