@@ -93,7 +93,7 @@
       </address>
     </author>
 
-    <date year="2019"/>
+    <date year="2020"/>
 
     <area>Transport</area>
 
@@ -197,7 +197,7 @@
       with ECN (ABE) <xref target="RFC8511"/>.</t>
 
       <t>It is recommended that the AccECN protocol is implemented alongside
-      the experimental ECN++ protocol <xref
+      SACK <xref target="RFC2018"/> and the experimental ECN++ protocol <xref
       target="I-D.ietf-tcpm-generalized-ecn"/>, which allows the ECN
       capability to be used on TCP control packets. Therefore, this
       specification does not discuss implementing AccECN alongside <xref
@@ -1051,12 +1051,14 @@ deliberately to reduce complexity.-->
           the first retransmitted SYN (using the usual retransmission
           time-outs). If this first retransmission also fails to be
           acknowledged, the sender SHOULD send subsequent retransmissions of
-          the SYN with the three TCP-ECN flags cleared (AE=CWR=ECE=0). This
-          adds delay, in the case where a middlebox drops an AccECN (or ECN)
-          SYN deliberately. However, current measurements imply that a drop is
-          less likely to be due to middlebox interference than other
-          intermittent causes of loss, e.g. congestion, wireless interference,
-          etc.</t>
+          the SYN with the three TCP-ECN flags cleared (AE=CWR=ECE=0). A
+          retransmitted SYN MUST use the same ISN as the original SYN.</t>
+
+          <t>Retrying once before fall-back adds delay in the case where a
+          middlebox drops an AccECN (or ECN) SYN deliberately. However,
+          current measurements imply that a drop is less likely to be due to
+          middlebox interference than other intermittent causes of loss, e.g.
+          congestion, wireless interference, etc.</t>
 
           <t>Implementers MAY use other fall-back strategies if they are found
           to be more effective (e.g. attempting to negotiate AccECN on the SYN
@@ -1064,11 +1066,11 @@ deliberately to reduce complexity.-->
           congestion). However, other fall-back strategies will need to follow
           all the rules in <xref target="accecn_implications_accecn_mode"/>,
           which concern behaviour when SYNs or SYN/ACKs negotiating different
-          types of feedback have been sent within the same connection. </t>
+          types of feedback have been sent within the same connection.</t>
 
-          <t>Further it may make sense to also remove any other experimental
-          fields or options on the SYN in case a middlebox might be blocking
-          them, although the required behaviour will depend on the
+          <t>Further it may make sense to also remove any other new or
+          experimental fields or options on the SYN in case a middlebox might
+          be blocking them, although the required behaviour will depend on the
           specification of the other option(s) and any attempt to co-ordinate
           fall-back between different modules of the stack.</t>
 
@@ -1104,16 +1106,18 @@ deliberately to reduce complexity.-->
                   if it has reason to believe such a packet would be
                   blocked).</t>
 
-                  <t>If for any reason it is not willing to use ECN on a
-                  particular TCP connection, it SHOULD clear the AE, CWR and
-                  ECE flags in all SYN and/or SYN/ACK packets that it sends to
-                  indicate this unwillingness.</t>
+                  <t>If for any reason it is not willing to provide ECN
+                  feedback on a particular TCP connection, to indicate this
+                  unwillingness it SHOULD clear the AE, CWR and ECE flags in
+                  all SYN and/or SYN/ACK packets that it sends.</t>
                 </list></t>
 
               <t>Switching feedback negotiation (e.g. fall-back):<list
                   style="symbols">
                   <t>It SHOULD NOT set ECT on any packet if it has received at
-                  least one SYN or SYN/ACK with AE=CWR=ECE=0.</t>
+                  least one valid SYN or Acceptable SYN/ACK with AE=CWR=ECE=0.
+                  A "valid SYN" has the same port numbers and the same ISN as
+                  the SYN that caused the server to enter AccECN mode.</t>
 
                   <t>It MUST NOT send an ECN-setup SYN <xref
                   target="RFC3168"/> within the same connection as it has sent
@@ -1131,11 +1135,11 @@ deliberately to reduce complexity.-->
               it.</t>
 
               <t>Congestion response:<list style="symbols">
-                  <t>It MUST respond appropriately to AccECN feedback with
-                  congestion indications on packets it had previously sent, as
-                  defined in Section 6.1 of <xref target="RFC3168"/> and
-                  updated by Sections 2.1 and 4.1 of <xref
-                  target="RFC8311"/>.</t>
+                  <t>It is still obliged to respond appropriately to AccECN
+                  feedback with congestion indications on packets it had
+                  previously sent, as defined in Section 6.1 of <xref
+                  target="RFC3168"/> and updated by Sections 2.1 and 4.1 of
+                  <xref target="RFC8311"/>.</t>
 
                   <t>The commitment to respond appropriately to incoming
                   indications of congestion remains even if it sends a SYN
@@ -1508,7 +1512,8 @@ deliberately to reduce complexity.-->
                 network. Nonetheless, once in the ESTABLISHED state, the
                 server will consider the ACE field to be encoded as the normal
                 ACE counter on all packets with SYN=0 (given it will be
-                following the above rule in this bullet).</t>
+                following the above rule in this bullet). The server MAY
+                include a test to avoid this case.</t>
               </list></t>
           </section>
 
@@ -1647,7 +1652,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
               which ECN marks are received with minimal additional complexity.
               If only CE marks are infrequent, or there are multiple marks in
               a row, the additional load will be low. Other marking patterns
-              could increase the load significantly, Investigating the
+              could increase the load significantly. Investigating the
               additional load is a goal of the proposed experiment.</t>
 
               <t>Even though the first bullet is stated as a "SHOULD", it is
@@ -1668,10 +1673,10 @@ even if the server does not disable sending ECN-capable packets"--></t>
                      title="Data Sender Safety Procedures">
               <t>If the Data Sender has not received AccECN TCP Options to
               give it more dependable information, and it detects that the ACE
-              field could have cycled under the prevailing conditions, it
-              SHOULD deem whether it cycled by taking the most likely case. It
-              can detect if the counter could have cycled by using the jump in
-              the acknowledgement number since the last ACK to calculate or
+              field could have cycled, it SHOULD deem whether it cycled by
+              taking the safest likely case under the prevailing conditions.
+              It can detect if the counter could have cycled by using the jump
+              in the acknowledgement number since the last ACK to calculate or
               estimate how many segments could have been acknowledged. An
               example algorithm to implement this policy is given in <xref
               target="accecn_Algo_ACE_Wrap"/>. An implementer MAY develop an
@@ -1683,6 +1688,13 @@ even if the server does not disable sending ECN-capable packets"--></t>
               attempt to neutralize the effect of any action it took based on
               a conservative assumption that it later found to be
               incorrect.</t>
+
+              <t>The Data Sender can estimate how many packets (of any
+              marking) an ACK acknowledges. If the ACE counter on an ACK seems
+              to imply that the minimum number of newly CE-marked packets is
+              greater that the number of newly acknowledged packets, the Data
+              Sender SHOULD believe the ACE counter, unless it can be sure
+              that it is counting all control packets correctly.</t>
             </section>
           </section>
         </section>
@@ -1906,7 +1918,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
               need to follow all the rules in <xref
               target="accecn_implications_accecn_mode"/>, which concern
               behaviour when SYNs or SYN/ACKs negotiating different types of
-              feedback have been sent within the same connection. </t>
+              feedback have been sent within the same connection.</t>
 
               <t>If the TCP client detects that the first data segment it sent
               with the AccECN Option was lost, it SHOULD fall back to no
@@ -2067,26 +2079,36 @@ See emails with Ilpo, 3/1/20.
                 <t hangText="Continual Repetition:">Otherwise, if arriving
                 packets continue to increment the same byte counter, the Data
                 Receiver can include an AccECN Option on most or all (delayed)
-                ACKs, but it does not have to. If the smallest allowed AccECN
-                Option would leave insufficient space for two SACK blocks on a
-                particular ACK, the Data Receiver MUST give precedence to the
-                SACK option (total 10 octets), because loss feedback is more
-                critical. It SHOULD include an AccECN Option if the r.ceb
-                counter has incremented and it MAY include an AccECN Option if
-                r.ec0b or r.ec1b has incremented;</t>
+                ACKs, but it does not have to.<list style="symbols">
+                    <t>It SHOULD include a counter that has continued to
+                    increment on the next scheduled ACK following a
+                    change-triggered ACK;</t>
 
-                <t hangText="Full-Length Options Preferred:">It SHOULD always
-                use full-length AccECN Options. It MAY use shorter AccECN
-                Options if space is limited, but {ToDo: Proposed change to
-                text so far in this bullet: "Necessary Option Length: It MAY
-                exclude counter(s) that have not changed for the whole
-                connection (but beacons still include all fields - see below).
-                It SHOULD include counter(s) that have incremented at some
-                time during the connection."} it MUST include the counter(s)
-                that have incremented since the previous AccECN Option and it
-                MUST only truncate fields from the right-hand tail of the
-                option to preserve the order of the remaining fields (see
-                <xref target="accecn_option"/>);</t>
+                    <t>while the same counter continues to increment, it
+                    SHOULD include the counter every n ACKs as consistently as
+                    possible, where n can be chosen by the implementer;</t>
+
+                    <t>It SHOULD always include an AccECN Option if the r.ceb
+                    counter is incrementing and it MAY include an AccECN
+                    Option if r.ec0b or r.ec1b is incrementing</t>
+
+                    <t>It SHOULD, include each counter at least once for every
+                    2^22 bytes incremented to prevent overflow during
+                    continual repetition.</t>
+                  </list>If the smallest allowed AccECN Option would leave
+                insufficient space for two SACK blocks on a particular ACK,
+                the Data Receiver MUST give precedence to the SACK option
+                (total 18 octets), because loss feedback is more critical.</t>
+
+                <t hangText="Necessary Option Length:">It MAY exclude
+                counter(s) that have not changed for the whole connection (but
+                beacons still include all fields - see below). It SHOULD
+                include counter(s) that have incremented at some time during
+                the connection. It MUST include the counter(s) that have
+                incremented since the previous AccECN Option and it MUST only
+                truncate fields from the right-hand tail of the option to
+                preserve the order of the remaining fields (see <xref
+                target="accecn_option"/>);</t>
 
                 <t hangText="Beaconing Full-Length Options:">Nonetheless, it
                 MUST include a full-length AccECN TCP Option on at least three
@@ -2712,12 +2734,12 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
 
       <?rfc include="reference.RFC.5681" ?>
 
-      <?rfc include="reference.RFC.6994" ?>
-
       <?rfc include="reference.RFC.8174" ?>
     </references>
 
     <references title="Informative References">
+      <?rfc include="reference.RFC.2018" ?>
+
       <?rfc include="reference.RFC.3540" ?>
 
       <?rfc include="reference.RFC.4987" ?>
@@ -2729,6 +2751,8 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
       <?rfc include="reference.RFC.5961" ?>
 
       <?rfc include="reference.RFC.6824" ?>
+
+      <?rfc include="reference.RFC.6994" ?>
 
       <?rfc include="reference.RFC.7560" ?>
 
@@ -2909,17 +2933,23 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
 
         <t>where '%' is the remainder operator.</t>
 
-        <t>On the arrival of an AccECN Option, the Data Sender uses the TCP
-        acknowledgement number and any SACK options to calculate newlyAckedB,
-        the amount of new data that the ACK acknowledges in bytes. If
-        newlyAckedB is negative it means that a more up to date ACK has
-        already been processed, so this ACK has been superseded and the Data
-        Sender has to ignore the AccECN Option. Otherwise, the Data Sender
-        calculates the minimum difference d.ceb between the ECEB field and its
-        local s.ceb counter, using modulo arithmetic as follows:</t>
+        <t>On the arrival of an AccECN Option, the Data Sender first makes
+        sure the ACK has not been superseded in order to avoid winding the
+        s.ceb counter backwards. It uses the TCP acknowledgement number and
+        any SACK options to calculate newlyAckedB, the amount of new data that
+        the ACK acknowledges in bytes (newlyAckedB can be zero but not
+        negative). If newlyAckedB is zero, either the ACK has been superseded
+        or CE-marked packet(s) without data could have arrived. To break the
+        tie for the latter case, the Data Sender could use timestamps (if
+        present) to work out newlyAckedT, the amount of new time that the ACK
+        acknowledges. If the Data Sender determines that the ACK has been
+        superseded it ignores the AccECN Option. Otherwise, the Data Sender
+        calculates the minimum non-negative difference d.ceb between the ECEB
+        field and its local s.ceb counter, using modulo arithmetic as
+        follows:</t>
 
         <figure>
-          <artwork><![CDATA[   if (newlyAckedB >= 0) {
+          <artwork><![CDATA[   if ((newlyAckedB > 0) || (newlyAckedT > 0)) {
        d.ceb = (ECEB + DIVOPT - (s.ceb % DIVOPT)) % DIVOPT
        s.ceb += d.ceb
    }
@@ -2974,42 +3004,41 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
           <t>If the Data Sender received an earlier value of the counter that
           had been delayed due to ACK reordering, it might incorrectly
           calculate that the ACE field had wrapped. Therefore, on the arrival
-          of every ACK, the Data Sender uses the TCP acknowledgement number
-          and any SACK options to calculate newlyAckedB, the amount of new
-          data that the ACK acknowledges. If newlyAckedB is negative it means
-          that a more up to date ACK has already been processed, so this ACK
-          has been superseded and the Data Sender has to ignore the ACE field.
-          If newlyAckedB is zero, to break the tie the Data Sender could use
-          timestamps (if present) to work out newlyAckedT, the amount of new
-          time that the ACK acknowledges. Then the Data Sender calculates the
-          minimum difference d.cep between the ACE field and its local s.cep
-          counter, using modulo arithmetic as follows:</t>
+          of every ACK, the Data Sender ensures the ACK has not been
+          superseded using the TCP acknowledgement number, any SACK options
+          and timestamps (if available) to calculate newlyAckedB, as in <xref
+          target="accecn_Algo_Option_Coding"/>. If the ACK has not been
+          superseded, the Data Sender calculates the minimum difference d.cep
+          between the ACE field and its local s.cep counter, using modulo
+          arithmetic as follows:</t>
 
           <figure>
-            <artwork><![CDATA[   if ((newlyAckedB > 0) || (newlyAckedB == 0 && newlyAckedT > 0))
+            <artwork><![CDATA[   if ((newlyAckedB > 0) || (newlyAckedT > 0))
        d.cep = (ACE + DIVACE - (s.cep % DIVACE)) % DIVACE
 ]]></artwork>
           </figure>
 
-          <t><xref target="accecn_ACE_Safety"/> requires the Data Sender to
-          assume that the ACE field did cycle if it could have cycled under
-          prevailing conditions. The 3-bit ACE field in an arriving ACK could
-          have cycled and become ambiguous to the Data Sender if a row of ACKs
-          goes missing that covers a stream of data long enough to contain 8
-          or more CE marks. We use the word `missing' rather than `lost',
-          because some or all the missing ACKs might arrive eventually, but
-          out of order. Even if some of the lost ACKs are piggy-backed on data
-          (i.e. not pure ACKs) retransmissions will not repair the lost AccECN
-          information, because AccECN requires retransmissions to carry the
-          latest AccECN counters, not the original ones.</t>
+          <t><xref target="accecn_ACE_Safety"/> expects the Data Sender to
+          assume that the ACE field cycled if it is the safest likely case
+          under prevailing conditions. The 3-bit ACE field in an arriving ACK
+          could have cycled and become ambiguous to the Data Sender if a row
+          of ACKs goes missing that covers a stream of data long enough to
+          contain 8 or more CE marks. We use the word `missing' rather than
+          `lost', because some or all the missing ACKs might arrive
+          eventually, but out of order. Even if some of the missing ACKs were
+          piggy-backed on data (i.e. not pure ACKs) retransmissions will not
+          repair the lost AccECN information, because AccECN requires
+          retransmissions to carry the latest AccECN counters, not the
+          original ones.</t>
 
-          <t>The phrase `under prevailing conditions' allows the Data Sender
-          to take account of the prevailing size of data segments and the
-          prevailing CE marking rate just before the sequence of ACK losses.
-          However, we shall start with the simplest algorithm, which assumes
-          segments are all full-sized and ultra-conservatively it assumes that
-          ECN marking was 100% on the forward path when ACKs on the reverse
-          path started to all be dropped. Specifically, if newlyAckedB is the
+          <t>The phrase `under prevailing conditions' allows for
+          implementation-dependent interpretation. A Data Sender might take
+          account of the prevailing size of data segments and the prevailing
+          CE marking rate just before the sequence of missing ACKs. However,
+          we shall start with the simplest algorithm, which assumes segments
+          are all full-sized and ultra-conservatively it assumes that ECN
+          marking was 100% on the forward path when ACKs on the reverse path
+          started to all be dropped. Specifically, if newlyAckedB is the
           amount of data that an ACK acknowledges since the previous ACK, then
           the Data Sender could assume that this acknowledges newlyAckedPkt
           full-sized segments, where newlyAckedPkt = newlyAckedB/MSS. Then it
@@ -3027,6 +3056,15 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
           10 full-sized segments, then it would be necessary to assume that
           there could have been 10 CE marks (because 10 - ((10-2) % 8) =
           10).</t>
+
+          <t>ACKs that acknowledge a large stretch of packets might be common
+          in data centres to achieve a high packet rate or might be due to ACK
+          thinning by a middlebox. In these cases, cycling of the ACE field
+          would often appear to have been possible, so the above algorithm
+          would be over-conservative, leading to a false high marking rate and
+          poor performance. Therefore it would be reasonable to only use
+          dSafer.cep rather than d.cep if the moving average of newlyAckedPkt
+          was well below 8.</t>
 
           <t>Implementers could build in more heuristics to estimate
           prevailing average segment size and prevailing ECN marking. For
@@ -3065,17 +3103,17 @@ See emails 3/1/20.-->
           CE-marked bytes, it will have sufficient information in the AccECN
           Option without needing to process the ACE field. If for some reason
           it needs CE-marked packets, if dSafer.cep is different from d.cep,
-          it can calculate the average marked segment size that each implies
-          to determine whether d.cep is likely to be a safe enough estimate.
-          Specifically, it could use the following algorithm, where d.ceb is
-          the amount of newly CE-marked bytes (see <xref
-          target="accecn_Algo_Option_Coding"/>):</t>
+          it can determine whether d.cep is likely to be a safe enough
+          estimate by checking whether the average marked segment size (s =
+          d.ceb/d.cep) is less than the MSS (where d.ceb is the amount of
+          newly CE-marked bytes - see <xref
+          target="accecn_Algo_Option_Coding"/>). Specifically, it could use
+          the following algorithm:</t>
 
           <figure>
             <artwork><![CDATA[   SAFETY_FACTOR = 2
    if (dSafer.cep > d.cep) {
-       s = d.ceb/d.cep        % The next line alone would avoid DBZ
-       if (s <= MSS) {        % if (d.ceb <= MSS * d.cep) {
+       if (d.ceb <= MSS * d.cep) {  % Same as (s <= MSS), but no DBZ
           sSafer = d.ceb/dSafer.cep
           if (sSafer < MSS/SAFETY_FACTOR)
               dSafer.cep = d.cep    % d.cep is a safe enough estimate
@@ -3103,7 +3141,7 @@ MSS/SAFETY_FACTOR+--------------+    safest
                  | d.cep is safe|
                  |    enough    |
                  +-------------------->
-                               MSS   s
+                               MSS     s
 
 ]]></artwork>
           </figure>
@@ -3233,7 +3271,8 @@ MSS/SAFETY_FACTOR+--------------+    safest
       </section>
     </section>
 
-    <section title="Rationale for Usage of TCP Header Flags">
+    <section anchor="accecn_flags_rationale"
+             title="Rationale for Usage of TCP Header Flags">
       <section title="Three TCP Header Flags in the SYN-SYN/ACK Handshake">
         <t>AccECN uses a rather unorthodox approach to negotiate the highest
         version TCP ECN feedback scheme that both ends support, as justified
