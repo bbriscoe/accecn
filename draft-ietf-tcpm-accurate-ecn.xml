@@ -33,7 +33,7 @@
 <!-- HTML formatting control -->
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
-<rfc category="std" docName="draft-ietf-tcpm-accurate-ecn-11"
+<rfc category="std" docName="draft-ietf-tcpm-accurate-ecn-12"
      ipr="trust200902" updates="3168">
   <front>
     <title abbrev="Accurate TCP-ECN Feedback">More Accurate ECN Feedback in
@@ -2033,8 +2033,7 @@ See emails with Ilpo, 3/1/20.
                   </list>If the smallest allowed AccECN Option would leave
                 insufficient space for two SACK blocks on a particular ACK,
                 the Data Receiver MUST give precedence to the SACK option
-                (total 18 octets), because loss feedback is more critical.
-                </t>
+                (total 18 octets), because loss feedback is more critical.</t>
 
                 <t hangText="Necessary Option Length:">It MAY exclude
                 counter(s) that have not changed for the whole connection (but
@@ -2623,7 +2622,7 @@ even though it uses existing TCP fields in unorthodox ways.
       <t>Early implementations using experimental option 254 per <xref
       target="RFC6994"/> with magic number 0xACCE (16 bits), as allocated in
       the IANA "TCP Experimental Option Experiment Identifiers (TCP ExIDs)"
-      registry, SHOULD migrate to use this new option kind (TBD1). </t>
+      registry, SHOULD migrate to use this new option kind (TBD1).</t>
 
       <t>[TO BE REMOVED: The description of the 0xACCE value in the TCP ExIDs
       registry should be changed to "AccECN (current and new implementations
