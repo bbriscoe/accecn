@@ -34,7 +34,7 @@
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
 <rfc category="std" docName="draft-ietf-tcpm-accurate-ecn-13"
-     ipr="trust200902" updates="3168">
+     ipr="trust200902" updates="3168, 3449">
   <front>
     <title abbrev="Accurate TCP-ECN Feedback">More Accurate ECN Feedback in
     TCP</title>
@@ -2139,65 +2139,133 @@ Note that the ACK for the next segment could be delayed again if it carries the 
        to maintain the box says it has to comply with updated standards -->
 
       <section anchor="accecn_Mbox_Operation"
-               title="Requirements for TCP Proxies, Offload Engines and other Middleboxes on AccECN Compliance">
-        <t>A large class of middleboxes split TCP connections. Such a
-        middlebox would be compliant with the AccECN protocol if the TCP
-        implementation on each side complied with the present AccECN
-        specification and each side negotiated AccECN independently of the
-        other side.</t>
+               title="AccECN Compliance Requirements for TCP Proxies, Offload Engines and other Middleboxes">
+        <t/>
 
-        <t>Another large class of middleboxes intervenes to some degree at the
-        transport layer, but attempts to be transparent (invisible) to the
-        end-to-end connection. A subset of this class of middleboxes attempts
-        to `normalize' the TCP wire protocol by checking that all values in
-        header fields comply with a rather narrow interpretation of the TCP
-        specifications. To comply with the present AccECN specification, such
-        a middlebox MUST NOT change the ACE field or the AccECN Option and it
-        SHOULD preserve the timing of each ACK (for example, if it coalesced
-        ACKs it would not be AccECN-compliant) as these can be used by the
-        Data Sender to infer further information about the path congestion
-        level.<!-- This includes the explicitly stated requirements to forward
+        <section title="Requirements for TCP Proxies">
+          <t>A large class of middleboxes split TCP connections. Such a
+          middlebox would be compliant with the AccECN protocol if the TCP
+          implementation on each side complied with the present AccECN
+          specification and each side negotiated AccECN independently of the
+          other side.</t>
+        </section>
+
+        <section title="Requirements for TCP Normalizers">
+          <t>Another large class of middleboxes intervenes to some degree at
+          the transport layer, but attempts to be transparent (invisible) to
+          the end-to-end connection. A subset of this class of middleboxes
+          attempts to `normalize' the TCP wire protocol by checking that all
+          values in header fields comply with a rather narrow and often
+          outdated interpretation of the TCP specifications. To comply with
+          the present AccECN specification, such a middlebox MUST NOT change
+          the ACE field or the AccECN Option.<!-- This includes the explicitly stated requirements to forward
         Reserved (Rsvd) and Currently Unused (CU) values unaltered. 
 An 'ideal' TCP normalizer would not have to change to accommodate AccECN, because AccECN does not directly contravene any existing TCP specifications, 
 even though it uses existing TCP fields in unorthodox ways.
---> A middlebox claiming to be transparent at the transport layer MUST forward
-        the AccECN TCP Option unaltered, whether or not the length value
-        matches one of those specified in <xref target="accecn_option"/>, and
-        whether or not the initial values of the byte-counter fields are
-        correct. This is because blocking apparently invalid values does not
-        improve security (because AccECN hosts are required to ignore invalid
-        values anyway), while it prevents the standardized set of values being
-        extended in future (because outdated normalizers would block updated
-        hosts from using the extended AccECN standard).</t>
+--></t>
 
-        <t>Hardware to offload certain TCP processing represents another large
-        class of middleboxes, even though it is often a function of a host's
-        network interface and rarely in its own 'box'. Leeway has been allowed
-        in the present AccECN specification in the expectation that offload
-        hardware could comply and still serve its function. Nonetheless, such
-        hardware SHOULD also preserve the timing of each ACK (for example, if
-        it coalesced ACKs it would not be AccECN-compliant).</t>
+          <t>A middlebox claiming to be transparent at the transport layer
+          MUST forward the AccECN TCP Option unaltered, whether or not the
+          length value matches one of those specified in <xref
+          target="accecn_option"/>, and whether or not the initial values of
+          the byte-counter fields are correct. This is because blocking
+          apparently invalid values does not improve security (because AccECN
+          hosts are required to ignore invalid values anyway), while it
+          prevents the standardized set of values being extended in future
+          (because outdated normalizers would block updated hosts from using
+          the extended AccECN standard).</t>
+        </section>
 
-        <t>The ACE field changes with every received CE marking, so today's
-        receive offloading could lead to many interrupts in high congestion
-        situations. Although that would be useful (because congestion
-        information is received sooner), it could also significantly increase
-        processor load, particularly in scenarios such as DCTCP or L4S where
-        the marking rate is generally higher.</t>
+        <section title="Requirements for TCP ACK Filtering">
+          <t>A node that implements ACK filtering (aka.&nbsp;thinning or
+          coalescing) and itself also implements ECN marking will not need to
+          filter ACKs from connections that use AccECN feedback. Therefore,
+          such a node SHOULD detect connections that have negotiated the use
+          of AccECN feedback during the handshake (see <xref
+          target="accecn_Tab_Negotiation"/>) and it SHOULD preserve the timing
+          of each ACK (if it coalesced ACKs it would not be AccECN-compliant,
+          but the requirement is stated as a "SHOULD" in order to allow leeway
+          for pre-existing ACK filtering functions to be brought into line).
+          </t>
 
-        <t>In data centres it has been fortunate for offload hardware that
-        DCTCP-style feedback changes less often when there are long sequences
-        of CE marks, which is more common with a step marking threshold. In
-        order to enable DCTCP to improve its responsiveness, DCs will need to
-        move beyond step marking. Before this can happen, offload hardware
-        will have to explicitly address the variability of ECN feedback.</t>
+          <t>A node that implements ACK filtering and does not itself
+          implement ECN marking does not need to treat AccECN connections any
+          differently from other TCP connections. Nonetheless, it is
+          RECOMMENDED that such nodes implement ECN marking and comply with
+          the requirements of the previoius paragraph. This should be a better
+          way than ACK filtering to improve the performance of AccECN TCP
+          connections.</t>
 
-        <t>ECN encodes a varying signal in the ACK stream, so it is inevitable
-        that offload hardware will ultimately need to handle any form of ECN
-        feedback exceptionally. The purpose of working towards standardized
-        TCP ECN feedback is to reduce the risk for hardware developers, who
-        would otherwise have to guess which scheme is likely to become
-        dominant.</t>
+          <t>The rationale for these requirements is that AccECN feedback
+          provides sufficient information to a data receiver for it to be able
+          to monitor ECN marking of the ACKs it has sent, so that it can thin
+          the ACK stream itself. This will eventually mean that ACK filtering
+          in the network gives no performance advantage. Then TCP will be able
+          to maintain its own control over ACK coalescing. This will also
+          allow the TCP Data Sender to use the timing of ACK arrivals to more
+          reliably infer further information about the path congestion
+          level.</t>
+
+          <t>Note that the specification of AccECN in TCP does not presume to
+          rely on the above ACK filtering behaviour in the network, because it
+          has to be robust against pre-existing network nodes that still
+          filter AccECN ACKs, and robust against ACK loss during overload.
+          </t>
+
+          <t>Section 5.2.1 of <xref target="RFC3449"/> gives best current
+          practice on ACK filtering (aka.&nbsp;thinning or coalescing). It
+          gives no advice on ACKs carrying ECN feedback, because at the time
+          is said that "ECN remain areas of ongoing research". This section
+          updates that advice for a TCP connection that supports AccECN
+          feedback.</t>
+        </section>
+
+        <section title="Requirements for TCP Segmentation Offload">
+          <t>Hardware to offload certain TCP processing represents another
+          large class of middleboxes (even though it is often a function of a
+          host's network interface and rarely in its own 'box'). </t>
+
+          <t>The ACE field changes with every received CE marking, so today's
+          receive offloading could lead to many interrupts in high congestion
+          situations. Although that would be useful (because congestion
+          information is received sooner), it could also significantly
+          increase processor load, particularly in scenarios such as DCTCP or
+          L4S where the marking rate is generally higher.</t>
+
+          <t>Current offload hardware ejects a segment from the coalescing
+          process whenever the TCP ECN flags change. Thus Classic ECN causes
+          offload to be inefficient. In data centres it has been fortunate for
+          this offload hardware that DCTCP-style feedback changes less often
+          when there are long sequences of CE marks, which is more common with
+          a step marking threshold (but less likely the more short flows are
+          in the mix). The ACE counter approach has been designed so that
+          coalescing can continue over arbitrary patterns of marking and only
+          needs to stop when the counter wraps. Nonetheless, until the
+          particular offload hardware in use implements this more efficient
+          approach, it is likely to be more efficient for AccECN connections
+          to implement this counter-style logic using software segmentation
+          offload.</t>
+
+          <t>ECN encodes a varying signal in the ACK stream, so it is
+          inevitable that offload hardware will ultimately need to handle any
+          form of ECN feedback exceptionally. The ACE field has been designed
+          as a counter so that it is straightforward for offload hardware to
+          pass on the highest counter, and to push a segment from its cache
+          before the counter wraps. The purpose of working towards
+          standardized TCP ECN feedback is to reduce the risk for hardware
+          developers, who would otherwise have to guess which scheme is likely
+          to become dominant. </t>
+
+          <t>The above process has been designed to enable a continuing
+          incremental deployment path - to more highly dynamic congestion
+          control. Once DCTCP offload hardware supports AccECN, it will be
+          able to coalesce efficiently for any sequence of marks, instead of
+          relying for efficiency on the long marking sequences from step
+          marking. In the next stage, DCTCP marking can evolve from a step to
+          a ramp function. That in turn will allow host congestion control
+          algorithms to respond faster to dynamics, while being backwards
+          compatible with existing host algorithms.</t>
+        </section>
       </section>
     </section>
 
@@ -2691,11 +2759,11 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
     <section anchor="accecn_Acknowledgements" title="Acknowledgements">
       <t>We want to thank Koen De Schepper, Praveen Balasubramanian, Michael
       Welzl, Gorry Fairhurst, David Black, Spencer Dawkins, Michael Scharf,
-      Michael Tuexen, Yuchung Cheng, Kenjiro Cho, Olivier Tilmans and Ilpo
-      J&auml;rvinen for their input and discussion. The idea of using the
-      three ECN-related TCP flags as one field for more accurate TCP-ECN
-      feedback was first introduced in the re-ECN protocol that was the
-      ancestor of ConEx.</t>
+      Michael Tuexen, Yuchung Cheng, Kenjiro Cho, Olivier Tilmans, Ilpo
+      J&auml;rvinen and Neal Cardwell for their input and discussion. The idea
+      of using the three ECN-related TCP flags as one field for more accurate
+      TCP-ECN feedback was first introduced in the re-ECN protocol that was
+      the ancestor of ConEx.</t>
 
       <t>Bob Briscoe was part-funded by the Comcast Innovation Fund, the
       European Community under its Seventh Framework Programme through the
@@ -2737,6 +2805,8 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
 
     <references title="Informative References">
       <?rfc include="reference.RFC.2018" ?>
+
+      <?rfc include="reference.RFC.3449" ?>
 
       <?rfc include="reference.RFC.3540" ?>
 
