@@ -332,31 +332,31 @@
 
         <texttable anchor="accecn_Tab_ECN"
                    title="The ECN Field in the IP Header">
-          <ttcol>IP-ECN codepoint (binary)</ttcol>
+          <ttcol>IP-ECN codepoint</ttcol>
 
           <ttcol>Codepoint name</ttcol>
 
           <ttcol>Description</ttcol>
 
-          <c>00</c>
+          <c>0b00</c>
 
           <c>Not-ECT</c>
 
           <c>Not&nbsp;ECN-Capable&nbsp;Transport</c>
 
-          <c>01</c>
+          <c>0b01</c>
 
           <c>ECT(1)</c>
 
           <c>ECN-Capable&nbsp;Transport (1)</c>
 
-          <c>10</c>
+          <c>0b10</c>
 
           <c>ECT(0)</c>
 
           <c>ECN-Capable&nbsp;Transport (0)</c>
 
-          <c>11</c>
+          <c>0b11</c>
 
           <c>CE</c>
 
@@ -583,9 +583,8 @@ deliberately to reduce complexity.-->
         need to test for unexpected interference with markings (for instance
         <xref target="accecn_sec_ACE_init_invalid"/>, <xref
         target="accecn_sec_ecn-mangling"/> and <xref
-        target="accecn_Mbox_Interference"/> of the present document, para 2 of
-        Section 20.2 of <xref target="RFC3168"/>) and <xref
-        target="I-D.kuehlewind-tcpm-ecn-fallback"/>.</t>
+        target="accecn_Mbox_Interference"/> of the present document and para 2
+        of Section 20.2 of <xref target="RFC3168"/>).</t>
 
         <t>The initial SYN is the most critical control packet, so AccECN
         provides feedback on its ECN marking. Although RFC 3168 prohibits an
@@ -603,8 +602,7 @@ deliberately to reduce complexity.-->
         target="Mandalari18"/>. If a TCP client has set the SYN to Not-ECT,
         but receives feedback that the ECN field on the SYN arrived with a
         different codepoint, it can detect such middlebox interference and
-        send Not-ECT for the rest of the connection (see <xref
-        target="I-D.kuehlewind-tcpm-ecn-fallback"/>). Today, if a TCP server
+        send Not-ECT for the rest of the connection. Today, if a TCP server
         receives ECT or CE on a SYN, it cannot know whether it is invalid (or
         valid) because only the TCP client knows whether it originally marked
         the SYN as Not-ECT (or ECT). Therefore, prior to AccECN, the server's
@@ -1046,11 +1044,6 @@ deliberately to reduce complexity.-->
                   <t>It does not have to set ECT on any packet (for instance
                   if it has reason to believe such a packet would be
                   blocked).</t>
-
-                  <t>If for any reason it is not willing to provide ECN
-                  feedback on a particular TCP connection, to indicate this
-                  unwillingness it SHOULD clear the AE, CWR and ECE flags in
-                  all SYN and/or SYN/ACK packets that it sends.</t>
                 </list></t>
 
               <t>Switching feedback negotiation (e.g. fall-back):<list
@@ -1105,6 +1098,11 @@ deliberately to reduce complexity.-->
               SYN requesting AccECN feedback or a SYN/ACK agreeing to use
               AccECN feedback, it MUST reset the connection with a RST
               packet.</t>
+
+              <t>If for any reason it is not willing to provide ECN feedback
+              on a particular TCP connection, to indicate this unwillingness
+              it SHOULD clear the AE, CWR and ECE flags in all SYN and/or
+              SYN/ACK packets that it sends.</t>
 
               <t>it MUST NOT use reception of packets with ECT set in the
               IP-ECN field as an implicit signal that the peer is ECN-capable.
@@ -2763,8 +2761,6 @@ ECN Nonce was specified separately therefore a end point that wants to conceal E
       <?rfc include="reference.RFC.8257" ?>
 
       <?rfc include="reference.RFC.8311" ?>
-
-      <?rfc include="reference.I-D.kuehlewind-tcpm-ecn-fallback" ?>
 
       <?rfc include="reference.I-D.ietf-tcpm-generalized-ecn" ?>
 
