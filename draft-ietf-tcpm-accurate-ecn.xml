@@ -1510,7 +1510,7 @@ even if the client does not disable sending ECN-capable packets"--></t>
             set the IP/ECN field on the SYN/ACK. If this comparison implies an
             unsafe transition of the IP/ECN field, for the remainder of the
             connection the server MUST NOT send ECN-capable packets, but it
-            MUST continue to feedback any ECN markings on arriving
+            MUST continue to feed back any ECN markings on arriving
             packets.<!--There is no need to say the following for forward compatibility:
 "If the client deliberately sends false feedback in the ACE field that implies an unsafe transition, it MUST continue the connection 
 even if the server does not disable sending ECN-capable packets"--></t>
@@ -1539,6 +1539,13 @@ even if the server does not disable sending ECN-capable packets"--></t>
             an ECN-enabled home router congests its upstream mobile broadband
             bottleneck link, then the ingress to the mobile network clears the
             ECN field <xref target="Mandalari18"/>.</t>
+
+            <t>Once a Data Sender has entered AccECN mode it SHOULD check
+            whether all feedback received for the first three or four round
+            indicated that every packet it sent was CE-marked. If so, for the
+            remainder of the connection, the Data Sender SHOULD NOT send
+            ECN-capable packets, but it MUST continue to feed back any ECN
+            markings on arriving packets.</t>
 
             <t>The above fall-back behaviours are necessary in case mangling
             of the IP/ECN field is asymmetric, which is currently common over
