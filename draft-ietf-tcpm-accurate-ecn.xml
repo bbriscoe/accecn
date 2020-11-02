@@ -1147,13 +1147,8 @@ deliberately to reduce complexity.-->
         <section anchor="accecn_init_counters"
                  title="Initialization of Feedback Counters">
           <t>When a host first enters AccECN mode, in its role as a Data
-          Receiver it initializes its counters to r.cep = 5 and r.ceb = 0, The
-          initial values of the other two byte counters depend on the Data
-          Receiver's choice of the order of fields it will use in the AccECN
-          TCP Option (see <xref target="accecn_option"/>). If field order 0,
-          it will initialize the remaining counters to r.e0b = 1; r.e1b.= 0.
-          If field order 1, it will initialize them to r.e0b = 0 and r.e1b.=
-          0x800001.</t>
+          Receiver it initializes its counters to r.cep = 5, r.e0b = 1 and
+          r.ceb = r.e1b.= 0, </t>
 
           <t>Non-zero initial values are used to support a stateless handshake
           (see <xref target="accecn_Interaction_SYN_Cookies"/>) and to be
@@ -1161,12 +1156,8 @@ deliberately to reduce complexity.-->
           middleboxes - see <xref target="accecn_sec_zero_option"/>).</t>
 
           <t>When a host enters AccECN mode, in its role as a Data Sender it
-          initializes its counters to s.cep = 5 and s.ceb = 0. The initial
-          values of the other two byte counters depend on the peer's choice of
-          the order of fields it will use in the AccECN TCP Option (see <xref
-          target="accecn_option"/>). If field order 0, it will initialize the
-          remaining counters to s.e0b = 1; s.e1b.= 0. If field order 1, it
-          will initialize them to s.e0b = 0 and s.e1b.= 0x800001.</t>
+          initializes its counters to s.cep = 5, s.e0b = 1 and s.ceb = s.e1b.=
+          0. </t>
         </section>
 
         <section anchor="accecn_ACE" title="The ACE Field">
@@ -1645,7 +1636,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
             <artwork><![CDATA[ 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Kind = TBD1  |  Length = 11  |          EE0B field           |
+|  Kind = TBD0  |  Length = 11  |          EE0B field           |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 | EE0B (cont'd) |           ECEB field                          |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1664,42 +1655,18 @@ even if the server does not disable sending ECN-capable packets"--></t>
 ]]></artwork>
           </figure>
 
-          <t>When a Data Receiver sends an AccECN Option, it MUST set the Kind
-          field to TBD1, which is registered in <xref
-          target="accecn_IANA_Considerations"/> as a new TCP option Kind
-          called AccECN.</t>
-
           <t><xref target="accecn_Fig_TCPopt"/> shows two option field orders;
           order 0 and order 1. They both consists of three 24-bit fields.
           Order 0 provides the 24 least significant bits of the r.e0b, r.ceb
           and r.e1b counters, respectively. Order 1 provides the same fields,
-          but in the opposite order. Each half-connection can use a different
-          field order, but a Data Receiver MUST consistently send the same
-          field order within the same half-connection.</t>
+          but in the opposite order. On each packet, the Data Receiver can use
+          whichever order is more efficient. </t>
 
-          <t>The field order to use for each half-connection is up to the Data
-          Receiver implementation. It might use the same hard-coded order for
-          all half-connections, or it might make a different choice for each
-          half-connection. For instance, the implementation of a Data Receiver
-          might default to using order 0, unless the ECN field in the IP
-          header of the packet it received during the 3WHS is ECT(1). A Data
-          Receiver just starts using its chosen field order and the field
-          immediately after the length field in the first AccECN TCP Option of
-          a half-connection will intrinsically indicate which order it is
-          using, because the initial counter values that it is required to use
-          depend on its chosen field order (see <xref
-          target="accecn_init_counters"/>).</t>
-
-          <t>A Data Sender can know which field order the Data Receiver is
-          using for a half-connection from the most significant bit (MSB) of
-          the counter in the field immediately after the length field in the
-          first non-empty AccECN TCP Option to arrive. If this MSB = 0, field
-          order 0 is being used, and if MSB = 1, field order 1 is being used.
-          Note that the Data Sender only tests the most significant bit, not
-          the value of the whole field, because the counters in the first
-          packet to arrive might have started to increment (e.g. if the first
-          packet to arrive is not the first packet sent due to loss or
-          reordering).</t>
+          <t>When a Data Receiver sends an AccECN Option, it MUST set the Kind
+          field to TBD0 if using Order 0, or to TBD1 if using Order 1. These
+          two new TCP Option Kinds are registered in <xref
+          target="accecn_IANA_Considerations"/> and called respectively
+          AccECN0 and AccECN1.</t>
 
           <t>Note that there is no field to feed back Not-ECT bytes.
           Nonetheless an algorithm for the Data Sender to calculate the number
@@ -1753,7 +1720,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
           <t>All implementations of a Data Sender that read any AccECN Option
           MUST be able to read in AccECN Options of any of the above lengths.
           For forward compatibility, if the AccECN Option is of any other
-          length, implementations MUST use those whole 3 octet fields that fit
+          length, implementations MUST use those whole 3-octet fields that fit
           within the length and ignore the remainder of the option.<!--ToDo: I'm sure we can make this more flexible, so we can introduce a 1 byte initial field later.--></t>
 
           <t>The AccECN Option has to be optional to implement, because both
@@ -2658,9 +2625,9 @@ even though it uses existing TCP fields in unorthodox ways.
       [RFC3540], which is now Historic [RFC8311]" and change the reference to
       this RFC-to-be instead of RFC8311.]</t>
 
-      <t>This document also defines a new TCP option for AccECN, assigned a
-      value of TBD1 (decimal) from the TCP option space. This value is defined
-      as:</t>
+      <t>This document also defines two new TCP options for AccECN, assigned
+      values of TBD0 and TBD1 (decimal) from the TCP option space. These
+      values are defined as:</t>
 
       <texttable>
         <ttcol>Kind</ttcol>
@@ -2671,11 +2638,19 @@ even though it uses existing TCP fields in unorthodox ways.
 
         <ttcol>Reference</ttcol>
 
+        <c>TBD0</c>
+
+        <c>N</c>
+
+        <c>Accurate ECN Order 0 (AccECN0)</c>
+
+        <c>RFC XXXX</c>
+
         <c>TBD1</c>
 
         <c>N</c>
 
-        <c>Accurate ECN (AccECN)</c>
+        <c>Accurate ECN Order 1 (AccECN1)</c>
 
         <c>RFC XXXX</c>
       </texttable>
@@ -2686,13 +2661,14 @@ even though it uses existing TCP fields in unorthodox ways.
       ]</t>
 
       <t>Early implementations using experimental option 254 per <xref
-      target="RFC6994"/> with magic number 0xACCE (16 bits), as allocated in
-      the IANA "TCP Experimental Option Experiment Identifiers (TCP ExIDs)"
-      registry, SHOULD migrate to use this new option kind (TBD1).</t>
+      target="RFC6994"/> with the single magic number 0xACCE (16 bits), as
+      allocated in the IANA "TCP Experimental Option Experiment Identifiers
+      (TCP ExIDs)" registry, SHOULD migrate to use these new option kinds
+      (TBD0 &amp; TBD1).</t>
 
       <t>[TO BE REMOVED: The description of the 0xACCE value in the TCP ExIDs
       registry should be changed to "AccECN (current and new implementations
-      SHOULD use option kind TBD1)" at the following location:
+      SHOULD use option kinds TBD0 and TBD1)" at the following location:
       https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-exids
       ]</t>
     </section>
