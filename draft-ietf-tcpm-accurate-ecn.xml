@@ -729,9 +729,9 @@ deliberately to reduce complexity.-->
 
             <c/>
 
-            <c>AE CWR ECE</c>
+            <c>AE&nbsp;CWR&nbsp;ECE</c>
 
-            <c>AE CWR ECE</c>
+            <c>AE&nbsp;CWR&nbsp;ECE</c>
 
             <c/>
 
@@ -743,7 +743,7 @@ deliberately to reduce complexity.-->
 
             <c>0 &nbsp; 1 &nbsp; 0</c>
 
-            <c>AccECN (no ECT on SYN)</c>
+            <c>AccECN(no ECT on SYN)</c>
 
             <!-- new -->
 
@@ -1060,18 +1060,18 @@ deliberately to reduce complexity.-->
                   <t>It MUST NOT send an ECN-setup SYN/ACK <xref
                   target="RFC3168"/> within the same connection as it has sent
                   a SYN/ACK agreeing to use AccECN feedback.</t>
-                </list>The above rules are necessary because, when one peer
-              negotiates the feedback mode in two different types of
-              handshake, it is not possible for the other peer to know for
-              certain which handshake packet(s) the other end eventually
-              receives or in which order it receives them. So the two peers
-              can end up using difference feedback modes without knowing
-              it.</t>
+                </list>The above rules are necessary because, if one peer were
+              to negotiate the feedback mode in two different types of
+              handshake, it would not be possible for the other peer to know
+              for certain which handshake packet(s) the other end had
+              eventually received or in which order it received them. So,
+              without these rules, the two peers could end up using difference
+              feedback modes without knowing it.</t>
 
               <t>Congestion response:<list style="symbols">
                   <t>It is still obliged to respond appropriately to AccECN
-                  feedback with congestion indications on packets it had
-                  previously sent, as defined in Section 6.1 of <xref
+                  feedback that indicates there were ECN marks on packets it
+                  had previously sent, as defined in Section 6.1 of <xref
                   target="RFC3168"/> and updated by Sections 2.1 and 4.1 of
                   <xref target="RFC8311"/>.</t>
 
@@ -1090,7 +1090,7 @@ deliberately to reduce complexity.-->
 
           <t>As a Data Receiver:<list style="symbols">
               <t>a host in AccECN mode MUST feed back the information in the
-              IP-ECN field on incoming packets using Accurate ECN feedback, as
+              IP-ECN field of incoming packets using Accurate ECN feedback, as
               specified in <xref target="accecn_feedback"/> below.</t>
 
               <t>if it receives an ECN-setup SYN or ECN-setup SYN/ACK <xref
@@ -1107,7 +1107,7 @@ deliberately to reduce complexity.-->
               <t>it MUST NOT use reception of packets with ECT set in the
               IP-ECN field as an implicit signal that the peer is ECN-capable.
               Reason: ECT at the IP layer does not explicitly confirm the peer
-              has the correct ECN feedback logic, and the packets could have
+              has the correct ECN feedback logic, as the packets could have
               been mangled at the IP layer.</t>
             </list></t>
         </section>
@@ -1148,7 +1148,7 @@ deliberately to reduce complexity.-->
                  title="Initialization of Feedback Counters">
           <t>When a host first enters AccECN mode, in its role as a Data
           Receiver it initializes its counters to r.cep = 5, r.e0b = 1 and
-          r.ceb = r.e1b.= 0, </t>
+          r.ceb = r.e1b.= 0,</t>
 
           <t>Non-zero initial values are used to support a stateless handshake
           (see <xref target="accecn_Interaction_SYN_Cookies"/>) and to be
@@ -1157,7 +1157,7 @@ deliberately to reduce complexity.-->
 
           <t>When a host enters AccECN mode, in its role as a Data Sender it
           initializes its counters to s.cep = 5, s.e0b = 1 and s.ceb = s.e1b.=
-          0. </t>
+          0.</t>
         </section>
 
         <section anchor="accecn_ACE" title="The ACE Field">
@@ -1541,7 +1541,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
             ECN field <xref target="Mandalari18"/>.</t>
 
             <t>Once a Data Sender has entered AccECN mode it SHOULD check
-            whether all feedback received for the first three or four round
+            whether all feedback received for the first three or four rounds
             indicated that every packet it sent was CE-marked. If so, for the
             remainder of the connection, the Data Sender SHOULD NOT send
             ECN-capable packets, but it MUST continue to feed back any ECN
@@ -1567,8 +1567,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
                      title="Data Receiver Safety Procedures">
               <t>An AccECN Data Receiver:<list style="symbols">
                   <t>SHOULD immediately send an ACK whenever a data packet
-                  marked CE arrives after the previous data packet was not
-                  CE.</t>
+                  marked CE arrives after the previous packet was not CE.</t>
 
                   <t>MUST immediately send an ACK once 'n' CE marks have
                   arrived since the previous ACK, where 'n' SHOULD be 2 and
@@ -1578,7 +1577,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
               which concern whether the AccECN TCP Option ought to be included
               on ACKs.</t>
 
-              <t>For the avoidance of doubt, the change-triggered ACK
+              <t>For the avoidance of doubt, the above change-triggered ACK
               mechanism is deliberately worded to solely apply to data
               packets, and to ignore the arrival of a control packet with no
               payload, because it is important that TCP does not acknowledge
@@ -1667,7 +1666,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
           Order 0 provides the 24 least significant bits of the r.e0b, r.ceb
           and r.e1b counters, respectively. Order 1 provides the same fields,
           but in the opposite order. On each packet, the Data Receiver can use
-          whichever order is more efficient. </t>
+          whichever order is more efficient.</t>
 
           <t>When a Data Receiver sends an AccECN Option, it MUST set the Kind
           field to TBD0 if using Order 0, or to TBD1 if using Order 1. These
@@ -2159,8 +2158,8 @@ even though it uses existing TCP fields in unorthodox ways.
           target="accecn_Tab_Negotiation"/>) and it SHOULD preserve the timing
           of each ACK (if it coalesced ACKs it would not be AccECN-compliant,
           but the requirement is stated as a "SHOULD" in order to allow leeway
-          for pre-existing ACK filtering functions to be brought into line).
-          </t>
+          for pre-existing ACK filtering functions to be brought into
+          line).</t>
 
           <t>A node that implements ACK filtering and does not itself
           implement ECN marking does not need to treat AccECN connections any
@@ -2183,8 +2182,7 @@ even though it uses existing TCP fields in unorthodox ways.
           <t>Note that the specification of AccECN in TCP does not presume to
           rely on the above ACK filtering behaviour in the network, because it
           has to be robust against pre-existing network nodes that still
-          filter AccECN ACKs, and robust against ACK loss during overload.
-          </t>
+          filter AccECN ACKs, and robust against ACK loss during overload.</t>
 
           <t>Section 5.2.1 of <xref target="RFC3449"/> gives best current
           practice on ACK filtering (aka.&nbsp;thinning or coalescing). It
@@ -2197,7 +2195,7 @@ even though it uses existing TCP fields in unorthodox ways.
         <section title="Requirements for TCP Segmentation Offload">
           <t>Hardware to offload certain TCP processing represents another
           large class of middleboxes (even though it is often a function of a
-          host's network interface and rarely in its own 'box'). </t>
+          host's network interface and rarely in its own 'box').</t>
 
           <t>The ACE field changes with every received CE marking, so today's
           receive offloading could lead to many interrupts in high congestion
@@ -2228,7 +2226,7 @@ even though it uses existing TCP fields in unorthodox ways.
           before the counter wraps. The purpose of working towards
           standardized TCP ECN feedback is to reduce the risk for hardware
           developers, who would otherwise have to guess which scheme is likely
-          to become dominant. </t>
+          to become dominant.</t>
 
           <t>The above process has been designed to enable a continuing
           incremental deployment path - to more highly dynamic congestion
