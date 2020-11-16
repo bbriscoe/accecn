@@ -2165,7 +2165,7 @@ even though it uses existing TCP fields in unorthodox ways.
           implement ECN marking does not need to treat AccECN connections any
           differently from other TCP connections. Nonetheless, it is
           RECOMMENDED that such nodes implement ECN marking and comply with
-          the requirements of the previoius paragraph. This should be a better
+          the requirements of the previous paragraph. This should be a better
           way than ACK filtering to improve the performance of AccECN TCP
           connections.</t>
 
