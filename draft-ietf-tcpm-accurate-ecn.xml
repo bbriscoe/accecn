@@ -1571,7 +1571,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
 
                   <t>MUST immediately send an ACK once 'n' CE marks have
                   arrived since the previous ACK, where 'n' SHOULD be 2 and
-                  MUST be no greater than 6.</t>
+                  MUST be in the range 2 to 6 inclusive.</t>
                 </list>These rules for when to send an ACK are designed to be
               complemented by those in <xref target="accecn_option_usage"/>,
               which concern whether the AccECN TCP Option ought to be included
