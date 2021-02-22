@@ -1727,7 +1727,8 @@ even if the server does not disable sending ECN-capable packets"--></t>
           MUST be able to read in AccECN Options of any of the above lengths.
           For forward compatibility, if the AccECN Option is of any other
           length, implementations MUST use those whole 3-octet fields that fit
-          within the length and ignore the remainder of the option.<!--ToDo: I'm sure we can make this more flexible, so we can introduce a 1 byte initial field later.--></t>
+          within the length and ignore the remainder of the option, treating
+          it as padding.<!--ToDo: I'm sure we can make this more flexible, so we can introduce a 1 byte initial field later.--></t>
 
           <t>The AccECN Option has to be optional to implement, because both
           sender and receiver have to be able to cope without the option
@@ -2153,13 +2154,11 @@ even though it uses existing TCP fields in unorthodox ways.
           <t>A node that implements ACK filtering (aka.&nbsp;thinning or
           coalescing) and itself also implements ECN marking will not need to
           filter ACKs from connections that use AccECN feedback. Therefore,
-          such a node SHOULD detect connections that have negotiated the use
-          of AccECN feedback during the handshake (see <xref
-          target="accecn_Tab_Negotiation"/>) and it SHOULD preserve the timing
-          of each ACK (if it coalesced ACKs it would not be AccECN-compliant,
-          but the requirement is stated as a "SHOULD" in order to allow leeway
-          for pre-existing ACK filtering functions to be brought into
-          line).</t>
+          such a node SHOULD detect connections that are using AccECN feedback
+          and it SHOULD refrain from filtering the ACKs of such connections
+          (if it coalesced ACKs it would not be AccECN-compliant, but the
+          requirement is stated as a "SHOULD" in order to allow leeway for
+          pre-existing ACK filtering functions to be brought into line).</t>
 
           <t>A node that implements ACK filtering and does not itself
           implement ECN marking does not need to treat AccECN connections any
@@ -2170,7 +2169,7 @@ even though it uses existing TCP fields in unorthodox ways.
           connections.</t>
 
           <t>The rationale for these requirements is that AccECN feedback
-          provides sufficient information to a data receiver for it to be able
+          provides sufficient information to a Data Receiver for it to be able
           to monitor ECN marking of the ACKs it has sent, so that it can thin
           the ACK stream itself. This will eventually mean that ACK filtering
           in the network gives no performance advantage. Then TCP will be able
@@ -2180,9 +2179,10 @@ even though it uses existing TCP fields in unorthodox ways.
           level.</t>
 
           <t>Note that the specification of AccECN in TCP does not presume to
-          rely on the above ACK filtering behaviour in the network, because it
-          has to be robust against pre-existing network nodes that still
-          filter AccECN ACKs, and robust against ACK loss during overload.</t>
+          rely on any of the above ACK filtering behaviour in the network,
+          because it has to be robust against pre-existing network nodes that
+          still filter AccECN ACKs, and robust against ACK loss during
+          overload.</t>
 
           <t>Section 5.2.1 of <xref target="RFC3449"/> gives best current
           practice on ACK filtering (aka.&nbsp;thinning or coalescing). It
@@ -2709,6 +2709,17 @@ even though it uses existing TCP fields in unorthodox ways.
       stripped by an incorrectly implemented middlebox, the resolution of the
       feedback will be degraded, but the integrity of this degraded
       information can still be assured.</t>
+
+      <t>In <xref target="accecn_option"/> a Data Sender is allowed to ignore
+      an unrecognized TCP AccECN Option length and read as many whole 3-octet
+      fields from it as possible up to a maximum of 3, treating the remainder
+      as padding. This opens up a potential covert channel of up to 29B (40 -
+      (2+3*3))B. {ToDo: If necessary this 'forward compatibility' requirement
+      can be capped or removed in a future revision, in order to narrow or
+      close the covert channel. Comments are solicited on whether such a
+      covert channel would be acceptable in TCP (given other TCP options
+      already open up covert channels). And, if not, whether the channel
+      should be narrowed or completely closed.}</t>
 
       <!--Bob adds: I removed the following 3 sentences, which I felt were weak. I think it is better to admit there is a security concern, than try to claim it is not a problem (when it is). 
 If a receiver has driven a network from marking into loss, it has already probably harmed other flows and gained a large share of resources for itself. 
