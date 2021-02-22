@@ -2171,7 +2171,7 @@ even though it uses existing TCP fields in unorthodox ways.
           <t>The rationale for these requirements is that AccECN feedback
           provides sufficient information to a Data Receiver for it to be able
           to monitor ECN marking of the ACKs it has sent, so that it can thin
-          the ACK stream itself. This will eventually mean that ACK filtering
+          the ACK stream itself. This could eventually mean that ACK filtering
           in the network gives no performance advantage. Then TCP will be able
           to maintain its own control over ACK coalescing. This will also
           allow the TCP Data Sender to use the timing of ACK arrivals to more
@@ -2186,10 +2186,11 @@ even though it uses existing TCP fields in unorthodox ways.
 
           <t>Section 5.2.1 of <xref target="RFC3449"/> gives best current
           practice on ACK filtering (aka.&nbsp;thinning or coalescing). It
-          gives no advice on ACKs carrying ECN feedback, because at the time
-          is said that "ECN remain areas of ongoing research". This section
-          updates that advice for a TCP connection that supports AccECN
-          feedback.</t>
+          gives no advice on ACKs carrying ECN feedback (other than that
+          filtering ought to preserve the correct operation of ECN feedback),
+          because at the time is said that "ECN remain areas of ongoing
+          research". This section updates that advice for a TCP connection
+          that supports AccECN feedback.</t>
         </section>
 
         <section title="Requirements for TCP Segmentation Offload">
