@@ -33,7 +33,7 @@
 <!-- HTML formatting control -->
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
-<rfc category="std" docName="draft-ietf-tcpm-accurate-ecn-14"
+<rfc category="std" docName="draft-ietf-tcpm-accurate-ecn-15"
      ipr="trust200902" updates="3168, 3449">
   <front>
     <title abbrev="Accurate TCP-ECN Feedback">More Accurate ECN Feedback in
@@ -130,7 +130,9 @@
       flags in the TCP header. The resulting extra space is exploited to feed
       back the IP-ECN field received during the 3-way handshake as well.
       Supplementary feedback information can optionally be provided in a new
-      TCP option, which is never used on the TCP SYN.</t>
+      TCP option, which is never used on the TCP SYN. The document also
+      specifies the treatment of this updated TCP wire protocol by
+      middleboxes.</t>
     </abstract>
   </front>
 
@@ -1783,9 +1785,10 @@ even if the server does not disable sending ECN-capable packets"--></t>
             <section anchor="accecn_AccECN_Option_3WHS"
                      title="Testing the AccECN Option during the Handshake">
               <t>The TCP client MUST NOT include the AccECN TCP Option on the
-              SYN. (A fall-back strategy for the loss of the SYN (possibly due
-              to middlebox interference) is specified in <xref
-              target="accecn_sec_SYN_rexmt"/>.)</t>
+              SYN. If there is somehow an AccECN Option on a SYN, it MUST be
+              ignored when forwarded or received. (A fall-back strategy for
+              the loss of the SYN, possibly due to middlebox interference, is
+              specified in <xref target="accecn_sec_SYN_rexmt"/>.)</t>
 
               <t>A TCP server that confirms its support for AccECN (in
               response to an AccECN SYN from the client as described in <xref
@@ -1798,10 +1801,10 @@ even if the server does not disable sending ECN-capable packets"--></t>
               TCP client SHOULD also include an AccECN Option on the first
               data segment it sends (if it ever sends one).</t>
 
-              <t>A host MAY NOT include an AccECN Option in any of these three
-              cases if it has cached knowledge that the packet would be likely
-              to be blocked on the path to the other host if it included an
-              AccECN Option.</t>
+              <t>A host MAY omit the AccECN Option in any of these three cases
+              due to insufficient option space or if it has cached knowledge
+              that the packet would be likely to be blocked on the path to the
+              other host if it included an AccECN Option.</t>
             </section>
 
             <section anchor="accecn_AccECN_Option_Loss"
@@ -2391,21 +2394,22 @@ even though it uses existing TCP fields in unorthodox ways.
             downstream network is suppressing congestion feedback or the
             sender is unresponsive to the feedback, or both, ConEx audit can
             neutralize any advantage that any of these three parties would
-            otherwise gain. <vspace blankLines="1"/>ConEx is a change to the
-            Data Sender that is most useful when combined with AccECN. Without
-            AccECN, the ConEx behaviour of a Data Sender would have to be more
-            conservative than would be necessary if it had the accurate
-            feedback of AccECN.</t>
+            otherwise gain. <vspace blankLines="1"/>ConEx is an experiental
+            change to the Data Sender that would be most useful when combined
+            with AccECN. Without AccECN, the ConEx behaviour of a Data Sender
+            would have to be more conservative than would be necessary if it
+            had the accurate feedback of AccECN.</t>
 
-            <t>The TCP authentication option (TCP-AO <xref target="RFC5925"/>)
-            can be used to detect any tampering with AccECN feedback between
-            the Data Receiver and the Data Sender (whether malicious or
-            accidental). The AccECN fields are immutable end-to-end, so they
-            are amenable to TCP-AO protection, which covers TCP options by
-            default. However, TCP-AO is often too brittle to use on many
-            end-to-end paths, where middleboxes can make verification fail in
-            their attempts to improve performance or security, e.g. by
-            resegmentation or shifting the sequence space.</t>
+            <t>The standards track TCP authentication option (TCP-AO <xref
+            target="RFC5925"/>) can be used to detect any tampering with
+            AccECN feedback between the Data Receiver and the Data Sender
+            (whether malicious or accidental). The AccECN fields are immutable
+            end-to-end, so they are amenable to TCP-AO protection, which
+            covers TCP options by default. However, TCP-AO is often too
+            brittle to use on many end-to-end paths, where middleboxes can
+            make verification fail in their attempts to improve performance or
+            security, e.g. by resegmentation or shifting the sequence
+            space.</t>
           </list>Originally the ECN Nonce <xref target="RFC3540"/> was
         proposed to ensure integrity of congestion feedback. With minor
         changes AccECN could be optimized for the possibility that the ECT(1)
