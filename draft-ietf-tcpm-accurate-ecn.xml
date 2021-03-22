@@ -2764,18 +2764,18 @@ ECN also do not have an integrity check.
 ECN Nonce was specified separately therefore a end point that wants to conceal ECN feedback can simply present to not 
 support ECN Nonce."-->
 
-      <t>There is a potential concern that a receiver could deliberately omit
-      the AccECN Option pretending that it had been stripped by a middlebox.
-      No known way can yet be contrived for a receiver to take advantage of
-      this behaviour, which seems to always degrade its own performance.
-      However, the concern is mentioned here for completeness.</t>
-
       <t>The AccECN protocol is not believed to introduce any new privacy
       concerns, because it merely counts and feeds back signals at the
       transport layer that had already been visible at the IP layer. A covert
       channel can be used to compromise privacy. However, as explained above,
       undefined TCP options in general open up such channels and common
       techniques are available to close them off.</t>
+
+      <t>There is a potential concern that a receiver could deliberately omit
+      the AccECN Option pretending that it had been stripped by a middlebox.
+      No known way can yet be contrived for a receiver to take advantage of
+      this behaviour, which seems to always degrade its own performance.
+      However, the concern is mentioned here for completeness.</t>
     </section>
 
     <!-- ================================================================ -->
