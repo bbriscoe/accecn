@@ -1442,15 +1442,16 @@ deliberately to reduce complexity.-->
                 feedback of more than one CE-marked SYN/ACK.<vspace
                 blankLines="1"/>Once the TCP server transitions to ESTABLISHED
                 state, it might later receive other pure ACK(s) with the
-                handshake encoding in the ACE field. The conditions for this
-                to occur are quite unusual, but not impossible, e.g.&nbsp;a
-                SYN/ACK (or ACK of the SYN/ACK) that is delayed for longer
-                than the server's retransmission timeout; or packet
-                duplication by the network. Nonetheless, once in the
-                ESTABLISHED state, the server will consider the ACE field to
-                be encoded as the normal ACE counter on all packets with SYN=0
-                (given it will be following the above rule in this bullet).
-                The server MAY include a test to avoid this case.</t>
+                handshake encoding in the ACE field. A server MAY implement a
+                test for such a case, but it is not required. Therefore, once
+                in the ESTABLISHED state, it will be sufficient for the server
+                to consider the ACE field to be encoded as the normal ACE
+                counter on all packets with SYN=0.<vspace
+                blankLines="1"/>Reasoning: Such ACKs will be quite unusual,
+                e.g.&nbsp;a SYN/ACK (or ACK of the SYN/ACK) that is delayed
+                for longer than the server's retransmission timeout; or packet
+                duplication by the network. And the impact of any error in the
+                feedback on such ACKs will only be temporary.</t>
               </list></t>
           </section>
 
@@ -1572,37 +1573,47 @@ even if the server does not disable sending ECN-capable packets"--></t>
 
             <section anchor="accecn_ACE_Safety_R"
                      title="Data Receiver Safety Procedures">
-              <t>An AccECN Data Receiver:<list style="symbols">
-                  <t>SHOULD immediately send an ACK whenever a data packet
-                  marked CE arrives after the previous packet was not CE.</t>
+              <t>The following rules define when a Data Receiver in AccECN
+              mode immediately sends an ACK:<list style="hanging">
+                  <t hangText="Change-Triggered ACKs:">An AccECN Data Receiver
+                  SHOULD immediately send an ACK whenever a data packet marked
+                  CE arrives after the previous packet was not CE.<vspace
+                  blankLines="1"/>Even though this rule is stated as a
+                  "SHOULD", it is important for a transition to immediately
+                  trigger an ACK if at all possible, The only valid exception
+                  to this rule is given below these bullets.<vspace
+                  blankLines="1"/>For the avoidance of doubt, this rule is
+                  deliberately worded to apply solely when <spanx
+                  style="emph">data</spanx> packets arrive, but the comparison
+                  with the previous packet includes any packet, not just data
+                  packets.</t>
 
-                  <t>MUST immediately send an ACK once 'n' CE marks have
+                  <t hangText="Increment-Triggered ACKs:">An AccECN Data
+                  Receiver MUST immediately send an ACK once 'n' CE marks have
                   arrived since the previous ACK, where 'n' SHOULD be 2 and
-                  MUST be in the range 2 to 6 inclusive.</t>
+                  MUST be in the range 2 to 6 inclusive.<vspace
+                  blankLines="1"/>For the avoidance of doubt, this rule is
+                  deliberately worded to apply to CE marks on any packet, not
+                  just data packets. It might therefore cause a pure ACK to
+                  trigger an ACK. {ToDo: more discussion}</t>
                 </list>These rules for when to send an ACK are designed to be
               complemented by those in <xref target="accecn_option_usage"/>,
               which concern whether the AccECN TCP Option ought to be included
               on ACKs.</t>
 
-              <t>For the avoidance of doubt, the above change-triggered ACK
-              mechanism is deliberately worded to solely apply to data
-              packets, and to ignore the arrival of a control packet with no
-              payload, because it is important that TCP does not acknowledge
-              pure ACKs. The change-triggered ACK approach can lead to some
-              additional ACKs but it feeds back the timing and the order in
-              which ECN marks are received with minimal additional complexity.
-              If only CE marks are infrequent, or there are multiple marks in
-              a row, the additional load will be low. Other marking patterns
-              could increase the load significantly.</t>
+              <t>The rationale for change-triggered ACKs is so that the Data
+              Sender can rely on them to detect queue growth as soon as
+              possible, e.g.&nbsp;at the start of a flow. The approach can
+              lead to some additional ACKs but it feeds back the timing and
+              the order in which ECN marks are received with minimal
+              additional complexity. If CE marks are infrequent, or there are
+              multiple marks in a row, the additional load will be low. Other
+              marking patterns could increase the load significantly.</t>
 
-              <t>Even though the first bullet is stated as a "SHOULD", it is
-              important for a transition to immediately trigger an ACK if at
-              all possible, so that the Data Sender can rely on
-              change-triggered ACKs to detect queue growth as soon as
-              possible, e.g.&nbsp;at the start of a flow. This requirement can
-              only be relaxed if certain offload hardware needed for high
-              performance cannot support change-triggered ACKs (although high
-              performance protocols such as DCTCP already successfully use
+              <t>The rule concerning change-triggered ACKs can only be relaxed
+              if certain offload hardware needed for high performance cannot
+              support change-triggered ACKs (although high performance
+              protocols such as DCTCP already successfully use
               change-triggered ACKs). One possible compromise would be for the
               receiver to heuristically detect whether the sender is in
               slow-start, then to implement change-triggered ACKs while the
@@ -1763,24 +1774,24 @@ even if the server does not disable sending ECN-capable packets"--></t>
             <t>Whenever the Data Sender receives ACK carrying an AccECN
             Option, it first checks whether the ACK has already been
             superseded by another ACK in which case it ignores the ECN
-            feedback. If the ACK has not been superseded, the Data Sender MUST
-            decode the fields in the AccECN Option as follows. For each field,
-            it takes the least significant 24 bits of its associated local
-            counter (s.ceb, s.e0b or s.e1b) and subtracts them from the
-            counter in the associated field of the incoming AccECN Option
-            (respectively ECEB, EE0B, EE1B), to work out the minimum positive
-            increment it could apply to s.ceb, s.e0b or s.e1b (assuming the
-            field in the option only wrapped at most once).</t>
+            feedback. If the ACK has not been superseded, the Data Sender
+            normally decodes the fields in the AccECN Option as follows. For
+            each field, it takes the least significant 24 bits of its
+            associated local counter (s.ceb, s.e0b or s.e1b) and subtracts
+            them from the counter in the associated field of the incoming
+            AccECN Option (respectively ECEB, EE0B, EE1B), to work out the
+            minimum positive increment it could apply to s.ceb, s.e0b or s.e1b
+            (assuming the field in the option only wrapped at most once).</t>
 
             <t><xref target="accecn_Algo_Option_Coding"/> gives an example
             algorithm for the Data Receiver to encode its byte counters into
             the AccECN Option, and for the Data Sender to decode the AccECN
-            Option fields into its byte counters.</t>
+            Option fields into its byte counters. </t>
 
             <t>Note that, as specified in <xref target="accecn_feedback"/>,
             any data on the SYN (SYN=1, ACK=0) is not included in any of the
-            locally held octet counters nor in the AccECN Option on the
-            wire.</t>
+            byte counters held locally for each ECN marking nor in the AccECN
+            Option on the wire.</t>
           </section>
 
           <section anchor="accecn_Mbox_Interference"
@@ -1986,10 +1997,13 @@ See emails with Ilpo, 3/1/20.
                 ACK with an AccECN Option, without waiting for the next
                 delayed ACK (this is in addition to the safety recommendation
                 in <xref target="accecn_ACE_Safety"/> against ambiguity of the
-                ACE field). <vspace blankLines="1"/>Even though this bullet is
-                stated as a "SHOULD", it is important for a transition to
-                immediately trigger an ACK if at all possible, as already
-                argued when specifying change-triggered ACKs for the ACE.</t>
+                ACE field). <vspace blankLines="1"/>Even though this rule is
+                stated as a "SHOULD", it is important for a transition in a
+                byte counter to immediately trigger an ACK if at all possible.
+                The only valid exception to this rule is given below these
+                bullets.<vspace blankLines="1"/>For the avoidance of doubt,
+                this rule does not concern the arrival of control packets with
+                no payload, because they cannot alter any byte counters.</t>
 
                 <t hangText="Continual Repetition:">Otherwise, if arriving
                 packets continue to increment the same byte counter, the Data
@@ -2047,30 +2061,26 @@ Note that the ACK for the next segment could be delayed again if it carries the 
             change-triggered ACKs: 01 -&gt; ACK, 01, 01 -&gt; ACK, 10 -&gt;
             ACK, 10, 01 -&gt; ACK, 01, 11 -&gt; ACK, 01 -&gt; ACK.</t>
 
-            <t>Even though first bullet is stated as a "SHOULD", it is
-            important for a transition to immediately trigger an ACK if at all
-            possible, so that the Data Sender can rely on change-triggered
-            ACKs to detect queue growth as soon as possible, e.g.&nbsp;at the
-            start of a flow. This requirement can only be relaxed if certain
-            offload hardware needed for high performance cannot support
-            change-triggered ACKs (although high performance protocols such as
-            DCTCP already successfully use change-triggered ACKs). One
-            possible experimental compromise would be for the receiver to
-            heuristically detect whether the sender is in slow-start, then to
-            implement change-triggered ACKs while the sender is in slow-start,
-            and offload otherwise.</t>
+            <t>The rationale for change-triggered ACKs is so that the Data
+            Sender can rely on them to detect queue growth as soon as
+            possible, e.g.&nbsp;at the start of a flow. The approach can lead
+            to some additional ACKs but it feeds back the timing and the order
+            in which ECN marks are received with minimal additional
+            complexity. If CE marks are infrequent, or there are multiple
+            marks in a row, the additional load will be low. Other marking
+            patterns could increase the load significantly.</t>
 
-            <t>For the avoidance of doubt, this change-triggered ACK mechanism
-            is deliberately worded to ignore the arrival of a control packet
-            with no payload, which therefore does not alter any byte counters,
-            because it is important that TCP does not acknowledge pure ACKs.
-            The change-triggered ACK approach can lead to some additional ACKs
-            but it feeds back the timing and the order in which ECN marks are
-            received with minimal additional complexity. If only CE marks are
-            infrequent, or there are multiple marks in a row, the additional
-            load will be low. Other marking patterns could increase the load
-            significantly, Investigating the additional load is a goal of the
-            proposed experiment.</t>
+            <t>The rule concerning change-triggered ACKs can only be relaxed
+            if certain offload hardware needed for high performance cannot
+            support change-triggered ACKs (although high performance protocols
+            such as DCTCP already successfully use change-triggered ACKs). One
+            possible compromise would be for the receiver to heuristically
+            detect whether the sender is in slow-start, then to implement
+            change-triggered ACKs while the sender is in slow-start, and
+            offload otherwise. These rules and exceptions for ACKs triggered
+            by byte-counter transitions are the same as those for ACKs
+            triggered by packet-counter transitions (<xref
+            target="accecn_ACE_Safety_R"/>).</t>
 
             <t>Implementation note: sending an AccECN Option each time a
             different counter changes and including a full-length AccECN
@@ -2085,7 +2095,7 @@ Note that the ACK for the next segment could be delayed again if it carries the 
 
             <t>If a host has determined that segments with the AccECN Option
             always seem to be discarded somewhere along the path, it is no
-            longer obliged to follow the above rules.</t>
+            longer obliged to follow any of the rules in this section.</t>
           </section>
         </section>
       </section>
@@ -2382,7 +2392,10 @@ even though it uses existing TCP fields in unorthodox ways.
         the SYN/ACK, even if it has data to send, it sends a pure ACK
         immediately before the data. Then it can reflect the IP-ECN field of
         the SYN/ACK on this pure ACK, which allows the server to detect ECN
-        mangling.</t>
+        mangling. Note that, as specified in <xref target="accecn_feedback"/>,
+        any data on the SYN (SYN=1, ACK=0) is not included in any of the byte
+        counters held locally for each ECN marking, nor in the AccECN Option
+        on the wire.</t>
       </section>
 
       <section anchor="accecn_Integrity"
@@ -2629,7 +2642,7 @@ even though it uses existing TCP fields in unorthodox ways.
 
     <section anchor="accecn_IANA_Considerations" title="IANA Considerations">
       <t>This document reassigns bit 7 of the TCP header flags to the AccECN
-      experiment. This bit was previously called the Nonce Sum (NS) flag <xref
+      protocol. This bit was previously called the Nonce Sum (NS) flag <xref
       target="RFC3540"/>, but RFC 3540 has been reclassified as historic <xref
       target="RFC8311"/>. The flag will now be defined as:</t>
 
@@ -3057,6 +3070,12 @@ support ECN Nonce."-->
                = 33,555,893
 ]]></artwork>
         </figure>
+
+        <t>In practice an implementation might use heuristics to guess the
+        feedback in missing ACKs, then when it subsequently receives feedback
+        it might find that it needs to correct its earlier heuristics as part
+        of the decoding process. The above decoding process does not include
+        any such heuristics.</t>
       </section>
 
       <section anchor="accecn_Algo_ACE_Wrap"
@@ -3441,9 +3460,9 @@ MSS/SAFETY_FACTOR+--------------+    safest
         <t>Despite availability of usable TCP header space being extremely
         scarce, the AccECN protocol has taken all possible steps to ensure
         that there is space to negotiate possible future variants of the
-        protocol, either if the experiment proves that a variant of AccECN is
-        required, or if a completely different ECN feedback approach is
-        needed:<list style="hanging">
+        protocol, either if a variant of AccECN is required, or if a
+        completely different ECN feedback approach is needed:<list
+            style="hanging">
             <t hangText="Future AccECN variants:">When the AccECN capability
             is negotiated during TCP's 3WHS, the rows in <xref
             target="accecn_Tab_Negotiation"/> tagged as 'Nonce' and 'Broken'
