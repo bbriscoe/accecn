@@ -1590,64 +1590,67 @@ even if the server does not disable sending ECN-capable packets"--></t>
 
                   <t hangText="Increment-Triggered ACKs:">An AccECN Data
                   Receiver MUST immediately send an ACK once 'n' CE marks have
-                  arrived since the previous ACK, where 'n' SHOULD be 3 and
-                  MUST be in the range 3 to 6 inclusive.<vspace
-                  blankLines="1"/>For the avoidance of doubt, this rule is
-                  deliberately worded to apply to CE marks on any packet, not
-                  just data packets. It might therefore cause ECN-capable pure
-                  ACKs to trigger further ACKs. Although TCP normally only
-                  ACKs new data, not ACKs, in this case the ACKs of ACKs feed
-                  back new congestion state. The minimum of 3 for 'n' ensures
-                  that, even if there is pathological congestion in both
-                  directions, any resulting ping-pong of ACKs will be rapidly
-                  damped.<vspace blankLines="1"/>In certain circumstances (see
-                  below), such ACKs of ACKs could be misidentified as
-                  duplicate ACKs. Therefore, a host in AccECN mode that is
-                  sending ECN-capable pure ACKs <xref
-                  target="I-D.ietf-tcpm-generalized-ecn"/> SHOULD add one of
-                  the following additional checks when it tests whether an
-                  incoming pure ACK is a duplicate:<list style="symbols">
-                      <t>If SACK has been negotatiated for the connection, but
-                      there is no SACK option on the incoming pure ACK, it is
-                      not a duplicate;</t>
-
-                      <t>If timestamps are in use, and the incoming pure ACK
-                      echoes a timestamp older than the oldest unacknowledged
-                      data, it is not a duplicate.</t>
-                    </list>In the unlikely event that neither SACK nor
-                  timestamps are in use, or if the implementation has opted
-                  not to include either of the above two checks, it SHOULD NOT
-                  send ECN-capable pure ACKs.<vspace blankLines="1"/>If it
-                  does, it could lead to false detection of duplicate ACKs,
-                  causing spurious retransmission(s) with a resulting
-                  unnecessary reduction in congestion window; but only in
-                  certain circumstances. Specifically, if TCP peer A has been
-                  sending data, then receiving, then within one round trip it
-                  starts sending again, and the ECN-capable pure ACKs it sent
-                  in the previous round encounter heavy enough congestion to
-                  trigger peer B to invoke the above 'n'-CE-mark rule.</t>
+                  arrived since the previous ACK. If there is new data to
+                  acknowledge, 'n' SHOULD be 2. If there is no new data to
+                  acknowledge, 'n' SHOULD be 3 and MUST be no less than 3. In
+                  either case, 'n' MUST be no greater than 6.</t>
                 </list>The above rules for when to send an ACK are designed to
               be complemented by those in <xref
               target="accecn_option_usage"/>, which concern whether the AccECN
               TCP Option ought to be included on ACKs.</t>
 
-              <t>The rationale for change-triggered ACKs is so that the Data
-              Sender can rely on them to detect queue growth as soon as
-              possible, e.g.&nbsp;at the start of a flow. The approach can
-              lead to some additional ACKs but it feeds back the timing and
-              the order in which ECN marks are received with minimal
-              additional complexity. If CE marks are infrequent, or there are
-              multiple marks in a row, the additional load will be low. Other
-              marking patterns could increase the load significantly.</t>
+              <t>In the 'Change-Triggered ACKs' rule, the only valid exception
+              to the 'SHOULD' is if certain offload hardware needed for high
+              performance cannot support change-triggered ACKs (although high
+              performance protocols such as DCTCP already successfully use
+              change-triggered ACKs). The rationale for change-triggered ACKs
+              is so that the Data Sender can rely on them to detect queue
+              growth as soon as possible, particularly at the start of a flow.
+              The approach can lead to some additional ACKs but it feeds back
+              the timing and the order in which ECN marks are received with
+              minimal additional complexity. If CE marks are infrequent, or
+              there are multiple marks in a row, the additional load will be
+              low. Other marking patterns could increase the load
+              significantly. One possible compromise would be for the receiver
+              to heuristically detect whether the sender is in slow-start,
+              then to implement change-triggered ACKs while the sender is in
+              slow-start, and offload otherwise.</t>
 
-              <t>The rule concerning change-triggered ACKs can only be relaxed
-              if certain offload hardware needed for high performance cannot
-              support change-triggered ACKs (although high performance
-              protocols such as DCTCP already successfully use
-              change-triggered ACKs). One possible compromise would be for the
-              receiver to heuristically detect whether the sender is in
-              slow-start, then to implement change-triggered ACKs while the
-              sender is in slow-start, and offload otherwise.</t>
+              <t>With ECN-capable pure ACKs <xref
+              target="I-D.ietf-tcpm-generalized-ecn"/>, the
+              'Increment-Triggered ACKs' rule could cause ECN-marked pure ACKs
+              to trigger further ACKs. Although TCP normally only ACKs new
+              data, in this case the ACKs of ACKs would feed back new
+              congestion state. The minimum of 3 for 'n' in this case ensures
+              that, even if there is pathological congestion in both
+              directions, any resulting ping-pong of ACKs will be rapidly
+              damped.</t>
+
+              <t>These ACKs of ACKs could be misidentified as duplicate ACKs
+              in certain circumstances described below. Therefore, a host in
+              AccECN mode that is sending ECN-capable pure ACKs SHOULD add one
+              of the following additional checks when it tests whether an
+              incoming pure ACK is a duplicate:<list style="symbols">
+                  <t>If SACK has been negotatiated for the connection, but
+                  there is no SACK option on the incoming pure ACK, it is not
+                  a duplicate;</t>
+
+                  <t>If timestamps are in use, and the incoming pure ACK
+                  echoes a timestamp older than the oldest unacknowledged
+                  data, it is not a duplicate.</t>
+                </list>In the unlikely event that neither SACK nor timestamps
+              are in use, or if the implementation has opted not to include
+              either of the above two checks, it SHOULD NOT send ECN-capable
+              pure ACKs. </t>
+
+              <t>If it does, it could lead to false detection of duplicate
+              ACKs, causing spurious retransmission(s) with a resulting
+              unnecessary reduction in congestion window; but only in certain
+              circumstances. Specifically, if TCP peer A has been sending
+              data, then receiving, then within one round trip it starts
+              sending again, and the ECN-capable pure ACKs it sent in the
+              previous round encounter heavy enough congestion to trigger peer
+              B to invoke the above 'n'-CE-mark rule.</t>
             </section>
 
             <section anchor="accecn_ACE_Safety_S"
