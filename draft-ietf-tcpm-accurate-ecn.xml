@@ -1590,16 +1590,46 @@ even if the server does not disable sending ECN-capable packets"--></t>
 
                   <t hangText="Increment-Triggered ACKs:">An AccECN Data
                   Receiver MUST immediately send an ACK once 'n' CE marks have
-                  arrived since the previous ACK, where 'n' SHOULD be 2 and
-                  MUST be in the range 2 to 6 inclusive.<vspace
+                  arrived since the previous ACK, where 'n' SHOULD be 3 and
+                  MUST be in the range 3 to 6 inclusive.<vspace
                   blankLines="1"/>For the avoidance of doubt, this rule is
                   deliberately worded to apply to CE marks on any packet, not
-                  just data packets. It might therefore cause a pure ACK to
-                  trigger an ACK. {ToDo: more discussion}</t>
-                </list>These rules for when to send an ACK are designed to be
-              complemented by those in <xref target="accecn_option_usage"/>,
-              which concern whether the AccECN TCP Option ought to be included
-              on ACKs.</t>
+                  just data packets. It might therefore cause ECN-capable pure
+                  ACKs to trigger further ACKs. Although TCP normally only
+                  ACKs new data, not ACKs, in this case the ACKs of ACKs feed
+                  back new congestion state. The minimum of 3 for 'n' ensures
+                  that, even if there is pathological congestion in both
+                  directions, any resulting ping-pong of ACKs will be rapidly
+                  damped.<vspace blankLines="1"/>In certain circumstances (see
+                  below), such ACKs of ACKs could be misidentified as
+                  duplicate ACKs. Therefore, a host in AccECN mode that is
+                  sending ECN-capable pure ACKs <xref
+                  target="I-D.ietf-tcpm-generalized-ecn"/> SHOULD add one of
+                  the following additional checks when it tests whether an
+                  incoming pure ACK is a duplicate:<list style="symbols">
+                      <t>If SACK has been negotatiated for the connection, but
+                      there is no SACK option on the incoming pure ACK, it is
+                      not a duplicate;</t>
+
+                      <t>If timestamps are in use, and the incoming pure ACK
+                      echoes a timestamp older than the oldest unacknowledged
+                      data, it is not a duplicate.</t>
+                    </list>In the unlikely event that neither SACK nor
+                  timestamps are in use, or if the implementation has opted
+                  not to include either of the above two checks, it SHOULD NOT
+                  send ECN-capable pure ACKs.<vspace blankLines="1"/>If it
+                  does, it could lead to false detection of duplicate ACKs,
+                  causing spurious retransmission(s) with a resulting
+                  unnecessary reduction in congestion window; but only in
+                  certain circumstances. Specifically, if TCP peer A has been
+                  sending data, then receiving, then within one round trip it
+                  starts sending again, and the ECN-capable pure ACKs it sent
+                  in the previous round encounter heavy enough congestion to
+                  trigger peer B to invoke the above 'n'-CE-mark rule.</t>
+                </list>The above rules for when to send an ACK are designed to
+              be complemented by those in <xref
+              target="accecn_option_usage"/>, which concern whether the AccECN
+              TCP Option ought to be included on ACKs.</t>
 
               <t>The rationale for change-triggered ACKs is so that the Data
               Sender can rely on them to detect queue growth as soon as
@@ -1698,12 +1728,11 @@ even if the server does not disable sending ECN-capable packets"--></t>
           target="accecn_Algo_Not-ECT"/>.</t>
 
           <t>Whenever a Data Receiver sends an AccECN Option, the rules in
-          <xref target="accecn_option_usage"/> expect it to usually send a
-          full-length option. To cope with option space limitations, it can
-          omit unchanged fields from the tail of the option, as long as it
-          preserves the order of the remaining fields and includes any field
-          that has changed. The length field MUST indicate which fields are
-          present as follows:</t>
+          <xref target="accecn_option_usage"/> allow it to omit unchanged
+          fields from the tail of the option, to help cope with option space
+          limitations, as long as it preserves the order of the remaining
+          fields and includes any field that has changed. The length field
+          MUST indicate which fields are present as follows:</t>
 
           <texttable>
             <ttcol>Length</ttcol>
@@ -1786,7 +1815,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
             <t><xref target="accecn_Algo_Option_Coding"/> gives an example
             algorithm for the Data Receiver to encode its byte counters into
             the AccECN Option, and for the Data Sender to decode the AccECN
-            Option fields into its byte counters. </t>
+            Option fields into its byte counters.</t>
 
             <t>Note that, as specified in <xref target="accecn_feedback"/>,
             any data on the SYN (SYN=1, ACK=0) is not included in any of the
@@ -1817,10 +1846,10 @@ even if the server does not disable sending ECN-capable packets"--></t>
               TCP client SHOULD also include an AccECN Option on the first
               data segment it sends (if it ever sends one).</t>
 
-              <t>A host MAY omit the AccECN Option in any of these three cases
-              due to insufficient option space or if it has cached knowledge
-              that the packet would be likely to be blocked on the path to the
-              other host if it included an AccECN Option.</t>
+              <t>A host MAY omit the AccECN Option in any of the above three
+              cases due to insufficient option space or if it has cached
+              knowledge that the packet would be likely to be blocked on the
+              path to the other host if it included an AccECN Option.</t>
             </section>
 
             <section anchor="accecn_AccECN_Option_Loss"
@@ -1982,36 +2011,83 @@ even if the data sender does not disable sending ECN-capable packets."--></t>
 
           <section anchor="accecn_option_usage"
                    title="Usage of the AccECN TCP Option">
-            <t>If the Data Receiver intends to use the AccECN TCP Option to
-            provide feedback, the following rules determine when a Data
-            Receiver in AccECN mode sends an ACK with the AccECN TCP Option,
-            and which fields to include:<list style="hanging">
+            <t>If the Data Receiver in AccECN mode intends to use the AccECN
+            TCP Option to provide feedback, the rules below determine when it
+            is most important to include an AccECN TCP Option, and which
+            fields are most important to include. The default case will often
+            suffice. But, if available TCP option space is limited, it has to
+            be up to the implementer to determine which TCP options and which
+            fields of those options take precedence on a particular packet,
+            because the tradeoffs will alter as new TCP options are
+            defined.<list style="hanging">
                 <!--ToDo: Has to be a MUST in some way (e.g.&nbsp;if send some MUST send all) for sender to guuess which counter is changing when its not receiving anything.
 See emails with Ilpo, 3/1/20.
 
 -->
 
-                <t hangText="Change-Triggered ACKs:">If an arriving packet
-                increments a different byte counter to that incremented by the
-                previous packet, the Data Receiver SHOULD immediately send an
-                ACK with an AccECN Option, without waiting for the next
-                delayed ACK (this is in addition to the safety recommendation
-                in <xref target="accecn_ACE_Safety"/> against ambiguity of the
-                ACE field). <vspace blankLines="1"/>Even though this rule is
-                stated as a "SHOULD", it is important for a transition in a
-                byte counter to immediately trigger an ACK if at all possible.
-                The only valid exception to this rule is given below these
-                bullets.<vspace blankLines="1"/>For the avoidance of doubt,
-                this rule does not concern the arrival of control packets with
-                no payload, because they cannot alter any byte counters.</t>
+                <t hangText="Importance of Congestion Control:">AccECN is for
+                congestion control, which SHOULD generally be considered
+                important relative to other TCP options.<vspace
+                blankLines="1"/>If the smallest recommended AccECN Option
+                would leave insufficient space for two SACK blocks on a
+                particular ACK, the Data Receiver MUST give precedence to the
+                SACK option (total 18 octets), because loss feedback is more
+                critical.</t>
+
+                <t hangText="Default case:">The Data Receiver SHOULD include
+                an AccECN TCP Option on every scheduled ACK that acknowledges
+                new data. Whenever possible, it SHOULD include a field for
+                every byte counter that has changed at some time during the
+                connection (see example later). This ensures that the space
+                available for payload data is usually consistent and that all
+                the relevant byte counters will be carried on any ACK that
+                reaches the Data Sender, no matter how many pure ACKs are
+                filtered or coalesced along the network path.<vspace
+                blankLines="1"/>A scheduled ACK means an ACK that the Data
+                Receiver would send by its regular delayed ACK rules. Recall
+                that <xref target="accecn_Terminology"/> defines an 'ACK' as
+                either with data payload or without. But the above rule is
+                worded so that, in the common case when most of the data is
+                from a server to a client, the server only includes an AccECN
+                TCP Option while it is acknowledging data from the
+                client.<vspace blankLines="1"/>{ToDo: By the above rules, if
+                peer A stops sending data, and peer B's data packet that
+                acknowledged the last data from A is lost, the AccECN TCP
+                Option on that packet will also have been lost. So, even
+                though B will retransmit its data, it does not send another
+                AccECN Option. Then, if A quickly starts sending again, it
+                will have missed congestion bytes information. Does this
+                matter? I think it would be complex to patch this corner
+                case.}</t>
+
+                <t hangText="Necessary Option Length:">If the Data Receiver
+                includes an AccECN TCP Option on a packet, it MUST include the
+                counter(s) that have incremented since the previous AccECN
+                Option and it MUST only truncate fields from the right-hand
+                tail of the option to preserve the order of the remaining
+                fields (see <xref target="accecn_option"/>);</t>
+
+                <t hangText="Change-Triggered AccECN TCP Options:">If an
+                arriving packet increments a different byte counter to that
+                incremented by the previous packet, the Data Receiver SHOULD
+                immediately send an ACK with an AccECN Option, without waiting
+                for the next delayed ACK (this is in addition to the safety
+                recommendation in <xref target="accecn_ACE_Safety"/> against
+                ambiguity of the ACE field). Alternatively, it SHOULD at least
+                include an AccECN Option on the next scheduled ACK. <vspace
+                blankLines="1"/>{ToDo: Do we need the first alternative at
+                all, given the earlier Change-Triggered ACK rules at least
+                cover the case when CE bytes increase?}<vspace
+                blankLines="1"/>For the avoidance of doubt, this rule does not
+                concern the arrival of control packets with no payload,
+                because they cannot alter any byte counters.</t>
 
                 <t hangText="Continual Repetition:">Otherwise, if arriving
-                packets continue to increment the same byte counter, the Data
-                Receiver can include an AccECN Option on most or all (delayed)
-                ACKs, but it does not have to.<list style="symbols">
-                    <t>It SHOULD include a counter that has continued to
-                    increment on the next scheduled ACK following a
-                    change-triggered ACK;</t>
+                packets continue to increment the same byte counter:<list
+                    style="symbols">
+                    <t>the Data Receiver SHOULD include a counter that has
+                    continued to increment on the next scheduled ACK following
+                    a change-triggered AccECN TCP Option;</t>
 
                     <t>while the same counter continues to increment, it
                     SHOULD include the counter every n ACKs as consistently as
@@ -2024,30 +2100,24 @@ See emails with Ilpo, 3/1/20.
                     <t>It SHOULD, include each counter at least once for every
                     2^22 bytes incremented to prevent overflow during
                     continual repetition.</t>
-                  </list>If the smallest allowed AccECN Option would leave
-                insufficient space for two SACK blocks on a particular ACK,
-                the Data Receiver MUST give precedence to the SACK option
-                (total 18 octets), because loss feedback is more critical.</t>
-
-                <t hangText="Necessary Option Length:">It MAY exclude
-                counter(s) that have not changed for the whole connection (but
-                beacons still include all fields - see below). It SHOULD
-                include counter(s) that have incremented at some time during
-                the connection. It MUST include the counter(s) that have
-                incremented since the previous AccECN Option and it MUST only
-                truncate fields from the right-hand tail of the option to
-                preserve the order of the remaining fields (see <xref
-                target="accecn_option"/>);</t>
-
-                <t hangText="Beaconing Full-Length Options:">Nonetheless, it
-                MUST include a full-length AccECN TCP Option on at least three
-                ACKs per RTT, or on all ACKs if there are less than three per
-                RTT (see <xref target="accecn_Algo_Beacon"/> for an example
-                algorithm that satisfies this requirement).</t>
+                  </list></t>
               </list>The above rules complement those in <xref
             target="accecn_ACE_Safety"/>, which determine when to generate an
             ACK irrespective of whether an AccECN TCP Option is to be
             included.</t>
+
+            <t>As an example, in the default case, if ECT(0) is the only
+            codepoint that has ever arrived in the IP-ECN field, the Data
+            Receiver will feed back an AccECN0 TCP Option with only the EE0B
+            field on every packet. However, as soon as even one CE-marked
+            packet arrives, it will start to include an option on every packet
+            with two fields, EE0B and ECEB. As a second example, if the first
+            packet to arrive happens to be CE-marked, the Data Receiver will
+            have to arbitrarily choose whether to precede the ECEB field with
+            an EE0B field or an EE1B field. If it chooses, say, EEB0, but it
+            turns out never to receive ECT(0), it can start sending EE1B and
+            ECEB instead - it does not have to include the EE0B field if the
+            r.e0b counter has never changed during the connection.</t>
 
             <!--Further an AccECN host MAY send the AccECN TCP Option immediately if a different counter changes than 
 triggered by the previous received segment. 'immediate' in this case does not only mean that the AccECN 
@@ -2059,7 +2129,9 @@ Note that the ACK for the next segment could be delayed again if it carries the 
             illustrates when a Data Receiver will emit an ACK with an AccECN
             Option if it is using a delayed ACK factor of 2 segments and
             change-triggered ACKs: 01 -&gt; ACK, 01, 01 -&gt; ACK, 10 -&gt;
-            ACK, 10, 01 -&gt; ACK, 01, 11 -&gt; ACK, 01 -&gt; ACK.</t>
+            ACK, 10, 01 -&gt; ACK, 01, 11 -&gt; ACK, 01 -&gt; ACK. {ToDo: This
+            refers to the Change-Triggered ACK part of the Change-Triggered
+            AccECN TCP Option bullet, which might get deleted.}</t>
 
             <t>The rationale for change-triggered ACKs is so that the Data
             Sender can rely on them to detect queue growth as soon as
@@ -2068,7 +2140,9 @@ Note that the ACK for the next segment could be delayed again if it carries the 
             in which ECN marks are received with minimal additional
             complexity. If CE marks are infrequent, or there are multiple
             marks in a row, the additional load will be low. Other marking
-            patterns could increase the load significantly.</t>
+            patterns could increase the load significantly. {ToDo: This refers
+            to the Change-Triggered ACK part of the Change-Triggered AccECN
+            TCP Option bullet, which might get deleted.}</t>
 
             <t>The rule concerning change-triggered ACKs can only be relaxed
             if certain offload hardware needed for high performance cannot
@@ -2080,14 +2154,17 @@ Note that the ACK for the next segment could be delayed again if it carries the 
             offload otherwise. These rules and exceptions for ACKs triggered
             by byte-counter transitions are the same as those for ACKs
             triggered by packet-counter transitions (<xref
-            target="accecn_ACE_Safety_R"/>).</t>
+            target="accecn_ACE_Safety_R"/>). {ToDo: This refers to the
+            Change-Triggered ACK part of the Change-Triggered AccECN TCP
+            Option bullet, which might get deleted.}</t>
 
             <t>Implementation note: sending an AccECN Option each time a
             different counter changes and including a full-length AccECN
             Option on every delayed ACK will satisfy the requirements
             described above and might be the easiest implementation, as long
             as sufficient space is available in each ACK (in total and in the
-            option space).</t>
+            option space). {ToDo: The new default case is simpler, so I'd like
+            to delete this para.}</t>
 
             <t><xref target="accecn_Algo_ACE_Bytes"/> gives an example
             algorithm to estimate the number of marked bytes from the ACE
@@ -2426,7 +2503,7 @@ even though it uses existing TCP fields in unorthodox ways.
             downstream network is suppressing congestion feedback or the
             sender is unresponsive to the feedback, or both, ConEx audit can
             neutralize any advantage that any of these three parties would
-            otherwise gain. <vspace blankLines="1"/>ConEx is an experiental
+            otherwise gain. <vspace blankLines="1"/>ConEx is an expermiental
             change to the Data Sender that would be most useful when combined
             with AccECN. Without AccECN, the ConEx behaviour of a Data Sender
             would have to be more conservative than would be necessary if it
@@ -2784,11 +2861,12 @@ support ECN Nonce."-->
       undefined TCP options in general open up such channels and common
       techniques are available to close them off.</t>
 
-      <t>There is a potential concern that a receiver could deliberately omit
-      the AccECN Option pretending that it had been stripped by a middlebox.
-      No known way can yet be contrived for a receiver to take advantage of
-      this behaviour, which seems to always degrade its own performance.
-      However, the concern is mentioned here for completeness.</t>
+      <t>There is a potential concern that a Data Receiver could deliberately
+      omit the AccECN Option pretending that it had been stripped by a
+      middlebox. No known way can yet be contrived for a receiver to take
+      advantage of this behaviour, which seems to always degrade its own
+      performance. However, the concern is mentioned here for
+      completeness.</t>
     </section>
 
     <!-- ================================================================ -->
