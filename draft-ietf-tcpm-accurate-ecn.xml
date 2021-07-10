@@ -2224,7 +2224,8 @@ Note that the ACK for the next segment could be delayed again if it carries the 
           other side.</t>
         </section>
 
-        <section title="Requirements for Transparent Middleboxes and TCP Normalizers">
+        <section anchor="accecn_middlebox_transparent_normalizers"
+                 title="Requirements for Transparent Middleboxes and TCP Normalizers">
           <t>Another large class of middleboxes intervenes to some degree at
           the transport layer, but attempts to be transparent (invisible) to
           the end-to-end connection. A subset of this class of middleboxes
@@ -2811,21 +2812,24 @@ even though it uses existing TCP fields in unorthodox ways.
       considered safe though, because if the option is not present, the AccECN
       Data Sender is then required to switch to more conservative assumptions
       about wrap of congestion indication counters (see <xref
-      target="accecn_ACE_Safety"/> and <xref
-      target="accecn_Algo_ACE_Wrap"/>).</t>
+      target="accecn_ACE_Safety"/> and <xref target="accecn_Algo_ACE_Wrap"/>).
+      {ToDo: is this still true?}</t>
 
       <t><xref target="accecn_Interaction_SYN_Cookies"/> describes how a TCP
       server can negotiate AccECN and use the SYN cookie method for mitigating
       SYN flooding attacks.</t>
 
-      <t>There is concern that ECN markings could be altered or suppressed,
+      <t>There is concern that ECN feedback could be altered or suppressed,
       particularly because a misbehaving Data Receiver could increase its own
       throughput at the expense of others. AccECN is compatible with the three
       schemes known to assure the integrity of ECN feedback (see <xref
       target="accecn_Integrity"/> for details). If the AccECN Option is
       stripped by an incorrectly implemented middlebox, the resolution of the
       feedback will be degraded, but the integrity of this degraded
-      information can still be assured.</t>
+      information can still be assured. Assuring that Data Senders respond
+      appropriately to ECN feedback is possible, but the scope of the present
+      document is confined to the feedback protocol, and excludes the response
+      to this feedback. </t>
 
       <t>In <xref target="accecn_option"/> a Data Sender is allowed to ignore
       an unrecognized TCP AccECN Option length and read as many whole 3-octet
@@ -2834,8 +2838,8 @@ even though it uses existing TCP fields in unorthodox ways.
       (2+3*3))B. However, it is really an overt channel (not hidden) and it is
       no different to the use of unknown TCP options with unknown option
       lengths in general. Therefore, where this is of concern, it can already
-      be adequately mitigated by regular TCP normalizer technology (see
-      Section 3.3.2).</t>
+      be adequately mitigated by regular TCP normalizer technology (see <xref
+      target="accecn_middlebox_transparent_normalizers"/>).</t>
 
       <!--Bob adds: I removed the following 3 sentences, which I felt were weak. I think it is better to admit there is a 
 security concern, than try to claim it is not a problem (when it is). 
