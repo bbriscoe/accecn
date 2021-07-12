@@ -1616,13 +1616,14 @@ even if the server does not disable sending ECN-capable packets"--></t>
               growth as soon as possible, particularly at the start of a flow.
               The approach can lead to some additional ACKs but it feeds back
               the timing and the order in which ECN marks are received with
-              minimal additional complexity. If CE marks are infrequent, or
-              there are multiple marks in a row, the additional load will be
-              low. Other marking patterns could increase the load
-              significantly. One possible compromise would be for the receiver
-              to heuristically detect whether the sender is in slow-start,
-              then to implement change-triggered ACKs while the sender is in
-              slow-start, and offload otherwise.</t>
+              minimal additional complexity. If CE marks are infrequent, as is
+              the case for most AQMs at the time of writing, or there are
+              multiple marks in a row, the additional load will be low.
+              However, marking patterns with numerous non-contiguous CE marks
+              could increase the load significantly. One possible compromise
+              would be for the receiver to heuristically detect whether the
+              sender is in slow-start, then to implement change-triggered ACKs
+              while the sender is in slow-start, and offload otherwise.</t>
 
               <t>With ECN-capable pure ACKs <xref
               target="I-D.ietf-tcpm-generalized-ecn"/>, the
@@ -1656,7 +1657,9 @@ even if the server does not disable sending ECN-capable packets"--></t>
               sending data, then receiving, then within one round trip it
               starts sending again, and the ECN-capable pure ACKs it sent in
               the previous round encounter heavy enough congestion to trigger
-              peer B to invoke the above 'n'-CE-mark rule.</t>
+              peer B to invoke the above 'n'-CE-mark rule. Also note that
+              falsely considering these ACKs as duplicates would incorrectly
+              imply that data left the network.</t>
             </section>
 
             <section anchor="accecn_ACE_Safety_S"
@@ -2034,21 +2037,21 @@ even if the data sender does not disable sending ECN-capable packets."--></t>
                 SACK option (total 18 octets), because loss feedback is more
                 critical.</t>
 
-                <t hangText="Default Scheme:">The Data Receiver SHOULD include
-                an AccECN TCP Option on every scheduled ACK that acknowledges
-                new data. Whenever possible, it SHOULD include a field for
-                every byte counter that has changed at some time during the
-                connection (see examples later). <vspace blankLines="1"/>A
-                scheduled ACK means an ACK that the Data Receiver would send
-                by its regular delayed ACK rules. Recall that <xref
-                target="accecn_Terminology"/> defines an 'ACK' as either with
-                data payload or without. But the above rule is worded so that,
-                in the common case when most of the data is from a server to a
-                client, the server only includes an AccECN TCP Option while it
-                is acknowledging data from the client.</t>
+                <t hangText="Recommended Simple Scheme:">The Data Receiver
+                SHOULD include an AccECN TCP Option on every scheduled ACK
+                that acknowledges new data. Whenever possible, it SHOULD
+                include a field for every byte counter that has changed at
+                some time during the connection (see examples later). <vspace
+                blankLines="1"/>A scheduled ACK means an ACK that the Data
+                Receiver would send by its regular delayed ACK rules. Recall
+                that <xref target="accecn_Terminology"/> defines an 'ACK' as
+                either with data payload or without. But the above rule is
+                worded so that, in the common case when most of the data is
+                from a server to a client, the server only includes an AccECN
+                TCP Option while it is acknowledging data from the client.</t>
               </list>When available TCP option space is limited on particular
-            packets, the default scheme will need to include compromises. To
-            guide the implementer the rules below are ranked in order of
+            packets, the recommended scheme will need to include compromises.
+            To guide the implementer the rules below are ranked in order of
             importance, but the final decision has to be
             implementation-dependent, because tradeoffs will alter as new TCP
             options are defined and new use-cases arise.<list style="hanging">
@@ -2093,14 +2096,14 @@ even if the data sender does not disable sending ECN-capable packets."--></t>
             ACK irrespective of whether an AccECN TCP Option is to be
             included.</t>
 
-            <t>The default scheme is intended as a simple way to ensure that
-            all the relevant byte counters will be carried on any ACK that
-            reaches the Data Sender, no matter how many pure ACKs are filtered
-            or coalesced along the network path, and without consuming the
-            space available for payload data with counter field(s) that have
-            never changed.</t>
+            <t>The recommended scheme is intended as a simple way to ensure
+            that all the relevant byte counters will be carried on any ACK
+            that reaches the Data Sender, no matter how many pure ACKs are
+            filtered or coalesced along the network path, and without
+            consuming the space available for payload data with counter
+            field(s) that have never changed.</t>
 
-            <t>As an example of the default scheme, if ECT(0) is the only
+            <t>As an example of the recommended scheme, if ECT(0) is the only
             codepoint that has ever arrived in the IP-ECN field, the Data
             Receiver will feed back an AccECN0 TCP Option with only the EE0B
             field on every packet. However, as soon as even one CE-marked
@@ -2114,13 +2117,13 @@ even if the data sender does not disable sending ECN-capable packets."--></t>
             have to include the EE0B field if the r.e0b counter has never
             changed during the connection.</t>
 
-            <t>With the default scheme, if the data sending direction switches
-            during a connection, there can be cases where the AccECN TCP
-            Option that is meant to feed back the counter values at the end of
-            a volley in one direction never reaches the other peer, due to
-            packet loss. ACE feedback ought to be sufficient to fill this gap,
-            given accurate feedback becomes moot after data transmission has
-            paused.</t>
+            <t>With the recommended scheme, if the data sending direction
+            switches during a connection, there can be cases where the AccECN
+            TCP Option that is meant to feed back the counter values at the
+            end of a volley in one direction never reaches the other peer, due
+            to packet loss. ACE feedback ought to be sufficient to fill this
+            gap, given accurate feedback becomes moot after data transmission
+            has paused.</t>
 
             <t><xref target="accecn_Algo_ACE_Bytes"/> gives an example
             algorithm to estimate the number of marked bytes from the ACE
@@ -2417,8 +2420,8 @@ even though it uses existing TCP fields in unorthodox ways.
 
         <t>When option space is under pressure from other options, <xref
         target="accecn_option_usage"/> provides guidance on how important it
-        is to send an AccECN Option and whether it needs to be a full-length
-        option.</t>
+        is to send an AccECN Option relative to other options, and which
+        fields are more important to include.</t>
 
         <t>Implementers of TFO need to take careful note of the recommendation
         in <xref target="accecn_ACE_3rdACK"/>. That section recommends that,
@@ -2835,10 +2838,11 @@ support ECN Nonce."-->
       <t>We want to thank Koen De Schepper, Praveen Balasubramanian, Michael
       Welzl, Gorry Fairhurst, David Black, Spencer Dawkins, Michael Scharf,
       Michael Tuexen, Yuchung Cheng, Kenjiro Cho, Olivier Tilmans, Ilpo
-      J&auml;rvinen and Neal Cardwell for their input and discussion. The idea
-      of using the three ECN-related TCP flags as one field for more accurate
-      TCP-ECN feedback was first introduced in the re-ECN protocol that was
-      the ancestor of ConEx.</t>
+      J&auml;rvinen, Neal Cardwell, Yoshifumi Nishida, Martin Duke and
+      Jonathan Morton for their input and discussion. The idea of using the
+      three ECN-related TCP flags as one field for more accurate TCP-ECN
+      feedback was first introduced in the re-ECN protocol that was the
+      ancestor of ConEx.</t>
 
       <t>Bob Briscoe was part-funded by the Comcast Innovation Fund, the
       European Community under its Seventh Framework Programme through the
@@ -3168,15 +3172,15 @@ support ECN Nonce."-->
           <t><xref target="accecn_ACE_Safety"/> expects the Data Sender to
           assume that the ACE field cycled if it is the safest likely case
           under prevailing conditions. The 3-bit ACE field in an arriving ACK
-          could have cycled and become ambiguous to the Data Sender if a row
-          of ACKs goes missing that covers a stream of data long enough to
-          contain 8 or more CE marks. We use the word `missing' rather than
-          `lost', because some or all the missing ACKs might arrive
-          eventually, but out of order. Even if some of the missing ACKs were
-          piggy-backed on data (i.e.&nbsp;not pure ACKs) retransmissions will
-          not repair the lost AccECN information, because AccECN requires
-          retransmissions to carry the latest AccECN counters, not the
-          original ones.</t>
+          could have cycled and become ambiguous to the Data Sender if a
+          sequence of ACKs goes missing that covers a stream of data long
+          enough to contain 8 or more CE marks. We use the word `missing'
+          rather than `lost', because some or all the missing ACKs might
+          arrive eventually, but out of order. Even if some of the missing
+          ACKs were piggy-backed on data (i.e.&nbsp;not pure ACKs)
+          retransmissions will not repair the lost AccECN information, because
+          AccECN requires retransmissions to carry the latest AccECN counters,
+          not the original ones.</t>
 
           <t>The phrase `under prevailing conditions' allows for
           implementation-dependent interpretation. A Data Sender might take
@@ -3349,44 +3353,6 @@ MSS/SAFETY_FACTOR+--------------+    safest
         is necessary to choose a good value for this constant, which ought to
         depend on the number of packets in flight. Also the decay constant
         needs to be power of two to avoid floating point arithmetic.</t>
-      </section>
-
-      <section anchor="accecn_Algo_Beacon"
-               title="Example Algorithm to Beacon AccECN Options">
-        <t><xref target="accecn_option_usage"/> requires a Data Receiver to
-        beacon a full-length AccECN Option at least 3 times per RTT. This
-        could be implemented by maintaining a variable to store the number of
-        ACKs (pure and data ACKs) since a full AccECN Option was last sent and
-        another for the approximate number of ACKs sent in the last round trip
-        time:</t>
-
-        <figure>
-          <artwork><![CDATA[   if (acks_since_full_last_sent > acks_in_round / BEACON_FREQ)
-       send_full_AccECN_Option()]]></artwork>
-        </figure>
-
-        <t>For optimized integer arithmetic, BEACON_FREQ = 4 could be used,
-        rather than 3, so that the division could be implemented as an integer
-        right bit-shift by lg(BEACON_FREQ).</t>
-
-        <t>In certain operating systems, it might be too complex to maintain
-        acks_in_round. In others it might be possible by tagging each data
-        segment in the retransmit buffer with the number of ACKs sent at the
-        point that segment was sent. This would not work well if the Data
-        Receiver was not sending data itself, in which case it might be
-        necessary to beacon based on time instead, as follows:</t>
-
-        <figure>
-          <artwork><![CDATA[   if ( time_now > time_last_option_sent + (RTT / BEACON_FREQ) )
-       send_full_AccECN_Option()]]></artwork>
-        </figure>
-
-        <t>This time-based approach does not work well when all the ACKs are
-        sent early in each round trip, as is the case during slow-start. In
-        this case few options will be sent (evtl. even less than 3 per RTT).
-        However, when continuously sending data, data packets as well as ACKs
-        will spread out equally over the RTT and sufficient ACKs with the
-        AccECN option will be sent.</t>
       </section>
 
       <section anchor="accecn_Algo_Not-ECT"
