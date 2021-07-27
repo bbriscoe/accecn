@@ -663,7 +663,7 @@ deliberately to reduce complexity.-->
           block of <xref target="accecn_Tab_Negotiation"/>, it confirms that
           iit supports AccECN. The TCP server MUST NOT set one of these 4
           combination of flags on the SYN/ACK unless the preceding SYN
-          requested support for AccECN as above. </t>
+          requested support for AccECN as above.</t>
 
           <t/>
 
@@ -1591,10 +1591,10 @@ even if the server does not disable sending ECN-capable packets"--></t>
 
                   <t hangText="Increment-Triggered ACKs:">An AccECN Data
                   Receiver MUST emit an ACK if 'n' CE marks have arrived since
-                  the previous ACK. If there is new data to acknowledge, 'n'
-                  SHOULD be 2. If there is no new data to acknowledge, 'n'
-                  SHOULD be 3 and MUST be no less than 3. In either case, 'n'
-                  MUST be no greater than 6.</t>
+                  the previous ACK. If there is newly delivered data to
+                  acknowledge, 'n' SHOULD be 2. If there is no newly delivered
+                  data to acknowledge, 'n' SHOULD be 3 and MUST be no less
+                  than 3. In either case, 'n' MUST be no greater than 6.</t>
                 </list>The above rules for when to send an ACK are designed to
               be complemented by those in <xref
               target="accecn_option_usage"/>, which concern whether the AccECN
