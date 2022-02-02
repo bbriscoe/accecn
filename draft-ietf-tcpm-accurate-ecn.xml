@@ -1630,10 +1630,10 @@ even if the server does not disable sending ECN-capable packets"--></t>
               <t>With ECN-capable pure ACKs <xref
               target="I-D.ietf-tcpm-generalized-ecn"/>, the
               'Increment-Triggered ACKs' rule could cause ECN-marked pure ACKs
-              to trigger further ACKs. Although TCP normally only ACKs new
-              data, in this case the ACKs of ACKs would feed back new
-              congestion state. The minimum of 3 for 'n' in this case ensures
-              that, even if there is pathological congestion in both
+              to trigger further ACKs. Although TCP normally only ACKs newly
+              delivered data, in this case the ACKs of ACKs would feed back
+              new congestion state. The minimum of 3 for 'n' in this case
+              ensures that, even if there is pathological congestion in both
               directions, any resulting ping-pong of ACKs will be rapidly
               damped.</t>
 
@@ -2044,17 +2044,18 @@ even if the data sender does not disable sending ECN-capable packets."--></t>
                 loss feedback is more critical.</t>
 
                 <t hangText="Recommended Simple Scheme:">The Data Receiver
-                SHOULD include an AccECN TCP Option on every scheduled ACK
-                that acknowledges new data. Whenever possible, it SHOULD
-                include a field for every byte counter that has changed at
-                some time during the connection (see examples later). <vspace
-                blankLines="1"/>A scheduled ACK means an ACK that the Data
-                Receiver would send by its regular delayed ACK rules. Recall
-                that <xref target="accecn_Terminology"/> defines an 'ACK' as
-                either with data payload or without. But the above rule is
-                worded so that, in the common case when most of the data is
-                from a server to a client, the server only includes an AccECN
-                TCP Option while it is acknowledging data from the client.</t>
+                SHOULD include an AccECN TCP Option on every scheduled ACK if
+                any byte counter has incremented since the last ACK. Whenever
+                possible, it SHOULD include a field for every byte counter
+                that has changed at some time during the connection (see
+                examples later). <vspace blankLines="1"/>A scheduled ACK means
+                an ACK that the Data Receiver would send by its regular
+                delayed ACK rules. Recall that <xref
+                target="accecn_Terminology"/> defines an 'ACK' as either with
+                data payload or without. But the above rule is worded so that,
+                in the common case when most of the data is from a server to a
+                client, the server only includes an AccECN TCP Option while it
+                is acknowledging data from the client.</t>
               </list>When available TCP option space is limited on particular
             packets, the recommended scheme will need to include compromises.
             To guide the implementer the rules below are ranked in order of
