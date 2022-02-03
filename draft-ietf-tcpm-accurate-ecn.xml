@@ -652,20 +652,19 @@ deliberately to reduce complexity.-->
 
           <t>If a TCP server (B) that is AccECN-enabled receives a SYN with
           the above three flags set, it MUST set both its half connections
-          into AccECN mode. Then it MUST set the AE, CWR and ECE TCP flags on
-          the SYN/ACK to the combination in the top block of <xref
+          into AccECN mode. Then it MUST set the TCP flags on the SYN/ACK to
+          one of the 4 values shown in the top block of <xref
+          target="accecn_Tab_Negotiation"/> to confirm that it supports
+          AccECN. The TCP server MUST NOT set one of these 4 combination of
+          flags on the SYN/ACK unless the preceding SYN requested support for
+          AccECN as above.</t>
+
+          <t>A TCP server in AccECN mode MUST set the AE, CWR and ECE TCP
+          flags on the SYN/ACK to the value in <xref
           target="accecn_Tab_Negotiation"/> that feeds back the IP-ECN field
           that arrived on the SYN. This applies whether or not the server
           itself supports setting the IP-ECN field on a SYN or SYN/ACK (see
           <xref target="accecn_demb_reflector"/> for rationale).</t>
-
-          <t>When the TCP server returns any of the 4 combinations in the top
-          block of <xref target="accecn_Tab_Negotiation"/>, it confirms that
-          iit supports AccECN. The TCP server MUST NOT set one of these 4
-          combination of flags on the SYN/ACK unless the preceding SYN
-          requested support for AccECN as above.</t>
-
-          <t/>
 
           <!--Bob: Out of scope: move to fall-back draft.-->
 
@@ -1128,13 +1127,12 @@ deliberately to reduce complexity.-->
             point in the IP ECN field, including CE marked control packets but
             excluding CE on SYN packets (SYN=1; ACK=0).</t>
 
-            <t>A Data Receiver that supports sending of the AccECN TCP Option
-            MUST increment the r.ceb, r.e0b or r.e1b byte counters by the
-            number of TCP payload octets in Acceptable packets marked
-            respectively with the CE, ECT(0) and ECT(1) codepoint in their
-            IP-ECN field, including any payload octets on control packets, but
-            not including any payload octets on SYN packets (SYN=1;
-            ACK=0).</t>
+            <t>The Data Receiver MUST increment the r.ceb, r.e0b or r.e1b byte
+            counters by the number of TCP payload octets in Acceptable packets
+            marked respectively with the CE, ECT(0) and ECT(1) codepoint in
+            their IP-ECN field, including any payload octets on control
+            packets, but not including any payload octets on SYN packets
+            (SYN=1; ACK=0).</t>
           </list></t>
 
         <t>Each Data Sender of each half connection maintains four counters,
@@ -1143,8 +1141,8 @@ deliberately to reduce complexity.-->
 
         <t>A Data Receiver feeds back the CE packet counter using the Accurate
         ECN (ACE) field, as explained in <xref target="accecn_ACE"/>. And it
-        optionally feeds back all the byte counters using the AccECN TCP
-        Option, as specified in <xref target="accecn_option"/>.</t>
+        feeds back all the byte counters using the AccECN TCP Option, as
+        specified in <xref target="accecn_option"/>.</t>
 
         <t>Whenever a host feeds back the value of any counter, it MUST report
         the most recent value, no matter whether it is in a pure ACK, an ACK
@@ -1591,10 +1589,10 @@ even if the server does not disable sending ECN-capable packets"--></t>
 
                   <t hangText="Increment-Triggered ACKs:">An AccECN Data
                   Receiver MUST emit an ACK if 'n' CE marks have arrived since
-                  the previous ACK. If there is newly delivered data to
-                  acknowledge, 'n' SHOULD be 2. If there is no newly delivered
-                  data to acknowledge, 'n' SHOULD be 3 and MUST be no less
-                  than 3. In either case, 'n' MUST be no greater than 6.</t>
+                  the previous ACK. If there is new data to acknowledge, 'n'
+                  SHOULD be 2. If there is no new data to acknowledge, 'n'
+                  SHOULD be 3 and MUST be no less than 3. In either case, 'n'
+                  MUST be no greater than 6.</t>
                 </list>The above rules for when to send an ACK are designed to
               be complemented by those in <xref
               target="accecn_option_usage"/>, which concern whether the AccECN
@@ -1630,10 +1628,10 @@ even if the server does not disable sending ECN-capable packets"--></t>
               <t>With ECN-capable pure ACKs <xref
               target="I-D.ietf-tcpm-generalized-ecn"/>, the
               'Increment-Triggered ACKs' rule could cause ECN-marked pure ACKs
-              to trigger further ACKs. Although TCP normally only ACKs newly
-              delivered data, in this case the ACKs of ACKs would feed back
-              new congestion state. The minimum of 3 for 'n' in this case
-              ensures that, even if there is pathological congestion in both
+              to trigger further ACKs. Although TCP normally only ACKs new
+              data, in this case the ACKs of ACKs would feed back new
+              congestion state. The minimum of 3 for 'n' in this case ensures
+              that, even if there is pathological congestion in both
               directions, any resulting ping-pong of ACKs will be rapidly
               damped.</t>
 
@@ -2037,25 +2035,24 @@ even if the data sender does not disable sending ECN-capable packets."--></t>
                 <t hangText="Importance of Congestion Control:">AccECN is for
                 congestion control, which SHOULD generally be considered
                 important relative to other TCP options.<vspace
-                blankLines="1"/>If SACK has been negotiated, and the smallest
-                recommended AccECN Option would leave insufficient space for
-                two SACK blocks on a particular ACK, the Data Receiver MUST
-                give precedence to the SACK option (total 18 octets), because
-                loss feedback is more critical.</t>
+                blankLines="1"/>If the smallest recommended AccECN Option
+                would leave insufficient space for two SACK blocks on a
+                particular ACK, the Data Receiver MUST give precedence to the
+                SACK option (total 18 octets), because loss feedback is more
+                critical.</t>
 
                 <t hangText="Recommended Simple Scheme:">The Data Receiver
-                SHOULD include an AccECN TCP Option on every scheduled ACK if
-                any byte counter has incremented since the last ACK. Whenever
-                possible, it SHOULD include a field for every byte counter
-                that has changed at some time during the connection (see
-                examples later). <vspace blankLines="1"/>A scheduled ACK means
-                an ACK that the Data Receiver would send by its regular
-                delayed ACK rules. Recall that <xref
-                target="accecn_Terminology"/> defines an 'ACK' as either with
-                data payload or without. But the above rule is worded so that,
-                in the common case when most of the data is from a server to a
-                client, the server only includes an AccECN TCP Option while it
-                is acknowledging data from the client.</t>
+                SHOULD include an AccECN TCP Option on every scheduled ACK
+                that acknowledges new data. Whenever possible, it SHOULD
+                include a field for every byte counter that has changed at
+                some time during the connection (see examples later). <vspace
+                blankLines="1"/>A scheduled ACK means an ACK that the Data
+                Receiver would send by its regular delayed ACK rules. Recall
+                that <xref target="accecn_Terminology"/> defines an 'ACK' as
+                either with data payload or without. But the above rule is
+                worded so that, in the common case when most of the data is
+                from a server to a client, the server only includes an AccECN
+                TCP Option while it is acknowledging data from the client.</t>
               </list>When available TCP option space is limited on particular
             packets, the recommended scheme will need to include compromises.
             To guide the implementer the rules below are ranked in order of
