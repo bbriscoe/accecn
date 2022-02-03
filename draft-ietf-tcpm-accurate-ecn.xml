@@ -586,8 +586,8 @@ deliberately to reduce complexity.-->
         unilaterally without any need for receivers to upgrade too. It is also
         useful to be able to rely on generic reflection behaviour when senders
         need to test for unexpected interference with markings (for instance
-        <xref target="accecn_sec_ACE_init_invalid"/>, <xref
-        target="accecn_sec_ecn-mangling"/> and <xref
+        <xref target="accecn_sec_ecn-mangling"/>, <xref
+        target="accecn_sec_ACE_init_invalid"/> and <xref
         target="accecn_Mbox_Interference"/> of the present document and para 2
         of Section 20.2 of <xref target="RFC3168"/>).</t>
 
