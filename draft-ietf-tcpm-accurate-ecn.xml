@@ -1455,51 +1455,6 @@ deliberately to reduce complexity.-->
               </list></t>
           </section>
 
-          <section anchor="accecn_sec_ACE_init_invalid"
-                   title="Testing for Zeroing of the ACE Field">
-            <t><xref target="accecn_ACE"/> required the Data Receiver to
-            initialize the r.cep counter to a non-zero value. Therefore, in
-            either direction the initial value of the ACE counter ought to be
-            non-zero.</t>
-
-            <t>If AccECN has been successfully negotiated, the Data Sender
-            SHOULD check the value of the ACE counter in the first packet
-            (with or without data) that arrives with SYN=0. If the value of
-            this ACE field is zero (0b000), the Data Sender disables sending
-            ECN-capable packets for the remainder of the half-connection by
-            setting the IP/ECN field in all subsequent packets to Not-ECT.
-            <!--There is no need to say the following for forward compatibility:
-"If a data receiver negotiates AccECN but then zeros the ACE field in its first segment with SYN=0, 
-it MUST continue the connection even if the data sender does not disable sending ECN-capable packets."--></t>
-
-            <t>Usually, the server checks the ACK of the SYN/ACK from the
-            client, while the client checks the first data segment from the
-            server. However, if reordering occurs, "the first packet ... that
-            arrives" will not necessarily be the same as the first packet in
-            sequence order. The test has been specified loosely like this to
-            simplify implementation, and because it would not have been any
-            more precise to have specified the first packet in sequence order,
-            which would not necessarily be the first ACE counter that the Data
-            Receiver fed back anyway, given it might have been a
-            retransmission.</t>
-
-            <t>The possibility of re-ordering means that there is a small
-            chance that the ACE field on the first packet to arrive is
-            genuinely zero (without middlebox interference). This would cause
-            a host to unnecessarily disable ECN for a half connection.
-            Therefore, in environments where there is no evidence of the ACE
-            field being zeroed, implementations can skip this test.</t>
-
-            <t>Note that the Data Sender MUST NOT test whether the arriving
-            counter in the initial ACE field has been initialized to a
-            specific valid value - the above check solely tests whether the
-            ACE fields have been incorrectly zeroed. This allows hosts to use
-            different initial values as an additional signalling channel in
-            future.</t>
-          </section>
-
-          <!--{ToDo: Consider reordering sections: Mangling, Zeroing (matches the order the tests are conducted)}-->
-
           <section anchor="accecn_sec_ecn-mangling"
                    title="Testing for Mangling of the IP/ECN Field">
             <t>The value of the ACE field on the SYN/ACK indicates the value
@@ -1561,6 +1516,49 @@ even if the server does not disable sending ECN-capable packets"--></t>
             might see no unsafe transition and continue sending ECN-capable
             packets, while the other end sees an unsafe transition and stops
             sending ECN-capable packets.</t>
+          </section>
+
+          <section anchor="accecn_sec_ACE_init_invalid"
+                   title="Testing for Zeroing of the ACE Field">
+            <t><xref target="accecn_ACE"/> required the Data Receiver to
+            initialize the r.cep counter to a non-zero value. Therefore, in
+            either direction the initial value of the ACE counter ought to be
+            non-zero.</t>
+
+            <t>If AccECN has been successfully negotiated, the Data Sender
+            SHOULD check the value of the ACE counter in the first packet
+            (with or without data) that arrives with SYN=0. If the value of
+            this ACE field is zero (0b000), the Data Sender disables sending
+            ECN-capable packets for the remainder of the half-connection by
+            setting the IP/ECN field in all subsequent packets to Not-ECT.
+            <!--There is no need to say the following for forward compatibility:
+"If a data receiver negotiates AccECN but then zeros the ACE field in its first segment with SYN=0, 
+it MUST continue the connection even if the data sender does not disable sending ECN-capable packets."--></t>
+
+            <t>Usually, the server checks the ACK of the SYN/ACK from the
+            client, while the client checks the first data segment from the
+            server. However, if reordering occurs, "the first packet ... that
+            arrives" will not necessarily be the same as the first packet in
+            sequence order. The test has been specified loosely like this to
+            simplify implementation, and because it would not have been any
+            more precise to have specified the first packet in sequence order,
+            which would not necessarily be the first ACE counter that the Data
+            Receiver fed back anyway, given it might have been a
+            retransmission.</t>
+
+            <t>The possibility of re-ordering means that there is a small
+            chance that the ACE field on the first packet to arrive is
+            genuinely zero (without middlebox interference). This would cause
+            a host to unnecessarily disable ECN for a half connection.
+            Therefore, in environments where there is no evidence of the ACE
+            field being zeroed, implementations can skip this test.</t>
+
+            <t>Note that the Data Sender MUST NOT test whether the arriving
+            counter in the initial ACE field has been initialized to a
+            specific valid value - the above check solely tests whether the
+            ACE fields have been incorrectly zeroed. This allows hosts to use
+            different initial values as an additional signalling channel in
+            future.</t>
           </section>
 
           <section anchor="accecn_ACE_Safety"
