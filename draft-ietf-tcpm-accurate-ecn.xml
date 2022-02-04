@@ -1513,18 +1513,26 @@ even if the server does not disable sending ECN-capable packets"--></t>
             ECN field <xref target="Mandalari18"/>.</t>
 
             <t>Once a Data Sender has entered AccECN mode it SHOULD check
-            whether all feedback received for the first three or four rounds
-            indicated that every packet it sent was CE-marked. If so, for the
-            remainder of the connection, the Data Sender SHOULD NOT send
-            ECN-capable packets, but it MUST continue to feed back any ECN
-            markings on arriving packets.</t>
+            whether it is receiving continuous CE marking. Specifying exactly
+            how to do this is beyond the scope of the present specification,
+            but the sender might check whether the feedback for every packet
+            it sends for the first three or four rounds indicates CE-marking.
+            If continuous CE-marking is detected, for the remainder of the
+            connection the Data Sender SHOULD NOT send ECN-capable packets and
+            consequently it SHOULD NOT respond to any ECN feedback. The phrase
+            'MUST NOT' has been avoided to allow the sender to test whether it
+            can resume sending ECN-capable packets. Throughout, it MUST remain
+            in the AccECN feedback mode and it MUST continue to feed back any
+            ECN markings on arriving packets (in its role as Data
+            Receiver).</t>
 
-            <t>The above fall-back behaviours are necessary in case mangling
-            of the IP/ECN field is asymmetric, which is currently common over
-            some mobile networks <xref target="Mandalari18"/>. Then one end
-            might see no unsafe transition and continue sending ECN-capable
-            packets, while the other end sees an unsafe transition and stops
-            sending ECN-capable packets.</t>
+            <t>All the fall-back behaviours in this section are necessary in
+            case mangling of the IP/ECN field is asymmetric, which is
+            currently common over some mobile networks <xref
+            target="Mandalari18"/>. Then one end might see no unsafe
+            transition and continue sending ECN-capable packets, while the
+            other end sees an unsafe transition and stops sending ECN-capable
+            packets.</t>
           </section>
 
           <section anchor="accecn_sec_ACE_init_invalid"
