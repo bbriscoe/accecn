@@ -16,6 +16,9 @@
 <!-- ToC format -->
 <?rfc toc="yes" ?>
 <!-- Default toc="no" No Table of Contents -->
+<!-- ToC depth -->
+<?rfc tocdepth="4" ?>
+<!-- Default tocDepth="3" Exclude subsections of depth >3 from Table of Contents -->
 <!-- Cross referencing, footnotes, comments -->
 <?rfc symrefs="yes"?>
 <!-- Default symrefs="no" Don't use anchors, but use numbers for refs -->
@@ -33,7 +36,7 @@
 <!-- HTML formatting control -->
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
-<rfc category="std" docName="draft-ietf-tcpm-accurate-ecn-16"
+<rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-17"
      ipr="trust200902" updates="3168, 3449">
   <front>
     <title abbrev="Accurate TCP-ECN Feedback">More Accurate ECN Feedback in
@@ -258,7 +261,8 @@
       </section>
 
       <section anchor="accecn_Terminology" title="Terminology">
-        <t><list style="hanging">
+        <t>
+          <list style="hanging">
             <t hangText="AccECN:">The more accurate ECN feedback scheme will
             be called AccECN for short.</t>
 
@@ -305,7 +309,8 @@
             hangText="Incoming AccECN Protocol Handler (or, Incoming Protocol Handler):">The
             protocol handler at the Data Sender that reads the AccECN fields
             when receiving an ACK.</t> -->
-          </list></t>
+          </list>
+        </t>
 
         <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
         "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
@@ -652,19 +657,20 @@ deliberately to reduce complexity.-->
 
           <t>If a TCP server (B) that is AccECN-enabled receives a SYN with
           the above three flags set, it MUST set both its half connections
-          into AccECN mode. Then it MUST set the TCP flags on the SYN/ACK to
-          one of the 4 values shown in the top block of <xref
-          target="accecn_Tab_Negotiation"/> to confirm that it supports
-          AccECN. The TCP server MUST NOT set one of these 4 combination of
-          flags on the SYN/ACK unless the preceding SYN requested support for
-          AccECN as above.</t>
-
-          <t>A TCP server in AccECN mode MUST set the AE, CWR and ECE TCP
-          flags on the SYN/ACK to the value in <xref
+          into AccECN mode. Then it MUST set the AE, CWR and ECE TCP flags on
+          the SYN/ACK to the combination in the top block of <xref
           target="accecn_Tab_Negotiation"/> that feeds back the IP-ECN field
           that arrived on the SYN. This applies whether or not the server
           itself supports setting the IP-ECN field on a SYN or SYN/ACK (see
           <xref target="accecn_demb_reflector"/> for rationale).</t>
+
+          <t>When the TCP server returns any of the 4 combinations in the top
+          block of <xref target="accecn_Tab_Negotiation"/>, it confirms that
+          it supports AccECN. The TCP server MUST NOT set one of these 4
+          combination of flags on the SYN/ACK unless the preceding SYN
+          requested support for AccECN as above.</t>
+
+          <t/>
 
           <!--Bob: Out of scope: move to fall-back draft.-->
 
@@ -1127,12 +1133,13 @@ deliberately to reduce complexity.-->
             point in the IP ECN field, including CE marked control packets but
             excluding CE on SYN packets (SYN=1; ACK=0).</t>
 
-            <t>The Data Receiver MUST increment the r.ceb, r.e0b or r.e1b byte
-            counters by the number of TCP payload octets in Acceptable packets
-            marked respectively with the CE, ECT(0) and ECT(1) codepoint in
-            their IP-ECN field, including any payload octets on control
-            packets, but not including any payload octets on SYN packets
-            (SYN=1; ACK=0).</t>
+            <t>A Data Receiver that supports sending of the AccECN TCP Option
+            MUST increment the r.ceb, r.e0b or r.e1b byte counters by the
+            number of TCP payload octets in Acceptable packets marked
+            respectively with the CE, ECT(0) and ECT(1) codepoint in their
+            IP-ECN field, including any payload octets on control packets, but
+            not including any payload octets on SYN packets (SYN=1;
+            ACK=0).</t>
           </list></t>
 
         <t>Each Data Sender of each half connection maintains four counters,
@@ -1141,8 +1148,8 @@ deliberately to reduce complexity.-->
 
         <t>A Data Receiver feeds back the CE packet counter using the Accurate
         ECN (ACE) field, as explained in <xref target="accecn_ACE"/>. And it
-        feeds back all the byte counters using the AccECN TCP Option, as
-        specified in <xref target="accecn_option"/>.</t>
+        optionally feeds back all the byte counters using the AccECN TCP
+        Option, as specified in <xref target="accecn_option"/>.</t>
 
         <t>Whenever a host feeds back the value of any counter, it MUST report
         the most recent value, no matter whether it is in a pure ACK, an ACK
@@ -1153,8 +1160,8 @@ deliberately to reduce complexity.-->
         <section anchor="accecn_init_counters"
                  title="Initialization of Feedback Counters">
           <t>When a host first enters AccECN mode, in its role as a Data
-          Receiver it initializes its counters to r.cep = 5, r.e0b = 1 and
-          r.ceb = r.e1b.= 0,</t>
+          Receiver it initializes its counters to r.cep = 5, r.e0b = r.e1b = 1
+          and r.ceb = 0,</t>
 
           <t>Non-zero initial values are used to support a stateless handshake
           (see <xref target="accecn_Interaction_SYN_Cookies"/>) and to be
@@ -1163,7 +1170,7 @@ deliberately to reduce complexity.-->
           target="accecn_sec_zero_option"/>).</t>
 
           <t>When a host enters AccECN mode, in its role as a Data Sender it
-          initializes its counters to s.cep = 5, s.e0b = 1 and s.ceb = s.e1b.=
+          initializes its counters to s.cep = 5, s.e0b = s.e1b = 1 and s.ceb =
           0.</t>
         </section>
 
@@ -1455,6 +1462,8 @@ deliberately to reduce complexity.-->
               </list></t>
           </section>
 
+          <!--{ToDo: Consider reordering sections: Mangling, Zeroing (matches the order the tests are conducted)}-->
+
           <section anchor="accecn_sec_ecn-mangling"
                    title="Testing for Mangling of the IP/ECN Field">
             <t>The value of the ACE field on the SYN/ACK indicates the value
@@ -1587,10 +1596,10 @@ it MUST continue the connection even if the data sender does not disable sending
 
                   <t hangText="Increment-Triggered ACKs:">An AccECN Data
                   Receiver MUST emit an ACK if 'n' CE marks have arrived since
-                  the previous ACK. If there is new data to acknowledge, 'n'
-                  SHOULD be 2. If there is no new data to acknowledge, 'n'
-                  SHOULD be 3 and MUST be no less than 3. In either case, 'n'
-                  MUST be no greater than 6.</t>
+                  the previous ACK. If there is newly delivered data to
+                  acknowledge, 'n' SHOULD be 2. If there is no newly delivered
+                  data to acknowledge, 'n' SHOULD be 3 and MUST be no less
+                  than 3. In either case, 'n' MUST be no greater than 7.</t>
                 </list>The above rules for when to send an ACK are designed to
               be complemented by those in <xref
               target="accecn_option_usage"/>, which concern whether the AccECN
@@ -1626,10 +1635,10 @@ it MUST continue the connection even if the data sender does not disable sending
               <t>With ECN-capable pure ACKs <xref
               target="I-D.ietf-tcpm-generalized-ecn"/>, the
               'Increment-Triggered ACKs' rule could cause ECN-marked pure ACKs
-              to trigger further ACKs. Although TCP normally only ACKs new
-              data, in this case the ACKs of ACKs would feed back new
-              congestion state. The minimum of 3 for 'n' in this case ensures
-              that, even if there is pathological congestion in both
+              to trigger further ACKs. Although TCP normally only ACKs newly
+              delivered data, in this case the ACKs of ACKs would feed back
+              new congestion state. The minimum of 3 for 'n' in this case
+              ensures that, even if there is pathological congestion in both
               directions, any resulting ping-pong of ACKs will be rapidly
               damped.</t>
 
@@ -1744,7 +1753,8 @@ it MUST continue the connection even if the data sender does not disable sending
           fields and includes any field that has changed. The length field
           MUST indicate which fields are present as follows:</t>
 
-          <texttable>
+          <texttable suppress-title="true"
+                     title="Fields included in AccECN TCP Options of each length and type">
             <ttcol>Length</ttcol>
 
             <ttcol>Type 0</ttcol>
@@ -1891,8 +1901,8 @@ it MUST continue the connection even if the data sender does not disable sending
               other fall-back strategies such as attempting to retransmit a
               second segment with the AccECN Option before fall-back, and/or
               caching whether the AccECN Option is blocked for subsequent
-              connections. <xref target="I-D.ietf-tcpm-2140bis"/> further
-              discusses caching of TCP parameters and status information.</t>
+              connections. <xref target="RFC9040"/> further discusses caching
+              of TCP parameters and status information.</t>
 
               <t>If a host falls back to not sending the AccECN Option, it
               will continue to process any incoming AccECN Options as
@@ -1956,21 +1966,24 @@ it MUST continue the connection even if the data sender does not disable sending
               <t>For a related test for invalid initialization of the ACE
               field, see <xref target="accecn_sec_ACE_init_invalid"/></t>
 
-              <t><xref target="accecn_feedback"/> required the Data Receiver
-              to initialize the r.e0b counter to a non-zero value. Therefore,
-              in either direction the initial value of the EE0B field in the
-              AccECN Option (if one exists) ought to be non-zero. If AccECN
-              has been negotiated:<list style="symbols">
-                  <t>the TCP server MAY check the initial value of the EE0B
-                  field in the first segment that acknowledges sequence space
-                  that at least covers the ISN plus 1. If the initial value of
-                  the EE0B field is zero, the server will switch into a mode
-                  that ignores the AccECN Option for this half connection.</t>
+              <t><xref target="accecn_init_counters"/> required the Data
+              Receiver to initialize the r.e0b and r.e1b counters to a
+              non-zero value. Therefore, in either direction the initial value
+              of the EE0B field or EE1B field in the AccECN Option (if one
+              exists) ought to be non-zero. If AccECN has been
+              negotiated:<list style="symbols">
+                  <t>the TCP server MAY check that the initial value of the
+                  EE0B field or the EE1B field is non-zero in the first
+                  segment that acknowledges sequence space that at least
+                  covers the ISN plus 1. If it runs a test and either initial
+                  value is zero, the server will switch into a mode that
+                  ignores the AccECN Option for this half connection.</t>
 
                   <t>the TCP client MAY check the initial value of the EE0B
-                  field on the SYN/ACK. If the initial value of the EE0B field
-                  is zero, the client will switch into a mode that ignores the
-                  AccECN Option for this half connection.</t>
+                  field or the EE1B field is non-zero on the SYN/ACK. If it
+                  runs a test and either initial value is zero, the client
+                  will switch into a mode that ignores the AccECN Option for
+                  this half connection.</t>
                 </list></t>
 
               <t>While a host is in the mode that ignores the AccECN Option it
@@ -2013,7 +2026,7 @@ it MUST continue the connection even if the data sender does not disable sending
               <t>If either end-point detects that the s.ceb counter has
               increased but the s.cep has not (and by testing ACK coverage it
               is certain how much the ACE field has wrapped), and if there is
-              no other explanation that an invalid protocol transition due to
+              no explanation other than an invalid protocol transition due to
               some form of feedback mangling, the Data Sender MUST disable
               sending ECN-capable packets for the remainder of the
               half-connection by setting the IP/ECN field in all subsequent
@@ -2033,24 +2046,25 @@ even if the data sender does not disable sending ECN-capable packets."--></t>
                 <t hangText="Importance of Congestion Control:">AccECN is for
                 congestion control, which SHOULD generally be considered
                 important relative to other TCP options.<vspace
-                blankLines="1"/>If the smallest recommended AccECN Option
-                would leave insufficient space for two SACK blocks on a
-                particular ACK, the Data Receiver MUST give precedence to the
-                SACK option (total 18 octets), because loss feedback is more
-                critical.</t>
+                blankLines="1"/>If SACK has been negotiated, and the smallest
+                recommended AccECN Option would leave insufficient space for
+                two SACK blocks on a particular ACK, the Data Receiver MUST
+                give precedence to the SACK option (total 18 octets), because
+                loss feedback is more critical.</t>
 
                 <t hangText="Recommended Simple Scheme:">The Data Receiver
-                SHOULD include an AccECN TCP Option on every scheduled ACK
-                that acknowledges new data. Whenever possible, it SHOULD
-                include a field for every byte counter that has changed at
-                some time during the connection (see examples later). <vspace
-                blankLines="1"/>A scheduled ACK means an ACK that the Data
-                Receiver would send by its regular delayed ACK rules. Recall
-                that <xref target="accecn_Terminology"/> defines an 'ACK' as
-                either with data payload or without. But the above rule is
-                worded so that, in the common case when most of the data is
-                from a server to a client, the server only includes an AccECN
-                TCP Option while it is acknowledging data from the client.</t>
+                SHOULD include an AccECN TCP Option on every scheduled ACK if
+                any byte counter has incremented since the last ACK. Whenever
+                possible, it SHOULD include a field for every byte counter
+                that has changed at some time during the connection (see
+                examples later). <vspace blankLines="1"/>A scheduled ACK means
+                an ACK that the Data Receiver would send by its regular
+                delayed ACK rules. Recall that <xref
+                target="accecn_Terminology"/> defines an 'ACK' as either with
+                data payload or without. But the above rule is worded so that,
+                in the common case when most of the data is from a server to a
+                client, the server only includes an AccECN TCP Option while it
+                is acknowledging data from the client.</t>
               </list>When available TCP option space is limited on particular
             packets, the recommended scheme will need to include compromises.
             To guide the implementer the rules below are ranked in order of
@@ -2685,7 +2699,7 @@ even though it uses existing TCP fields in unorthodox ways.
       target="RFC3540"/>, but RFC 3540 has been reclassified as historic <xref
       target="RFC8311"/>. The flag will now be defined as:</t>
 
-      <texttable>
+      <texttable suppress-title="true" title="TCP header flag reassignment">
         <ttcol>Bit</ttcol>
 
         <ttcol>Name</ttcol>
@@ -2710,7 +2724,7 @@ even though it uses existing TCP fields in unorthodox ways.
       values of TBD0 and TBD1 (decimal) from the TCP option space. These
       values are defined as:</t>
 
-      <texttable>
+      <texttable suppress-title="true" title="New TCP Option assignments">
         <ttcol>Kind</ttcol>
 
         <ttcol>Length</ttcol>
@@ -2770,8 +2784,8 @@ even though it uses existing TCP fields in unorthodox ways.
       considered safe though, because if the option is not present, the AccECN
       Data Sender is then required to switch to more conservative assumptions
       about wrap of congestion indication counters (see <xref
-      target="accecn_ACE_Safety"/> and <xref target="accecn_Algo_ACE_Wrap"/>).
-      {ToDo: is this still true?}</t>
+      target="accecn_ACE_Safety"/> and <xref
+      target="accecn_Algo_ACE_Wrap"/>).</t>
 
       <t><xref target="accecn_Interaction_SYN_Cookies"/> describes how a TCP
       server can negotiate AccECN and use the SYN cookie method for mitigating
@@ -2915,7 +2929,7 @@ support ECN Nonce."-->
 
       <?rfc include="reference.I-D.ietf-tcpm-generalized-ecn" ?>
 
-      <?rfc include="reference.I-D.ietf-tcpm-2140bis" ?>
+      <?rfc include="reference.RFC.9040" ?>
 
       <?rfc include="reference.RFC.8511" ?>
 
@@ -3366,10 +3380,7 @@ MSS/SAFETY_FACTOR+--------------+    safest
         <t>A Data Sender in AccECN mode can infer the amount of TCP payload
         data arriving at the receiver marked Not-ECT from the difference
         between the amount of newly ACKed data and the sum of the bytes with
-        the other three markings, d.ceb, d.e0b and d.e1b. Note that, because
-        r.e0b is initialized to 1 and the other two counters are initialized
-        to 0, the initial sum will be 1, which matches the initial offset of
-        the TCP sequence number on completion of the 3WHS.</t>
+        the other three markings, d.ceb, d.e0b and d.e1b.</t>
 
         <!--ToDo: write-up pseudocode, rather than just describe it.-->
 
