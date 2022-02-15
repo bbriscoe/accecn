@@ -1405,13 +1405,13 @@ deliberately to reduce complexity.-->
                 r.cep (it remains at its initial value of 5). <vspace
                 blankLines="1"/>Reason: It would be redundant for the server
                 to include CE-marked SYNs in its r.cep counter, because it
-                already reliably delivers feedback of any CE marking on the
-                SYN/ACK using the encoding in <xref
-                target="accecn_Tab_Negotiation"/>. This also ensures that,
-                when the server starts using the ACE field, it has not
-                unnecessarily consumed more than one initial value, given they
-                can be used to negotiate variants of the AccECN protocol (see
-                <xref target="accecn_space_evolution"/>).</t>
+                already reliably delivers feedback of any CE marking using the
+                encoding in <xref target="accecn_Tab_Negotiation"/> in the
+                SYN/ACK. This also ensures that, when the server starts using
+                the ACE field, it has not unnecessarily consumed more than one
+                initial value, given they can be used to negotiate variants of
+                the AccECN protocol (see <xref
+                target="accecn_space_evolution"/>).</t>
 
                 <t>If a TCP client in AccECN mode receives CE feedback in the
                 TCP flags of a SYN/ACK, it MUST NOT increment s.cep (it
@@ -1461,8 +1461,6 @@ deliberately to reduce complexity.-->
                 feedback on such ACKs will only be temporary.</t>
               </list></t>
           </section>
-
-          <!--{ToDo: Consider reordering sections: Mangling, Zeroing (matches the order the tests are conducted)}-->
 
           <section anchor="accecn_sec_ecn-mangling"
                    title="Testing for Mangling of the IP/ECN Field">
