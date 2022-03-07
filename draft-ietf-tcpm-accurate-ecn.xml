@@ -126,15 +126,16 @@
       Congestion Exposure (ConEx), Data Center TCP (DCTCP) or Low Latency Low
       Loss Scalable Throughput (L4S) need more accurate ECN feedback
       information whenever more than one marking is received in one RTT. This
-      document specifies a scheme to provide more than one feedback signal per
-      RTT in the TCP header. Given TCP header space is scarce, it allocates a
-      reserved header bit previously assigned to the ECN-Nonce. It also
-      overloads the two existing ECN flags in the TCP header. The resulting
-      extra space is exploited to feed back the IP-ECN field received during
-      the 3-way handshake as well. Supplementary feedback information can
-      optionally be provided in a new TCP option, which is never used on the
-      TCP SYN. The document also specifies the treatment of this updated TCP
-      wire protocol by middleboxes.</t>
+      document updates the original ECN specification to specify a scheme to
+      provide more than one feedback signal per RTT in the TCP header. Given
+      TCP header space is scarce, it allocates a reserved header bit
+      previously assigned to the ECN-Nonce. It also overloads the two existing
+      ECN flags in the TCP header. The resulting extra space is exploited to
+      feed back the IP-ECN field received during the 3-way handshake as well.
+      Supplementary feedback information can optionally be provided in a new
+      TCP option, which is never used on the TCP SYN. The document also
+      specifies the treatment of this updated TCP wire protocol by
+      middleboxes, updating BCP 69 with respect to ACK filtering.</t>
     </abstract>
   </front>
 
@@ -2243,45 +2244,43 @@ even though it uses existing TCP fields in unorthodox ways.
 
         <section title="Requirements for TCP ACK Filtering">
           <t>A node that implements ACK filtering (aka.&nbsp;thinning or
-          coalescing) and itself also implements ECN marking will not need to
-          filter ACKs from connections that use AccECN feedback. Therefore,
-          such a node SHOULD detect connections that are using AccECN feedback
-          and it SHOULD refrain from filtering the ACKs of such connections
-          (if it coalesced ACKs it would not be AccECN-compliant, but the
-          requirement is stated as a "SHOULD" in order to allow leeway for
-          pre-existing ACK filtering functions to be brought into line).</t>
+          coalescing) SHOULD determine if an ACK is part of a connection using
+          AccECN and SHOULD then preserve the correct operation of AccECN
+          feedback. The following notes might help with each part of this
+          requirement:<list style="symbols">
+              <t>It is hard to determine for certain whether a pure TCP ACK is
+              part of an AccECN connection without watching the handshake and
+              maintaining per-flow state. A simpler heuristic would be to
+              assume that TCP pure ACKs that are themselves ECN-capable at the
+              IP layer are likely to be part of an AccECN connection (because
+              the ECN++ experiment only allows TCP pure ACKs to be ECN-capable
+              if AccECN has been negotiated <xref
+              target="I-D.ietf-tcpm-generalized-ecn"/>). However, this might
+              not detect all AccECN packets, and it might detect packets that
+              are ECN-capable owing to some scheme other than AccECN
+              (e.g.&nbsp;<xref target="RFC5690"/> or some future standards
+              action).</t>
 
-          <t>A node that implements ACK filtering and does not itself
-          implement ECN marking does not need to treat AccECN connections any
-          differently from other TCP connections. Nonetheless, it is
-          RECOMMENDED that such nodes implement ECN marking and comply with
-          the requirements of the previous paragraph. This should be a better
-          way than ACK filtering to improve the performance of AccECN TCP
-          connections.</t>
+              <t>The main concern with preserving correct AccECN operation
+              involves leaving enough ACKs for the data sender to work out
+              whether the 3-bit ACE field has wrapped. ACE field wrap is of
+              less concern if packets also carry the AccECN TCP Option.</t>
+            </list></t>
 
-          <t>The rationale for these requirements is that AccECN feedback
-          provides sufficient information to a Data Receiver for it to be able
-          to monitor ECN marking of the ACKs it has sent, so that it can thin
-          the ACK stream itself. This could eventually mean that ACK filtering
-          in the network gives no performance advantage. Then TCP will be able
-          to maintain its own control over ACK coalescing. This will also
-          allow the TCP Data Sender to use the timing of ACK arrivals to more
-          reliably infer further information about the path congestion
-          level.</t>
-
-          <t>Note that the specification of AccECN in TCP does not presume to
-          rely on any of the above ACK filtering behaviour in the network,
+          <t>Note that the present specification of AccECN in TCP does not
+          presume to rely on any of the above ACK filtering behaviour in the
+          network (hence the use of 'SHOULD' rather than 'MUST' above),
           because it has to be robust against pre-existing network nodes that
           still filter AccECN ACKs, and robust against ACK loss during
           overload.</t>
 
-          <t>Section 5.2.1 of <xref target="RFC3449"/> gives best current
-          practice on ACK filtering (aka.&nbsp;thinning or coalescing). It
-          gives no advice on ACKs carrying ECN feedback (other than that
-          filtering ought to preserve the correct operation of ECN feedback),
-          because at the time is said that "ECN remain areas of ongoing
-          research". This section updates that advice for a TCP connection
-          that supports AccECN feedback.</t>
+          <t>Section 5.2.1 of BCP&nbsp;69 <xref target="RFC3449"/> gives best
+          current practice on pure TCP ACK filtering. It gives no advice on
+          ACKs carrying ECN feedback, other than that filtering ought to
+          preserve the correct operation of ECN feedback, because at the time
+          it said that "SACK and ECN remain areas of ongoing research". This
+          section updates that best current practice for a TCP connection that
+          supports AccECN feedback.</t>
         </section>
 
         <section title="Requirements for TCP Segmentation Offload">
@@ -2914,6 +2913,8 @@ support ECN Nonce."-->
       <?rfc include="reference.RFC.4987" ?>
 
       <?rfc include="reference.RFC.5562" ?>
+
+      <?rfc include="reference.RFC.5690" ?>
 
       <?rfc include="reference.RFC.5925" ?>
 
