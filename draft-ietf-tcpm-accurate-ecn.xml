@@ -2248,18 +2248,19 @@ even though it uses existing TCP fields in unorthodox ways.
           AccECN and SHOULD then preserve the correct operation of AccECN
           feedback. The following notes might help with each part of this
           requirement:<list style="symbols">
-              <t>It is hard to determine for certain whether a pure TCP ACK is
-              part of an AccECN connection without watching the handshake and
-              maintaining per-flow state. A simpler heuristic would be to
-              assume that TCP pure ACKs that are themselves ECN-capable at the
-              IP layer are likely to be part of an AccECN connection (because
-              the ECN++ experiment only allows TCP pure ACKs to be ECN-capable
-              if AccECN has been negotiated <xref
-              target="I-D.ietf-tcpm-generalized-ecn"/>). However, this might
-              not detect all AccECN packets, and it might detect packets that
-              are ECN-capable owing to some scheme other than AccECN
-              (e.g.&nbsp;<xref target="RFC5690"/> or some future standards
-              action).</t>
+              <t>To determine whether a pure TCP ACK is part of an AccECN
+              connection without resorting to connection tracking and per-flow
+              state, a useful heuristic would be to check for a non-zero ECN
+              field at the IP layer (because the ECN++ experiment only allows
+              TCP pure ACKs to be ECN-capable if AccECN has been negotiated
+              <xref target="I-D.ietf-tcpm-generalized-ecn"/>). This heuristic
+              is simple and stateless. However, it might omit some AccECN
+              ACKs, because it is only recommended but not obligatory to use
+              ECN++ with AccECN - only deployment experience will tell. Also,
+              TCP ACKs might be ECN-capable owing to some scheme other than
+              AccECN, e.g.&nbsp;<xref target="RFC5690"/> or some future
+              standards action. Again, only deployment experience will
+              tell.</t>
 
               <t>The main concern with preserving correct AccECN operation
               involves leaving enough ACKs for the data sender to work out
@@ -2271,8 +2272,8 @@ even though it uses existing TCP fields in unorthodox ways.
           presume to rely on any of the above ACK filtering behaviour in the
           network (hence the use of 'SHOULD' rather than 'MUST' above),
           because it has to be robust against pre-existing network nodes that
-          still filter AccECN ACKs, and robust against ACK loss during
-          overload.</t>
+          do not distinguish AccECN ACKs, and robust against ACK loss during
+          overload more generally.</t>
 
           <t>Section 5.2.1 of BCP&nbsp;69 <xref target="RFC3449"/> gives best
           current practice on pure TCP ACK filtering. It gives no advice on
