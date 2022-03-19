@@ -1468,7 +1468,7 @@ deliberately to reduce complexity.-->
             <t>The value of the ACE field on the SYN/ACK indicates the value
             of the IP/ECN field when the SYN arrived at the server. The client
             can compare this with how it originally set the IP/ECN field on
-            the SYN. If this comparison implies an unsafe transition (defined
+            the SYN. If this comparison implies an invalid transition (defined
             below) of the IP/ECN field, for the remainder of the
             half-connection the client is advised to send non-ECN-capable
             packets, but it still ought to respond to any feedback of CE
@@ -1482,7 +1482,7 @@ even if the client does not disable sending ECN-capable packets"--></t>
             indicates the value of the IP/ECN field when the SYN/ACK arrived
             at the client. The server can compare this with how it originally
             set the IP/ECN field on the SYN/ACK. If this comparison implies an
-            unsafe transition of the IP/ECN field, for the remainder of the
+            invalid transition of the IP/ECN field, for the remainder of the
             half-connection the server is advised to send non-ECN-capable
             packets, but it still ought to respond to any feedback of CE
             markings (explained below). However, the server MUST remain in the
@@ -1495,12 +1495,12 @@ even if the server does not disable sending ECN-capable packets"--></t>
             packets because it has detected mangling, it is still advised to
             respond to CE feedback. Reason: any CE-marking arriving at the
             Data Receiver could be due to something early in the path mangling
-            the non-ECN-capable IP/ECN field into an ECN-capable codepoint
-            then, later in the path, a regular network bottleneck might be
-            applying CE-markings to indicate genuine congestion. This argument
-            applies whether the handshake packet originally sent by the client
-            or server was non-ECN-capable or ECN-capable because, in either
-            case, an unsafe transition could imply that future non-ECN-capable
+            the non-ECN-capable IP/ECN field into an ECN-capable codepoint and
+            then, later in the path, a network bottleneck might be applying
+            CE-markings to indicate genuine congestion. This argument applies
+            whether the handshake packet originally sent by the client or
+            server was non-ECN-capable or ECN-capable because, in either case,
+            an unsafe transition could imply that future non-ECN-capable
             packets might get mangled.</t>
 
             <t>Once a Data Sender has entered AccECN mode it is advised to
@@ -1509,7 +1509,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
             specification, but the sender might check whether the feedback for
             every packet it sends for the first three or four rounds indicates
             CE-marking. If continuous CE-marking is detected, for the
-            remainder of the half-connection the Data Sender ought to send
+            remainder of the half-connection, the Data Sender ought to send
             non-ECN-capable packets and it is advised not to respond to CE
             markings. The Data Sender might occasionally test whether it can
             resume sending ECN-capable packets. As always, once a host has
@@ -1538,9 +1538,9 @@ even if the server does not disable sending ECN-capable packets"--></t>
             other end sees an unsafe transition and stops sending ECN-capable
             packets.</t>
 
-            <t>Invalid transitions of the IP/ECN field are defined in <xref
-            target="RFC3168"/> and repeated here for convenience:<list
-                style="symbols">
+            <t>Invalid transitions of the IP/ECN field are defined in section
+            18 of <xref target="RFC3168"/> and repeated here for
+            convenience:<list style="symbols">
                 <t>the not-ECT codepoint changes;</t>
 
                 <t>either ECT codepoint transitions to not-ECT;</t>
@@ -1570,11 +1570,13 @@ even if the server does not disable sending ECN-capable packets"--></t>
             (with or without data) that arrives with SYN=0. If the value of
             this ACE field is zero (0b000), for the remainder of the
             half-connection the Data Sender is advised to send non-ECN-capable
-            packets. If feedback of CE markings arrives at the Data Sender
-            despite it sending non-ECN-capable packets, it is probably
-            advisable to reset the connection, given this implies either
-            potential mangling of both the IP and TCP headers, or a broken TCP
-            implementation. This advice is not stated normatively (in
+            packets. If feedback of CE markings then arrives at the Data
+            Sender despite it sending non-ECN-capable packets, for the
+            remainder of the half-connection, the Data Sender ought to send
+            non-ECN-capable packets and it is advised not to respond to CE
+            markings. Reason: the symptoms imply either potential mangling of
+            the ECN fields in both the IP and TCP headers, or a broken remote
+            TCP implementation. This advice is not stated normatively (in
             capitals), because the best strategy might depend on experience of
             the most likely types of mangling, which can only be known at the
             time of deployment.<!--There is no need to say the following for forward compatibility:
