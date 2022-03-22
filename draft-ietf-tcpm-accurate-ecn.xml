@@ -2907,9 +2907,9 @@ support ECN Nonce."-->
       <t>We want to thank Koen De Schepper, Praveen Balasubramanian, Michael
       Welzl, Gorry Fairhurst, David Black, Spencer Dawkins, Michael Scharf,
       Michael Tuexen, Yuchung Cheng, Kenjiro Cho, Olivier Tilmans, Ilpo
-      J&auml;rvinen, Neal Cardwell, Yoshifumi Nishida, Martin Duke and
-      Jonathan Morton for their input and discussion. The idea of using the
-      three ECN-related TCP flags as one field for more accurate TCP-ECN
+      J&auml;rvinen, Neal Cardwell, Yoshifumi Nishida, Martin Duke, Jonathan
+      Morton and Vidhi Goel for their input and discussion. The idea of using
+      the three ECN-related TCP flags as one field for more accurate TCP-ECN
       feedback was first introduced in the re-ECN protocol that was the
       ancestor of ConEx.</t>
 
