@@ -208,7 +208,7 @@
       (L4S) congestion control <xref target="I-D.ietf-tsvwg-l4s-arch"/>; or
       Alternative Backoff with ECN (ABE) <xref target="RFC8511"/>.</t>
 
-      <t>It is recommended that the AccECN protocol is implemented alongside
+      <t>It is RECOMMENDED that the AccECN protocol is implemented alongside
       SACK <xref target="RFC2018"/> and the experimental ECN++ protocol <xref
       target="I-D.ietf-tcpm-generalized-ecn"/>, which allows the ECN
       capability to be used on TCP control packets. Therefore, this
@@ -514,8 +514,8 @@
         Receiver continually repeats the current LSBs of each of its
         respective counters. There is no need to acknowledge these continually
         repeated counters, so the congestion window reduced (CWR) mechanism is
-        no longer used. Even if some ACKs are lost, the Data Sender should be
-        able to infer how much to increment its own counters, even if the
+        no longer used. Even if some ACKs are lost, the Data Sender ought to
+        be able to infer how much to increment its own counters, even if the
         protocol field has wrapped.</t>
 
         <t>The 3-bit ACE field can wrap fairly frequently. Therefore, even if
@@ -571,7 +571,7 @@ deliberately to reduce complexity.-->
         simple algorithm to estimate the number of marked bytes from the ACE
         field is given in <xref target="accecn_Algo_ACE_Bytes"/>.</t>
 
-        <t>Feedback in bytes is recommended in order to protect against the
+        <t>Feedback in bytes is provided in order to protect against the
         receiver using attacks similar to 'ACK-Division' to artificially
         inflate the congestion window, which is why <xref target="RFC5681"/>
         now recommends that TCP counts acknowledged bytes not packets.</t>
@@ -964,9 +964,9 @@ deliberately to reduce complexity.-->
               <t hangText="In-window SYN during TIME-WAIT:">Many TCP
               implementations create a new TCP connection if they receive an
               in-window SYN packet during TIME-WAIT state. When a TCP host
-              enters TIME-WAIT or CLOSED state, it should ignore any previous
-              state about the negotiation of AccECN for that connection and
-              renegotiate the feedback mode according to <xref
+              enters TIME-WAIT or CLOSED state, it ought to ignore any
+              previous state about the negotiation of AccECN for that
+              connection and renegotiate the feedback mode according to <xref
               target="accecn_Tab_Negotiation"/>.</t>
             </list></t>
         </section>
@@ -1020,7 +1020,7 @@ deliberately to reduce complexity.-->
           when SYNs or SYN/ACKs negotiating different types of feedback have
           been sent within the same connection.</t>
 
-          <t>Further it may make sense to also remove any other new or
+          <t>Further it might make sense to also remove any other new or
           experimental fields or options on the SYN in case a middlebox might
           be blocking them, although the required behaviour will depend on the
           specification of the other option(s) and any attempt to co-ordinate
@@ -1030,7 +1030,7 @@ deliberately to reduce complexity.-->
           cache failed connection attempts. If it does, it SHOULD NOT give up
           attempting to negotiate AccECN on the SYN of subsequent connection
           attempts until it is clear that the blockage is persistently and
-          specifically due to AccECN. The cache should be arranged to expire
+          specifically due to AccECN. The cache needs to be arranged to expire
           so that the initiator will infrequently attempt to check whether the
           problem has been resolved.</t>
 
@@ -1086,7 +1086,12 @@ deliberately to reduce complexity.-->
                   feedback that indicates there were ECN marks on packets it
                   had previously sent, as defined in Section 6.1 of <xref
                   target="RFC3168"/> and updated by Sections 2.1 and 4.1 of
-                  <xref target="RFC8311"/>.</t>
+                  <xref target="RFC8311"/>.<vspace blankLines="1"/>In general,
+                  it is obliged to respond to congestion feedback even when it
+                  is solely sending non-ECN-capable packets (for rationale,
+                  some examples and some exceptions see <xref
+                  target="accecn_sec_ecn-mangling"/>, <xref
+                  target="accecn_sec_ACE_init_invalid"/>).</t>
 
                   <t>The commitment to respond appropriately to incoming
                   indications of congestion remains even if it sends a SYN
@@ -1501,21 +1506,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
             whether the handshake packet originally sent by the client or
             server was non-ECN-capable or ECN-capable because, in either case,
             an unsafe transition could imply that future non-ECN-capable
-            packets might get mangled.</t>
-
-            <t>Once a Data Sender has entered AccECN mode it is advised to
-            check whether it is receiving continuous CE marking. Specifying
-            exactly how to do this is beyond the scope of the present
-            specification, but the sender might check whether the feedback for
-            every packet it sends for the first three or four rounds indicates
-            CE-marking. If continuous CE-marking is detected, for the
-            remainder of the half-connection, the Data Sender ought to send
-            non-ECN-capable packets and it is advised not to respond to CE
-            markings. The Data Sender might occasionally test whether it can
-            resume sending ECN-capable packets. As always, once a host has
-            entered AccECN mode, it MUST remain in the same feedback mode and
-            it MUST continue to feed back any ECN markings on arriving
-            packets.</t>
+            packets might get mangled.<!--ToDo: Move continuous CE as next para.--></t>
 
             <t>The above advice on switching to sending non-ECN-capable
             packets but still responding to CE-markings unless they become
@@ -1528,15 +1519,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
             the count of CE marks is still eventually delivered reliably). If
             this ACK does not arrive, the server is advised to continue to
             send ECN-capable packets without having tested for mangling of the
-            IP/ECN field on the SYN/ACK.</t>
-
-            <t>All the fall-back behaviours in this section are necessary in
-            case mangling of the IP/ECN field is asymmetric, which is
-            currently common over some mobile networks <xref
-            target="Mandalari18"/>. Then one end might see no unsafe
-            transition and continue sending ECN-capable packets, while the
-            other end sees an unsafe transition and stops sending ECN-capable
-            packets.</t>
+            IP/ECN field on the SYN/ACK.<!--ToDo: Move asymmetry note as next para.--></t>
 
             <t>Invalid transitions of the IP/ECN field are defined in section
             18 of <xref target="RFC3168"/> and repeated here for
@@ -1556,6 +1539,28 @@ even if the server does not disable sending ECN-capable packets"--></t>
             an ECN-enabled home router congests its upstream mobile broadband
             bottleneck link, then the ingress to the mobile network clears the
             ECN field <xref target="Mandalari18"/>.</t>
+
+            <t>Once a Data Sender has entered AccECN mode it is advised to
+            check whether it is receiving continuous CE marking. Specifying
+            exactly how to do this is beyond the scope of the present
+            specification, but the sender might check whether the feedback for
+            every packet it sends for the first three or four rounds indicates
+            CE-marking. If continuous CE-marking is detected, for the
+            remainder of the half-connection, the Data Sender ought to send
+            non-ECN-capable packets and it is advised not to respond to any
+            feedback of CE markings. The Data Sender might occasionally test
+            whether it can resume sending ECN-capable packets. As always, once
+            a host has entered AccECN mode, it MUST remain in the same
+            feedback mode and it MUST continue to feed back any ECN markings
+            on arriving packets.</t>
+
+            <t>All the fall-back behaviours in this section are necessary in
+            case mangling of the IP/ECN field is asymmetric, which is
+            currently common over some mobile networks <xref
+            target="Mandalari18"/>. Then one end might see no unsafe
+            transition and continue sending ECN-capable packets, while the
+            other end sees an unsafe transition and stops sending ECN-capable
+            packets.</t>
           </section>
 
           <section anchor="accecn_sec_ACE_init_invalid"
@@ -1569,11 +1574,8 @@ even if the server does not disable sending ECN-capable packets"--></t>
             SHOULD check the value of the ACE counter in the first packet
             (with or without data) that arrives with SYN=0. If the value of
             this ACE field is zero (0b000), for the remainder of the
-            half-connection the Data Sender is advised to send non-ECN-capable
-            packets. If feedback of CE markings then arrives at the Data
-            Sender despite it sending non-ECN-capable packets, for the
-            remainder of the half-connection, the Data Sender ought to send
-            non-ECN-capable packets and it is advised not to respond to CE
+            half-connection the Data Sender ought to send non-ECN-capable
+            packets and it is advised not to respond to any feedback of CE
             markings. Reason: the symptoms imply either potential mangling of
             the ECN fields in both the IP and TCP headers, or a broken remote
             TCP implementation. This advice is not stated normatively (in
@@ -1583,16 +1585,16 @@ even if the server does not disable sending ECN-capable packets"--></t>
 "If a data receiver negotiates AccECN but then zeros the ACE field in its first segment with SYN=0, 
 it MUST continue the connection even if the data sender does not disable sending ECN-capable packets."--></t>
 
-            <t>Usually, the server checks the ACK of the SYN/ACK from the
-            client, while the client checks the first data segment from the
-            server. However, if reordering occurs, "the first packet ... that
-            arrives" will not necessarily be the same as the first packet in
-            sequence order. The test has been specified loosely like this to
-            simplify implementation, and because it would not have been any
-            more precise to have specified the first packet in sequence order,
+            <t>If reordering occurs, "the first packet ... that arrives" will
+            not necessarily be the same as the first packet in sequence order.
+            The test has been specified loosely like this to simplify
+            implementation, and because it would not have been any more
+            precise to have specified the first packet in sequence order,
             which would not necessarily be the first ACE counter that the Data
             Receiver fed back anyway, given it might have been a
-            retransmission.</t>
+            retransmission. Usually, the server checks the ACK of the SYN/ACK
+            from the client, while the client checks the first data segment
+            from the server. </t>
 
             <t>The possibility of re-ordering means that there is a small
             chance that the ACE field on the first packet to arrive is
@@ -1840,16 +1842,22 @@ it MUST continue the connection even if the data sender does not disable sending
           sender and receiver have to be able to cope without the option
           anyway - in cases where it does not traverse a network path. It is
           RECOMMENDED to implement both sending and receiving of the AccECN
-          Option. If sending of the AccECN Option is implemented, the
-          fall-backs described in this document will need to be implemented as
-          well (unless solely for a controlled environment where path
-          traversal is not considered a problem). Even if a developer does not
-          implement sending of the AccECN Option, it is RECOMMENDED that they
-          still implement logic to receive and understand any AccECN Options
-          sent by remote peers.</t>
+          Option. Support for the AccECN Option is particularly valuable over
+          paths that introduce a high degree of ACK filtering, where the 3-bit
+          ACE counter alone might sometimes be insufficient, when it is
+          ambiguous whether it has wrapped. If sending of the AccECN Option is
+          implemented, the fall-backs described in this document will need to
+          be implemented as well (unless solely for a controlled environment
+          where path traversal is not considered a problem). Even if a
+          developer does not implement sending of the AccECN Option, it is
+          RECOMMENDED that they still implement logic to receive and
+          understand any AccECN Options sent by remote peers.<!--ToDo: Choose whether sending but not receiving is more important, and iff so swap in the following:
+Even if a developer does not implement logic to understand received AccECN Options, 
+it is RECOMMENDED that they still implement logic to send AccECN Options, to provide 
+richer feedback to those remote peers that do understand it.--></t>
 
           <t>If a Data Receiver intends to send the AccECN Option at any time
-          during the rest of the connection it is strongly recommended to also
+          during the rest of the connection it is strongly RECOMMENDED to also
           test path traversal of the AccECN Option as specified in <xref
           target="accecn_Mbox_Interference"/>.</t>
 
@@ -1952,15 +1960,16 @@ it MUST continue the connection even if the data sender does not disable sending
               path.</t>
 
               <t>If the TCP server receives a second SYN with a request for
-              AccECN support, it should resend the SYN/ACK, again confirming
-              its support for AccECN, but this time without the AccECN Option.
-              This approach rules out any interference by middleboxes that may
-              drop packets with unknown options, even though it is more likely
-              that the SYN/ACK would have been lost due to congestion. The TCP
-              server MAY try to send another packet with the AccECN Option at
-              a later point during the connection but should monitor if that
-              packet got lost as well, in which case it SHOULD disable the
-              sending of the AccECN Option for this half-connection.</t>
+              AccECN support, it is advised to resend the SYN/ACK, again
+              confirming its support for AccECN, but this time without the
+              AccECN Option. This approach rules out any interference by
+              middleboxes that might drop packets with unknown options, even
+              though it is more likely that the SYN/ACK would have been lost
+              due to congestion. The TCP server MAY try to send another packet
+              with the AccECN Option at a later point during the connection
+              but it ought to monitor if that packet got lost as well, in
+              which case it SHOULD disable the sending of the AccECN Option
+              for this half-connection.</t>
 
               <t>Similarly, an AccECN end-point MAY separately memorize which
               data packets carried an AccECN Option and disable the sending of
@@ -2070,7 +2079,8 @@ it MUST continue the connection even if the data sender does not disable sending
               sending ECN-capable packets for the remainder of the
               half-connection by setting the IP/ECN field in all subsequent
               packets to Not-ECT.<!--There is no need to say the following for forward compatibility:
-"If a data receiver negotiates AccECN but then deliberately makes the counters inconsistent, it MUST continue the connection 
+"If a data receiver negotiates AccECN but then deliberately makes the counters inconsistent, 
+it MUST continue the connection 
 even if the data sender does not disable sending ECN-capable packets."--></t>
             </section>
           </section>
@@ -2298,11 +2308,7 @@ even though it uses existing TCP fields in unorthodox ways.
               involves leaving enough ACKs for the Data Sender to work out
               whether the 3-bit ACE field has wrapped. ACE field wrap might be
               of less concern if packets also carry the AccECN TCP Option.
-              However, note that logic to read an AccECN TCP Option is
-              optional to implement (albeit recommended &nbsp; see <xref
-              target="accecn_option"/>). So one end writing an AccECN TCP
-              Option into a packet does not necessarily imply that the other
-              end will read it.</t>
+              </t>
             </list></t>
 
           <t>Note that the present specification of AccECN in TCP does not
@@ -2421,11 +2427,11 @@ even though it uses existing TCP fields in unorthodox ways.
           target="RFC3168"/> prohibit use of ECN on TCP control packets and
           retransmissions. The present specification does not update that
           aspect of RFC 3168, but it does say what feedback an AccECN Data
-          Receiver should provide if it receives an ECN-capable control packet
-          or retransmission. This ensures AccECN is forward compatible with
-          any future scheme that allows ECN on these packets, as provided for
-          in section 4.3 of <xref target="RFC8311"/> and as proposed in <xref
-          target="I-D.ietf-tcpm-generalized-ecn"/>.</t>
+          Receiver ought to provide if it receives an ECN-capable control
+          packet or retransmission. This ensures AccECN is forward compatible
+          with any future scheme that allows ECN on these packets, as provided
+          for in section 4.3 of <xref target="RFC8311"/> and as proposed in
+          <xref target="I-D.ietf-tcpm-generalized-ecn"/>.</t>
         </list></t>
     </section>
 
@@ -2449,10 +2455,10 @@ even though it uses existing TCP fields in unorthodox ways.
         it receives a pure ACK that acknowledges an ISN that is a valid SYN
         cookie, and if the ACK contains an ACE field with the value 0b010 to
         0b111 (decimal 2 to 7), it can assume that:<list style="symbols">
-            <t>the TCP client must have requested AccECN support on the
+            <t>the TCP client has to have requested AccECN support on the
             SYN</t>
 
-            <t>it (the server) must have confirmed that it supported
+            <t>it (the server) has to have confirmed that it supported
             AccECN</t>
           </list>Therefore the server can switch itself into AccECN mode, and
         continue as if it had never forgotten that it switched itself into
@@ -2510,7 +2516,7 @@ even though it uses existing TCP fields in unorthodox ways.
             standardization and it does not rely on misbehaving receivers
             volunteering to reveal feedback information that allows them to be
             detected. However, setting the CE mark by the sender might conceal
-            actual congestion feedback from the network and should therefore
+            actual congestion feedback from the network and therefore ought to
             only be done sparingly.</t>
 
             <t>Networks generate congestion signals when they are becoming
@@ -3441,7 +3447,7 @@ MSS/SAFETY_FACTOR+--------------+    safest
         the path is clearing the ECN field (perhaps due to an out-dated
         attempt to clear, or bleach, what used to be the ToS field). To detect
         bleaching it will be sufficient to detect whether nearly all bytes
-        arrive marked as Not-ECT. Therefore there should be no need to keep
+        arrive marked as Not-ECT. Therefore there ought to be no need to keep
         track of the details of retransmissions.</t>
       </section>
     </section>
