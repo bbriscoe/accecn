@@ -36,7 +36,7 @@
 <!-- HTML formatting control -->
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
-<rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-18"
+<rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-19"
      ipr="trust200902" updates="3168, 3449">
   <front>
     <title abbrev="Accurate TCP-ECN Feedback">More Accurate ECN Feedback in
@@ -1506,7 +1506,21 @@ even if the server does not disable sending ECN-capable packets"--></t>
             whether the handshake packet originally sent by the client or
             server was non-ECN-capable or ECN-capable because, in either case,
             an unsafe transition could imply that future non-ECN-capable
-            packets might get mangled.<!--ToDo: Move continuous CE as next para.--></t>
+            packets might get mangled.</t>
+
+            <t>Once a Data Sender has entered AccECN mode it is advised to
+            check whether it is receiving continuous CE marking. Specifying
+            exactly how to do this is beyond the scope of the present
+            specification, but the sender might check whether the feedback for
+            every packet it sends for the first three or four rounds indicates
+            CE-marking. If continuous CE-marking is detected, for the
+            remainder of the half-connection, the Data Sender ought to send
+            non-ECN-capable packets and it is advised not to respond to any
+            feedback of CE markings. The Data Sender might occasionally test
+            whether it can resume sending ECN-capable packets. As always, once
+            a host has entered AccECN mode, it MUST remain in the same
+            feedback mode and it MUST continue to feed back any ECN markings
+            on arriving packets.</t>
 
             <t>The above advice on switching to sending non-ECN-capable
             packets but still responding to CE-markings unless they become
@@ -1519,7 +1533,15 @@ even if the server does not disable sending ECN-capable packets"--></t>
             the count of CE marks is still eventually delivered reliably). If
             this ACK does not arrive, the server is advised to continue to
             send ECN-capable packets without having tested for mangling of the
-            IP/ECN field on the SYN/ACK.<!--ToDo: Move asymmetry note as next para.--></t>
+            IP/ECN field on the SYN/ACK.</t>
+
+            <t>All the fall-back behaviours in this section are necessary in
+            case mangling of the IP/ECN field is asymmetric, which is
+            currently common over some mobile networks <xref
+            target="Mandalari18"/>. Then one end might see no unsafe
+            transition and continue sending ECN-capable packets, while the
+            other end sees an unsafe transition and stops sending ECN-capable
+            packets.</t>
 
             <t>Invalid transitions of the IP/ECN field are defined in section
             18 of <xref target="RFC3168"/> and repeated here for
@@ -1539,28 +1561,6 @@ even if the server does not disable sending ECN-capable packets"--></t>
             an ECN-enabled home router congests its upstream mobile broadband
             bottleneck link, then the ingress to the mobile network clears the
             ECN field <xref target="Mandalari18"/>.</t>
-
-            <t>Once a Data Sender has entered AccECN mode it is advised to
-            check whether it is receiving continuous CE marking. Specifying
-            exactly how to do this is beyond the scope of the present
-            specification, but the sender might check whether the feedback for
-            every packet it sends for the first three or four rounds indicates
-            CE-marking. If continuous CE-marking is detected, for the
-            remainder of the half-connection, the Data Sender ought to send
-            non-ECN-capable packets and it is advised not to respond to any
-            feedback of CE markings. The Data Sender might occasionally test
-            whether it can resume sending ECN-capable packets. As always, once
-            a host has entered AccECN mode, it MUST remain in the same
-            feedback mode and it MUST continue to feed back any ECN markings
-            on arriving packets.</t>
-
-            <t>All the fall-back behaviours in this section are necessary in
-            case mangling of the IP/ECN field is asymmetric, which is
-            currently common over some mobile networks <xref
-            target="Mandalari18"/>. Then one end might see no unsafe
-            transition and continue sending ECN-capable packets, while the
-            other end sees an unsafe transition and stops sending ECN-capable
-            packets.</t>
           </section>
 
           <section anchor="accecn_sec_ACE_init_invalid"
@@ -2308,7 +2308,11 @@ even though it uses existing TCP fields in unorthodox ways.
               involves leaving enough ACKs for the Data Sender to work out
               whether the 3-bit ACE field has wrapped. ACE field wrap might be
               of less concern if packets also carry the AccECN TCP Option.
-              </t>
+              However, note that logic to read an AccECN TCP Option is
+              optional to implement (albeit recommended &mdash; see <xref
+              target="accecn_option"/>). So one end writing an AccECN TCP
+              Option into a packet does not necessarily imply that the other
+              end will read it.</t>
             </list></t>
 
           <t>Note that the present specification of AccECN in TCP does not
