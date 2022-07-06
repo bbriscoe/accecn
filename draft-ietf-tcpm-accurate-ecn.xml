@@ -37,7 +37,7 @@
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
 <rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-19"
-     ipr="trust200902" updates="3168, 3449">
+     ipr="trust200902" updates="3168">
   <front>
     <title abbrev="Accurate TCP-ECN Feedback">More Accurate ECN Feedback in
     TCP</title>
@@ -135,7 +135,7 @@
       Supplementary feedback information can optionally be provided in a new
       TCP option, which is never used on the TCP SYN. The document also
       specifies the treatment of this updated TCP wire protocol by
-      middleboxes, updating BCP 69 with respect to ACK filtering.</t>
+      middleboxes.</t>
     </abstract>
   </front>
 
@@ -2287,11 +2287,17 @@ even though it uses existing TCP fields in unorthodox ways.
         </section>
 
         <section title="Requirements for TCP ACK Filtering">
-          <t>A node that implements ACK filtering (aka.&nbsp;thinning or
-          coalescing) SHOULD determine if an ACK is part of a connection using
-          AccECN and SHOULD then preserve the correct operation of AccECN
-          feedback. The following notes might help with each part of this
-          requirement:<list style="symbols">
+          <t>Section 5.2.1 of BCP&nbsp;69 <xref target="RFC3449"/> gives best
+          current practice on filtering (aka. thinning or coalescing) of pure
+          TCP ACKs. It advises that filtering ACKs carrying ECN feedback ought
+          to preserve the correct operation of ECN feedback. As the present
+          specification updates the operation of ECN feedback, this section
+          discusses how an ACK filter might preserve correct operation of
+          AccECN feedback as well.</t>
+
+          <t>The problem divides into two parts: determining if an ACK is part
+          of a connection that is using AccECN and then preserving the correct
+          operation of AccECN feedback:<list style="symbols">
               <t>To determine whether a pure TCP ACK is part of an AccECN
               connection without resorting to connection tracking and per-flow
               state, a useful heuristic would be to check for a non-zero ECN
@@ -2308,9 +2314,11 @@ even though it uses existing TCP fields in unorthodox ways.
 
               <t>The main concern with preserving correct AccECN operation
               involves leaving enough ACKs for the Data Sender to work out
-              whether the 3-bit ACE field has wrapped. ACE field wrap might be
-              of less concern if packets also carry the AccECN TCP Option.
-              However, note that logic to read an AccECN TCP Option is
+              whether the 3-bit ACE field has wrapped. In the worst case, when
+              feeding back a run of packets that were all ECN-marked, the ACE
+              field can wrap every 8 acknowledged packets. ACE field wrap
+              might be of less concern if packets also carry the AccECN TCP
+              Option. However, note that logic to read an AccECN TCP Option is
               optional to implement (albeit recommended &mdash; see <xref
               target="accecn_option"/>). So one end writing an AccECN TCP
               Option into a packet does not necessarily imply that the other
@@ -2319,18 +2327,9 @@ even though it uses existing TCP fields in unorthodox ways.
 
           <t>Note that the present specification of AccECN in TCP does not
           presume to rely on any of the above ACK filtering behaviour in the
-          network (hence the use of 'SHOULD' rather than 'MUST' above),
-          because it has to be robust against pre-existing network nodes that
-          do not distinguish AccECN ACKs, and robust against ACK loss during
-          overload more generally.</t>
-
-          <t>Section 5.2.1 of BCP&nbsp;69 <xref target="RFC3449"/> gives best
-          current practice on pure TCP ACK filtering. It gives no advice on
-          ACKs carrying ECN feedback, other than that filtering ought to
-          preserve the correct operation of ECN feedback, because at the time
-          it said that "SACK and ECN remain areas of ongoing research". This
-          section updates that best current practice for a TCP connection that
-          supports AccECN feedback.</t>
+          network, because it has to be robust against pre-existing network
+          nodes that do not distinguish AccECN ACKs, and robust against ACK
+          loss during overload more generally.</t>
         </section>
 
         <section title="Requirements for TCP Segmentation Offload">
