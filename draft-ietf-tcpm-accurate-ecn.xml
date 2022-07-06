@@ -1594,7 +1594,7 @@ it MUST continue the connection even if the data sender does not disable sending
             Receiver fed back anyway, given it might have been a
             retransmission. Usually, the server checks the ACK of the SYN/ACK
             from the client, while the client checks the first data segment
-            from the server. </t>
+            from the server.</t>
 
             <t>The possibility of re-ordering means that there is a small
             chance that the ACE field on the first packet to arrive is
@@ -1857,8 +1857,8 @@ it is RECOMMENDED that they still implement logic to send AccECN Options, to pro
 richer feedback to those remote peers that do understand it.--></t>
 
           <t>If a Data Receiver intends to send the AccECN Option at any time
-          during the rest of the connection it is strongly RECOMMENDED to also
-          test path traversal of the AccECN Option as specified in <xref
+          during the rest of the connection it is RECOMMENDED to also test
+          path traversal of the AccECN Option as specified in <xref
           target="accecn_Mbox_Interference"/>.</t>
 
           <section title="Encoding and Decoding Feedback in the AccECN Option Fields">
