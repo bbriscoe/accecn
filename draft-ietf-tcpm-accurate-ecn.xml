@@ -1849,9 +1849,11 @@ it MUST continue the connection even if the data sender does not disable sending
           implemented, the fall-backs described in this document will need to
           be implemented as well (unless solely for a controlled environment
           where path traversal is not considered a problem). Even if a
-          developer does not implement sending of the AccECN Option, it is
-          RECOMMENDED that they still implement logic to receive and
-          understand any AccECN Options sent by remote peers.<!--ToDo: Choose whether sending but not receiving is more important, and iff so swap in the following:
+          developer does not implement logic to understand received AccECN
+          Options, it is RECOMMENDED that they still implement logic to send
+          AccECN Options to provide richer feedback to those remote peers that
+          do understand it. The logic to send AccECN Options is the simpler to
+          implement of the two sides.<!--ToDo: Choose whether sending but not receiving is more important, and iff so swap in the following:
 Even if a developer does not implement logic to understand received AccECN Options, 
 it is RECOMMENDED that they still implement logic to send AccECN Options, to provide 
 richer feedback to those remote peers that do understand it.--></t>
