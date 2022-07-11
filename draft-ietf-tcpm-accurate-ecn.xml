@@ -2314,15 +2314,15 @@ even though it uses existing TCP fields in unorthodox ways.
 
               <t>The main concern with preserving correct AccECN operation
               involves leaving enough ACKs for the Data Sender to work out
-              whether the 3-bit ACE field has wrapped. In the worst case, when
-              feeding back a run of packets that were all ECN-marked, the ACE
-              field can wrap every 8 acknowledged packets. ACE field wrap
-              might be of less concern if packets also carry the AccECN TCP
-              Option. However, note that logic to read an AccECN TCP Option is
-              optional to implement (albeit recommended &mdash; see <xref
-              target="accecn_option"/>). So one end writing an AccECN TCP
-              Option into a packet does not necessarily imply that the other
-              end will read it.</t>
+              whether the 3-bit ACE field has wrapped. In the worst case, in
+              feedback about a run of received packets that were all
+              ECN-marked, the ACE field will wrap every 8 acknowledged
+              packets. ACE field wrap might be of less concern if packets also
+              carry the AccECN TCP Option. However, note that logic to read an
+              AccECN TCP Option is optional to implement (albeit recommended
+              &mdash; see <xref target="accecn_option"/>). So one end writing
+              an AccECN TCP Option into a packet does not necessarily imply
+              that the other end will read it.</t>
             </list></t>
 
           <t>Note that the present specification of AccECN in TCP does not
