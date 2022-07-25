@@ -36,7 +36,7 @@
 <!-- HTML formatting control -->
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
-<rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-19"
+<rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-20"
      ipr="trust200902" updates="3168">
   <front>
     <title abbrev="Accurate TCP-ECN Feedback">More Accurate ECN Feedback in
@@ -1850,10 +1850,12 @@ it MUST continue the connection even if the data sender does not disable sending
           be implemented as well (unless solely for a controlled environment
           where path traversal is not considered a problem). Even if a
           developer does not implement logic to understand received AccECN
-          Options, it is RECOMMENDED that they still implement logic to send
-          AccECN Options to provide richer feedback to those remote peers that
-          do understand it. The logic to send AccECN Options is the simpler to
-          implement of the two sides.<!--ToDo: Choose whether sending but not receiving is more important, and iff so swap in the following:
+          Options, it is RECOMMENDED that they implement logic to send AccECN
+          Options. Otherwise, those remote peers that implement the receiving
+          logic will still be excluded from congestion feedback that is robust
+          against the increasingly aggressive ACK filtering in the Internet.
+          The logic to send AccECN Options is the simpler to implement of the
+          two sides.<!--ToDo: Choose whether sending but not receiving is more important, and iff so swap in the following:
 Even if a developer does not implement logic to understand received AccECN Options, 
 it is RECOMMENDED that they still implement logic to send AccECN Options, to provide 
 richer feedback to those remote peers that do understand it.--></t>
@@ -2809,15 +2811,18 @@ even though it uses existing TCP fields in unorthodox ways.
       http://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-1
       ]</t>
 
-      <t>Early implementations using experimental option 254 per <xref
+      <t>Early implementations used experimental option 254 per <xref
       target="RFC6994"/> with the single magic number 0xACCE (16 bits), as
       allocated in the IANA "TCP Experimental Option Experiment Identifiers
-      (TCP ExIDs)" registry, SHOULD migrate to use these new option kinds
-      (TBD0 &amp; TBD1).</t>
+      (TCP ExIDs)" registry. Later implementations of the two AccECN Options
+      used 16-bit magic numbers 0xACC0 and 0xACC1 respectively for Order 0 and
+      1. Uses of these experimental options SHOULD migrate to use the new
+      option kinds (TBD0 &amp; TBD1). </t>
 
-      <t>[TO BE REMOVED: The description of the 0xACCE value in the TCP ExIDs
-      registry should be changed to "AccECN (current and new implementations
-      SHOULD use option kinds TBD0 and TBD1)" at the following location:
+      <t>[TO BE REMOVED: The description of the above three values in the TCP
+      ExIDs registry should be changed to "AccECN (current and new
+      implementations SHOULD use option kinds TBD0 and TBD1)" at the following
+      location:
       https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-exids
       ]</t>
     </section>
