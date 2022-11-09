@@ -36,7 +36,7 @@
 <!-- HTML formatting control -->
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
-<rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-20"
+<rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-21"
      ipr="trust200902" updates="3168">
   <front>
     <title abbrev="Accurate TCP-ECN Feedback">More Accurate ECN Feedback in
@@ -723,182 +723,71 @@ deliberately to reduce complexity.-->
 
           <!--Could turn first 4 columns into 2 columns headed A & B, with Ac, N, E, I within the columns.-->
 
-          <!-- <?rfc needLines="22" ?> -->
-
-          <texttable align="center" anchor="accecn_Tab_Negotiation"
-                     title="ECN capability negotiation between Client (A) and Server (B)">
-            <ttcol align="left">A</ttcol>
-
-            <ttcol align="left">B</ttcol>
-
-            <ttcol align="center">SYN A-&gt;B</ttcol>
-
-            <ttcol align="center" width="10">SYN/ACK B-&gt;A</ttcol>
-
-            <ttcol align="left">Feedback Mode</ttcol>
-
-            <c/>
-
-            <c/>
-
-            <c>AE&nbsp;CWR&nbsp;ECE</c>
-
-            <c>AE&nbsp;CWR&nbsp;ECE</c>
-
-            <c/>
-
-            <c>AccECN</c>
-
-            <c>AccECN</c>
-
-            <c>1 &nbsp; 1 &nbsp; 1</c>
-
-            <c>0 &nbsp; 1 &nbsp; 0</c>
-
-            <c>AccECN(no ECT on SYN)</c>
-
-            <!-- new -->
-
-            <c>AccECN</c>
-
-            <c>AccECN</c>
-
-            <c>1 &nbsp; 1 &nbsp; 1</c>
-
-            <c>0 &nbsp; 1 &nbsp; 1</c>
-
-            <c>AccECN (ECT1 on SYN)</c>
-
-            <!-- changed to AccECN (CU) instead of RSVD -->
-
-            <c>AccECN</c>
-
-            <c>AccECN</c>
-
-            <c>1 &nbsp; 1 &nbsp; 1</c>
-
-            <c>1 &nbsp; 0 &nbsp; 0</c>
-
-            <!-- changed to AccECN (CU) instead of RSVD -->
-
-            <c>AccECN (ECT0 on SYN)</c>
-
-            <c>AccECN</c>
-
-            <c>AccECN</c>
-
-            <c>1 &nbsp; 1 &nbsp; 1</c>
-
-            <c>1 &nbsp; 1 &nbsp; 0</c>
-
-            <c>AccECN (CE on SYN)</c>
-
-            <!-- new end -->
-
-            <c/>
-
-            <c/>
-
-            <c/>
-
-            <c/>
-
-            <c/>
-
-            <c>AccECN</c>
-
-            <c>Nonce</c>
-
-            <c>1 &nbsp; 1 &nbsp; 1</c>
-
-            <c>1 &nbsp; 0 &nbsp; 1</c>
-
-            <c>(Reserved)</c>
-
-            <c>AccECN</c>
-
-            <c>ECN</c>
-
-            <c>1 &nbsp; 1 &nbsp; 1</c>
-
-            <c>0 &nbsp; 0 &nbsp; 1</c>
-
-            <c>classic ECN</c>
-
-            <c>AccECN</c>
-
-            <c>No ECN</c>
-
-            <c>1 &nbsp; 1 &nbsp; 1</c>
-
-            <c>0 &nbsp; 0 &nbsp; 0</c>
-
-            <c>Not ECN</c>
-
-            <c/>
-
-            <c/>
-
-            <c/>
-
-            <c/>
-
-            <c/>
-
-            <c>Nonce</c>
-
-            <c>AccECN</c>
-
-            <c>0 &nbsp; 1 &nbsp; 1</c>
-
-            <c>0 &nbsp; 0 &nbsp; 1</c>
-
-            <c>classic ECN</c>
-
-            <c>ECN</c>
-
-            <c>AccECN</c>
-
-            <c>0 &nbsp; 1 &nbsp; 1</c>
-
-            <c>0 &nbsp; 0 &nbsp; 1</c>
-
-            <c>classic ECN</c>
-
-            <c>No ECN</c>
-
-            <c>AccECN</c>
-
-            <c>0 &nbsp; 0 &nbsp; 0</c>
-
-            <c>0 &nbsp; 0 &nbsp; 0</c>
-
-            <c>Not ECN</c>
-
-            <c/>
-
-            <c/>
-
-            <c/>
-
-            <c/>
-
-            <c/>
-
-            <!-- moved -->
-
-            <c>AccECN</c>
-
-            <c>Broken</c>
-
-            <c>1 &nbsp; 1 &nbsp; 1</c>
-
-            <c>1 &nbsp; 1 &nbsp; 1</c>
-
-            <c>Not ECN</c>
-
-            <!-- moved  end -->
-          </texttable>
+          <!-- <?rfc needLines="23" ?> -->
+
+          <table align="center" anchor="accecn_Tab_Negotiation">
+            <name>ECN capability negotiation between Client (A) and Server (B)</name>
+            <thead>
+              <tr>
+                <th align="left">A</th>
+                <th align="left">B</th>
+                <th align="center">SYN<br/>A-&gt;B<br/>AE&nbsp;CWR&nbsp;ECE</th>
+                <th align="center">SYN/ACK<br/>B-&gt;A<br/>AE&nbsp;CWR&nbsp;ECE</th>
+                <th align="left">Feedback Mode</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td align="left">AccECN<br/>AccECN<br/>AccECN<br/>AccECN</td>
+                <td align="left">AccECN<br/>AccECN<br/>AccECN<br/>AccECN</td>
+                <td align="center">1 &nbsp; 1 &nbsp; 1<br/>1 &nbsp; 1 &nbsp; 1<br/>1 &nbsp; 1 &nbsp; 1<br/>1 &nbsp; 1 &nbsp; 1</td>
+                <td align="center">0 &nbsp; 1 &nbsp; 0<br/>0 &nbsp; 1 &nbsp; 1<br/>1 &nbsp; 0 &nbsp; 0<br/>1 &nbsp; 1 &nbsp; 0</td>
+                <td align="left">AccECN (Not-ECT SYN)<br/>AccECN (ECT1 on SYN)<br/>AccECN (ECT0 on SYN)<br/>AccECN (CE on SYN)</td>
+              </tr>
+              <tr>
+                <td align="left"/>
+                <td align="left"/>
+                <td align="center"/>
+                <td align="center"/>
+                <td align="left"/>
+              </tr>
+              <tr>
+                <td align="left">AccECN<br/>AccECN<br/>AccECN</td>
+                <td align="left">Nonce<br/>ECN<br/>No ECN</td>
+                <td align="center">1 &nbsp; 1 &nbsp; 1<br/>1 &nbsp; 1 &nbsp; 1<br/>1 &nbsp; 1 &nbsp; 1</td>
+                <td align="center">1 &nbsp; 0 &nbsp; 1<br/>0 &nbsp; 0 &nbsp; 1<br/>0 &nbsp; 0 &nbsp; 0</td>
+                <td align="left">(Reserved)<br/>classic ECN<br/>Not ECN</td>
+              </tr>
+              <tr>
+                <td align="left"/>
+                <td align="left"/>
+                <td align="center"/>
+                <td align="center"/>
+                <td align="left"/>
+              </tr>
+              <tr>
+                <td align="left">Nonce<br/>ECN<br/>No ECN</td>
+                <td align="left">AccECN<br/>AccECN<br/>AccECN</td>
+                <td align="center">0 &nbsp; 1 &nbsp; 1<br/>0 &nbsp; 1 &nbsp; 1<br/>0 &nbsp; 0 &nbsp; 0</td>
+                <td align="center">0 &nbsp; 0 &nbsp; 1<br/>0 &nbsp; 0 &nbsp; 1<br/>0 &nbsp; 0 &nbsp; 0</td>
+                <td align="left">classic ECN<br/>classic ECN<br/>Not ECN</td>
+              </tr>
+              <tr>
+                <td align="left"/>
+                <td align="left"/>
+                <td align="center"/>
+                <td align="center"/>
+                <td align="left"/>
+              </tr>
+              <tr>
+                <td align="left">AccECN</td>
+                <td align="left">Broken</td>
+                <td align="center">1 &nbsp; 1 &nbsp; 1</td>
+                <td align="center">1 &nbsp; 1 &nbsp; 1</td>
+                <td align="left">Not ECN</td>
+              </tr>
+            </tbody>
+          </table>
 
           <t><xref target="accecn_Tab_Negotiation"/> is divided into blocks
           each separated by an empty row.<list style="numbers">
@@ -2817,9 +2706,9 @@ even though it uses existing TCP fields in unorthodox ways.
       (TCP ExIDs)" registry. Later implementations of the two AccECN Options
       used 16-bit magic numbers 0xACC0 and 0xACC1 respectively for Order 0 and
       1. Uses of these experimental options SHOULD migrate to use the new
-      option kinds (TBD0 &amp; TBD1). </t>
+      option kinds (TBD0 &amp; TBD1).</t>
 
-      <t>[TO BE REMOVED: The description of the above three values in the TCP
+      <t>[TO BE REMOVED: The description of the three values in the TCP
       ExIDs registry should be changed to "AccECN (current and new
       implementations SHOULD use option kinds TBD0 and TBD1)" at the following
       location:
