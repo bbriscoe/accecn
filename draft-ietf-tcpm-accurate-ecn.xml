@@ -36,10 +36,10 @@
 <!-- HTML formatting control -->
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
-<rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-22"
+<rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-23"
      ipr="trust200902" updates="3168">
   <front>
-    <title abbrev="Accurate TCP-ECN Feedback">More Accurate ECN Feedback in
+    <title abbrev="Accurate TCP-ECN Feedback">More Accurate Explicit Congestion Notification (ECN) Feedback in
     TCP</title>
 
     <author fullname="Bob Briscoe" initials="B." surname="Briscoe">
@@ -729,64 +729,114 @@ deliberately to reduce complexity.-->
           <!-- <?rfc needLines="23" ?> -->
 
           <table align="center" anchor="accecn_Tab_Negotiation">
-            <name>ECN capability negotiation between Client (A) and Server (B)</name>
+            <name>ECN capability negotiation between Client (A) and Server
+            (B)</name>
+
             <thead>
               <tr>
                 <th align="left">A</th>
+
                 <th align="left">B</th>
-                <th align="center">SYN<br/>A-&gt;B<br/>AE&nbsp;CWR&nbsp;ECE</th>
-                <th align="center">SYN/ACK<br/>B-&gt;A<br/>AE&nbsp;CWR&nbsp;ECE</th>
+
+                <th
+                align="center">SYN<br/>A-&gt;B<br/>AE&nbsp;CWR&nbsp;ECE</th>
+
+                <th
+                align="center">SYN/ACK<br/>B-&gt;A<br/>AE&nbsp;CWR&nbsp;ECE</th>
+
                 <th align="left">Feedback Mode</th>
               </tr>
             </thead>
+
             <tbody>
               <tr>
                 <td align="left">AccECN<br/>AccECN<br/>AccECN<br/>AccECN</td>
+
                 <td align="left">AccECN<br/>AccECN<br/>AccECN<br/>AccECN</td>
-                <td align="center">1 &nbsp; 1 &nbsp; 1<br/>1 &nbsp; 1 &nbsp; 1<br/>1 &nbsp; 1 &nbsp; 1<br/>1 &nbsp; 1 &nbsp; 1</td>
-                <td align="center">0 &nbsp; 1 &nbsp; 0<br/>0 &nbsp; 1 &nbsp; 1<br/>1 &nbsp; 0 &nbsp; 0<br/>1 &nbsp; 1 &nbsp; 0</td>
-                <td align="left">AccECN (Not-ECT SYN)<br/>AccECN (ECT1 on SYN)<br/>AccECN (ECT0 on SYN)<br/>AccECN (CE on SYN)</td>
+
+                <td align="center">1 &nbsp; 1 &nbsp; 1<br/>1 &nbsp; 1 &nbsp;
+                1<br/>1 &nbsp; 1 &nbsp; 1<br/>1 &nbsp; 1 &nbsp; 1</td>
+
+                <td align="center">0 &nbsp; 1 &nbsp; 0<br/>0 &nbsp; 1 &nbsp;
+                1<br/>1 &nbsp; 0 &nbsp; 0<br/>1 &nbsp; 1 &nbsp; 0</td>
+
+                <td align="left">AccECN (Not-ECT SYN)<br/>AccECN (ECT1 on
+                SYN)<br/>AccECN (ECT0 on SYN)<br/>AccECN (CE on SYN)</td>
               </tr>
+
               <tr>
                 <td align="left"/>
+
                 <td align="left"/>
+
                 <td align="center"/>
+
                 <td align="center"/>
+
                 <td align="left"/>
               </tr>
+
               <tr>
                 <td align="left">AccECN<br/>AccECN<br/>AccECN</td>
+
                 <td align="left">Nonce<br/>ECN<br/>No ECN</td>
-                <td align="center">1 &nbsp; 1 &nbsp; 1<br/>1 &nbsp; 1 &nbsp; 1<br/>1 &nbsp; 1 &nbsp; 1</td>
-                <td align="center">1 &nbsp; 0 &nbsp; 1<br/>0 &nbsp; 0 &nbsp; 1<br/>0 &nbsp; 0 &nbsp; 0</td>
+
+                <td align="center">1 &nbsp; 1 &nbsp; 1<br/>1 &nbsp; 1 &nbsp;
+                1<br/>1 &nbsp; 1 &nbsp; 1</td>
+
+                <td align="center">1 &nbsp; 0 &nbsp; 1<br/>0 &nbsp; 0 &nbsp;
+                1<br/>0 &nbsp; 0 &nbsp; 0</td>
+
                 <td align="left">(Reserved)<br/>classic ECN<br/>Not ECN</td>
               </tr>
+
               <tr>
                 <td align="left"/>
+
                 <td align="left"/>
+
                 <td align="center"/>
+
                 <td align="center"/>
+
                 <td align="left"/>
               </tr>
+
               <tr>
                 <td align="left">Nonce<br/>ECN<br/>No ECN</td>
+
                 <td align="left">AccECN<br/>AccECN<br/>AccECN</td>
-                <td align="center">0 &nbsp; 1 &nbsp; 1<br/>0 &nbsp; 1 &nbsp; 1<br/>0 &nbsp; 0 &nbsp; 0</td>
-                <td align="center">0 &nbsp; 0 &nbsp; 1<br/>0 &nbsp; 0 &nbsp; 1<br/>0 &nbsp; 0 &nbsp; 0</td>
+
+                <td align="center">0 &nbsp; 1 &nbsp; 1<br/>0 &nbsp; 1 &nbsp;
+                1<br/>0 &nbsp; 0 &nbsp; 0</td>
+
+                <td align="center">0 &nbsp; 0 &nbsp; 1<br/>0 &nbsp; 0 &nbsp;
+                1<br/>0 &nbsp; 0 &nbsp; 0</td>
+
                 <td align="left">classic ECN<br/>classic ECN<br/>Not ECN</td>
               </tr>
+
               <tr>
                 <td align="left"/>
+
                 <td align="left"/>
+
                 <td align="center"/>
+
                 <td align="center"/>
+
                 <td align="left"/>
               </tr>
+
               <tr>
                 <td align="left">AccECN</td>
+
                 <td align="left">Broken</td>
+
                 <td align="center">1 &nbsp; 1 &nbsp; 1</td>
+
                 <td align="center">1 &nbsp; 1 &nbsp; 1</td>
+
                 <td align="left">Not ECN</td>
               </tr>
             </tbody>
@@ -1127,6 +1177,9 @@ deliberately to reduce complexity.-->
             handshake encoding of the ACE field, and it is the only exception
             to the rule that the ACE field carries the 3 least significant
             bits of the r.cep counter on packets with SYN=0.</t>
+
+            <t>The TCP client MUST also use the handshake encoding for the pure
+            ACK of any retransmitted SYN/ACK.</t>
 
             <t>Normally, a TCP client acknowledges a SYN/ACK with an ACK that
             satisfies the above conditions anyway (SYN=0, no data, no SACK
@@ -1818,8 +1871,9 @@ richer feedback to those remote peers that do understand it.--></t>
             <section anchor="accecn_AccECN_Option_Loss"
                      title="Testing for Loss of Packets Carrying the AccECN Option">
               <t><!--Should we make rexmt of SYN/ACK with AccECN flags, but not AccECN Option that default?-->If
-              after the normal TCP timeout the TCP server has not received an
-              ACK to acknowledge its SYN/ACK, the SYN/ACK might just have been
+              the TCP server has not received an
+              ACK to acknowledge its SYN/ACK after the normal TCP timeout or it receives a second SYN with a request for
+              AccECN support, then either the SYN/ACK might just have been
               lost, e.g.&nbsp;due to congestion, or a middlebox might be
               blocking the AccECN Option. To expedite connection setup, the
               TCP server SHOULD retransmit the SYN/ACK repeating the same AE,
@@ -1828,6 +1882,15 @@ richer feedback to those remote peers that do understand it.--></t>
               connection setup, the TCP server SHOULD disable AccECN and ECN
               for this connection by retransmitting the SYN/ACK with
               AE=CWR=ECE=0 and no AccECN Option.</t>
+
+              <t>This approach limits any interference by
+              middleboxes that might drop packets with unknown options, even
+              though it is more likely that SYN/ACK loss is
+              due to congestion. The TCP server MAY try to send another packet
+              with the AccECN Option at a later point during the connection
+              but it ought to monitor if that packet got lost as well, in
+              which case it SHOULD disable the sending of the AccECN Option
+              for this half-connection.</t>
 
               <t>Implementers MAY use other fall-back strategies if they are
               found to be more effective (e.g.&nbsp;retrying the AccECN Option
@@ -1847,25 +1910,20 @@ richer feedback to those remote peers that do understand it.--></t>
               connections. <xref target="RFC9040"/> further discusses caching
               of TCP parameters and status information.</t>
 
+              <t>If a middlebox is dropping packets with options it does not recognize,
+              a host that is sending little or no data but mostly pure ACKs will
+              not inherently detect such losses. Such a host MAY detect loss of ACKs
+              carrying the AccECN Option by detecting whether the acknowledged data
+              always reappears as a retransmission. In such cases, the host SHOULD 
+              disable the sending of the AccECN Option for this half-connection.</t>
+
               <t>If a host falls back to not sending the AccECN Option, it
               will continue to process any incoming AccECN Options as
               normal.</t>
 
               <t>Either host MAY include the AccECN Option in a subsequent
-              segment to retest whether the AccECN Option can traverse the
+              segment or segments to retest whether the AccECN Option can traverse the
               path.</t>
-
-              <t>If the TCP server receives a second SYN with a request for
-              AccECN support, it is advised to resend the SYN/ACK, again
-              confirming its support for AccECN, but this time without the
-              AccECN Option. This approach rules out any interference by
-              middleboxes that might drop packets with unknown options, even
-              though it is more likely that the SYN/ACK would have been lost
-              due to congestion. The TCP server MAY try to send another packet
-              with the AccECN Option at a later point during the connection
-              but it ought to monitor if that packet got lost as well, in
-              which case it SHOULD disable the sending of the AccECN Option
-              for this half-connection.</t>
 
               <t>Similarly, an AccECN end-point MAY separately memorize which
               data packets carried an AccECN Option and disable the sending of
@@ -2710,11 +2768,11 @@ even though it uses existing TCP fields in unorthodox ways.
       allocated in the IANA "TCP Experimental Option Experiment Identifiers
       (TCP ExIDs)" registry. Even earlier experimental implementations used
       the single magic number 0xACCE (16 bits). Uses of these experimental
-      options SHOULD migrate to use the new option kinds (172 &amp; 173). </t>
+      options SHOULD migrate to use the new option kinds (172 &amp; 173).</t>
 
-      <t>[TO BE REMOVED: If the early registrations, which may be temporary, do 
-      not proceed, the three references to them in the TCP ExIDs registry at the 
-      following location will also need to be edited out:
+      <t>[TO BE REMOVED: If the early registrations, which may be temporary,
+      do not proceed, the three references to them in the TCP ExIDs registry
+      at the following location will also need to be edited out:
       https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-exids
       ]</t>
     </section>
