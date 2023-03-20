@@ -37,10 +37,10 @@
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
 <rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-23"
-     ipr="trust200902" updates="3168">
+     ipr="pre5378Trust200902" updates="3168">
   <front>
-    <title abbrev="Accurate TCP-ECN Feedback">More Accurate Explicit Congestion Notification (ECN) Feedback in
-    TCP</title>
+    <title abbrev="Accurate TCP-ECN Feedback">More Accurate Explicit
+    Congestion Notification (ECN) Feedback in TCP</title>
 
     <author fullname="Bob Briscoe" initials="B." surname="Briscoe">
       <organization>Independent</organization>
@@ -123,19 +123,19 @@
       protocol feed back this information to the sender. ECN was originally
       specified for TCP in such a way that only one feedback signal can be
       transmitted per Round-Trip Time (RTT). Recent new TCP mechanisms like
-      Congestion Exposure (ConEx), Data Center TCP (DCTCP) or Low Latency Low
-      Loss Scalable Throughput (L4S) need more accurate ECN feedback
+      Congestion Exposure (ConEx), Data Center TCP (DCTCP) or Low Latency, Low
+      Loss, and Scalable Throughput (L4S) need more accurate ECN feedback
       information whenever more than one marking is received in one RTT. This
-      document updates the original ECN specification to specify a scheme to
-      provide more than one feedback signal per RTT in the TCP header. Given
-      TCP header space is scarce, it allocates a reserved header bit
-      previously assigned to the ECN-Nonce. It also overloads the two existing
-      ECN flags in the TCP header. The resulting extra space is exploited to
-      feed back the IP-ECN field received during the 3-way handshake as well.
-      Supplementary feedback information can optionally be provided in a new
-      TCP option, which is never used on the TCP SYN. The document also
-      specifies the treatment of this updated TCP wire protocol by
-      middleboxes.</t>
+      document updates the original ECN specification in RFC 3168 to specify a
+      scheme that provides more than one feedback signal per RTT in the TCP
+      header. Given TCP header space is scarce, it allocates a reserved header
+      bit previously assigned to the ECN-Nonce. It also overloads the two
+      existing ECN flags in the TCP header. The resulting extra space is
+      exploited to feed back the IP-ECN field received during the 3-way
+      handshake as well. Supplementary feedback information can optionally be
+      provided in a new TCP option, which is never used on the TCP SYN. The
+      document also specifies the treatment of this updated TCP wire protocol
+      by middleboxes.</t>
     </abstract>
   </front>
 
@@ -153,14 +153,14 @@
       one feedback signal could be transmitted per Round-Trip Time (RTT).
       Recently, proposed mechanisms like Congestion Exposure (ConEx <xref
       target="RFC7713"/>), DCTCP <xref target="RFC8257"/> or L4S <xref
-      target="I-D.ietf-tsvwg-l4s-arch"/> need to know when more than one
-      marking is received in one RTT which is information that cannot be
-      provided by the feedback scheme as specified in <xref
-      target="RFC3168"/>. This document specifies an update to the ECN
-      feedback scheme of RFC 3168 that provides more accurate information and
-      could be used by these and potentially other future TCP extensions. A
-      fuller treatment of the motivation for this specification is given in
-      the associated requirements document <xref target="RFC7560"/>.</t>
+      target="RFC9330"/> need to know when more than one marking is received
+      in one RTT which is information that cannot be provided by the feedback
+      scheme as specified in <xref target="RFC3168"/>. This document specifies
+      an update to the ECN feedback scheme of RFC 3168 that provides more
+      accurate information and could be used by these and potentially other
+      future TCP extensions. A fuller treatment of the motivation for this
+      specification is given in the associated requirements document <xref
+      target="RFC7560"/>.</t>
 
       <t>This documents specifies a standards track scheme for ECN feedback in
       the TCP header to provide more than one feedback signal per RTT. It will
@@ -205,8 +205,8 @@
       target="RFC8257"/>. For congestion response, this specification refers
       to RFC 3168, or ECN experiments such as those referred to in <xref
       target="RFC8311"/>, namely: a TCP-based Low Latency Low Loss Scalable
-      (L4S) congestion control <xref target="I-D.ietf-tsvwg-l4s-arch"/>; or
-      Alternative Backoff with ECN (ABE) <xref target="RFC8511"/>.</t>
+      (L4S) congestion control <xref target="RFC9330"/>; or Alternative
+      Backoff with ECN (ABE) <xref target="RFC8511"/>.</t>
 
       <t>It is RECOMMENDED that the AccECN protocol is implemented alongside
       SACK <xref target="RFC2018"/> and the experimental ECN++ protocol <xref
@@ -282,7 +282,7 @@
             payload.</t>
 
             <t hangText="Acceptable packet / segment:">A packet or segment
-            that passes the acceptability tests in <xref target="RFC0793"/>
+            that passes the acceptability tests in <xref target="RFC9293"/>
             and <xref target="RFC5961"/>.</t>
 
             <!-- <t hangText="SupAccECN:">The Supplementary Accurate ECN field that
@@ -314,10 +314,10 @@
         </t>
 
         <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
-        document are to be interpreted as described in BCP 14 <xref
-        target="RFC2119"/> <xref target="RFC8174"/> when, and only when, they
-        appear in all capitals, as shown here.</t>
+        "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+        "OPTIONAL" in this document are to be interpreted as described in BCP
+        14 <xref target="RFC2119"/> <xref target="RFC8174"/> when, and only
+        when, they appear in all capitals, as shown here.</t>
       </section>
 
       <section anchor="accecn_Recap"
@@ -1178,8 +1178,8 @@ deliberately to reduce complexity.-->
             to the rule that the ACE field carries the 3 least significant
             bits of the r.cep counter on packets with SYN=0.</t>
 
-            <t>The TCP client MUST also use the handshake encoding for the pure
-            ACK of any retransmitted SYN/ACK.</t>
+            <t>The TCP client MUST also use the handshake encoding for the
+            pure ACK of any retransmitted SYN/ACK.</t>
 
             <t>Normally, a TCP client acknowledges a SYN/ACK with an ACK that
             satisfies the above conditions anyway (SYN=0, no data, no SACK
@@ -1871,26 +1871,25 @@ richer feedback to those remote peers that do understand it.--></t>
             <section anchor="accecn_AccECN_Option_Loss"
                      title="Testing for Loss of Packets Carrying the AccECN Option">
               <t><!--Should we make rexmt of SYN/ACK with AccECN flags, but not AccECN Option that default?-->If
-              the TCP server has not received an
-              ACK to acknowledge its SYN/ACK after the normal TCP timeout or it receives a second SYN with a request for
-              AccECN support, then either the SYN/ACK might just have been
-              lost, e.g.&nbsp;due to congestion, or a middlebox might be
-              blocking the AccECN Option. To expedite connection setup, the
-              TCP server SHOULD retransmit the SYN/ACK repeating the same AE,
-              CWR and ECE TCP flags as on the original SYN/ACK but with no
-              AccECN Option. If this retransmission times out, to expedite
-              connection setup, the TCP server SHOULD disable AccECN and ECN
-              for this connection by retransmitting the SYN/ACK with
+              the TCP server has not received an ACK to acknowledge its
+              SYN/ACK after the normal TCP timeout or it receives a second SYN
+              with a request for AccECN support, then either the SYN/ACK might
+              just have been lost, e.g.&nbsp;due to congestion, or a middlebox
+              might be blocking the AccECN Option. To expedite connection
+              setup, the TCP server SHOULD retransmit the SYN/ACK repeating
+              the same AE, CWR and ECE TCP flags as on the original SYN/ACK
+              but with no AccECN Option. If this retransmission times out, to
+              expedite connection setup, the TCP server SHOULD disable AccECN
+              and ECN for this connection by retransmitting the SYN/ACK with
               AE=CWR=ECE=0 and no AccECN Option.</t>
 
-              <t>This approach limits any interference by
-              middleboxes that might drop packets with unknown options, even
-              though it is more likely that SYN/ACK loss is
-              due to congestion. The TCP server MAY try to send another packet
-              with the AccECN Option at a later point during the connection
-              but it ought to monitor if that packet got lost as well, in
-              which case it SHOULD disable the sending of the AccECN Option
-              for this half-connection.</t>
+              <t>This approach limits any interference by middleboxes that
+              might drop packets with unknown options, even though it is more
+              likely that SYN/ACK loss is due to congestion. The TCP server
+              MAY try to send another packet with the AccECN Option at a later
+              point during the connection but it ought to monitor if that
+              packet got lost as well, in which case it SHOULD disable the
+              sending of the AccECN Option for this half-connection.</t>
 
               <t>Implementers MAY use other fall-back strategies if they are
               found to be more effective (e.g.&nbsp;retrying the AccECN Option
@@ -1910,20 +1909,21 @@ richer feedback to those remote peers that do understand it.--></t>
               connections. <xref target="RFC9040"/> further discusses caching
               of TCP parameters and status information.</t>
 
-              <t>If a middlebox is dropping packets with options it does not recognize,
-              a host that is sending little or no data but mostly pure ACKs will
-              not inherently detect such losses. Such a host MAY detect loss of ACKs
-              carrying the AccECN Option by detecting whether the acknowledged data
-              always reappears as a retransmission. In such cases, the host SHOULD 
-              disable the sending of the AccECN Option for this half-connection.</t>
+              <t>If a middlebox is dropping packets with options it does not
+              recognize, a host that is sending little or no data but mostly
+              pure ACKs will not inherently detect such losses. Such a host
+              MAY detect loss of ACKs carrying the AccECN Option by detecting
+              whether the acknowledged data always reappears as a
+              retransmission. In such cases, the host SHOULD disable the
+              sending of the AccECN Option for this half-connection.</t>
 
               <t>If a host falls back to not sending the AccECN Option, it
               will continue to process any incoming AccECN Options as
               normal.</t>
 
               <t>Either host MAY include the AccECN Option in a subsequent
-              segment or segments to retest whether the AccECN Option can traverse the
-              path.</t>
+              segment or segments to retest whether the AccECN Option can
+              traverse the path.</t>
 
               <t>Similarly, an AccECN end-point MAY separately memorize which
               data packets carried an AccECN Option and disable the sending of
@@ -2377,7 +2377,7 @@ even though it uses existing TCP fields in unorthodox ways.
           target="accecn_Spec"/>) only 'Acceptable' packets contribute to the
           ECN counters at the AccECN receiver and <xref
           target="accecn_Terminology"/> defines an Acceptable packet as one
-          that passes the acceptability tests in both <xref target="RFC0793"/>
+          that passes the acceptability tests in both <xref target="RFC9293"/>
           and <xref target="RFC5961"/>.</t>
 
           <t>Sections 5.2, 6.1.1, 6.1.4, 6.1.5 and 6.1.6 of <xref
@@ -2436,7 +2436,7 @@ even though it uses existing TCP fields in unorthodox ways.
         used TCP options: MSS, time-stamp, window scaling, SACK and TCP-AO. It
         is also compatible with the recent promising experimental TCP options
         TCP Fast Open (TFO <xref target="RFC7413"/>) and Multipath TCP (MPTCP
-        <xref target="RFC6824"/>). AccECN is friendly to all these protocols,
+        <xref target="RFC8684"/>). AccECN is friendly to all these protocols,
         because space for TCP options is particularly scarce on the SYN, where
         AccECN consumes zero additional header space.</t>
 
@@ -2896,7 +2896,7 @@ support ECN Nonce."-->
     <!-- ================================================================ -->
 
     <references title="Normative References">
-      <?rfc include="reference.RFC.0793" ?>
+      <?rfc include="reference.RFC.9293" ?>
 
       <?rfc include="reference.RFC.2119" ?>
 
@@ -2924,7 +2924,7 @@ support ECN Nonce."-->
 
       <?rfc include="reference.RFC.5961" ?>
 
-      <?rfc include="reference.RFC.6824" ?>
+      <?rfc include="reference.RFC.8684" ?>
 
       <?rfc include="reference.RFC.6994" ?>
 
@@ -2944,7 +2944,7 @@ support ECN Nonce."-->
 
       <?rfc include="reference.RFC.8511" ?>
 
-      <?rfc include="reference.I-D.ietf-tsvwg-l4s-arch" ?>
+      <?rfc include="reference.RFC.9330" ?>
 
       <reference anchor="Mandalari18">
         <front>
