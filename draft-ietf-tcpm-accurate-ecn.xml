@@ -392,8 +392,8 @@
         Nonce Sum (NS) for the ECN Nonce <xref target="RFC3540"/>. In the
         absence of widespread deployment RFC 3540 has been reclassified as
         historic <xref target="RFC8311"/> and the respective flag has been
-        marked as "reserved", making this TCP flag available for use by the
-        AccECN experiment instead.</t>
+        marked as "reserved", making this TCP flag available for use by AccECN
+        instead.</t>
 
         <?rfc needLines="8" ?>
 
