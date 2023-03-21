@@ -1317,7 +1317,7 @@ deliberately to reduce complexity.-->
             target="accecn_Interaction_SYN_Cookies"/> for details). If a
             stateless server that implements AccECN receives either of these
             two values in the ACK, its action is implementation-dependent and
-            outside the scope of this spec, It will certainly not take the
+            outside the scope of this spec. It will certainly not take the
             action in the third column because, after it receives either of
             these values, it is not in AccECN mode. I.e., it will not disable
             ECN (at least not just because ACE is 0b000) and it will not set
