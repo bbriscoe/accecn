@@ -2914,16 +2914,14 @@ even though it uses existing TCP fields in unorthodox ways.
 
         <t>It is assumed that each local byte counter is an unsigned integer
         greater than 24b (probably 32b), and that the following constant has
-        been assigned:<list style="empty">
-            <t>DIVOPT = 2^24</t>
-          </list></t>
+        been assigned:</t>
+        <sourcecode><![CDATA[   DIVOPT = 2^24]]></sourcecode>
 
         <t>Every time a CE marked data segment arrives, the Data Receiver
         increments its local value of r.ceb by the size of the TCP Data.
         Whenever it sends an ACK with the AccECN Option, the value it writes
-        into the ECEB field is <list style="empty">
-            <t>ECEB = r.ceb % DIVOPT</t>
-          </list></t>
+        into the ECEB field is </t>
+        <sourcecode><![CDATA[   ECEB = r.ceb % DIVOPT]]></sourcecode>
 
         <t>where '%' is the remainder operator.</t>
 
@@ -2941,25 +2939,23 @@ even though it uses existing TCP fields in unorthodox ways.
         calculates the minimum non-negative difference d.ceb between the ECEB
         field and its local s.ceb counter, using modulo arithmetic as
         follows:</t>
-
         <figure>
-          <artwork><![CDATA[   if ((newlyAckedB > 0) || (newlyAckedT > 0)) {
+          <sourcecode><![CDATA[   if ((newlyAckedB > 0) || (newlyAckedT > 0)) {
        d.ceb = (ECEB + DIVOPT - (s.ceb % DIVOPT)) % DIVOPT
        s.ceb += d.ceb
    }
-]]></artwork>
+]]></sourcecode>
         </figure>
 
         <t>For example, if s.ceb is 33,554,433 and ECEB is 1461 (both
         decimal), then</t>
-
         <figure>
-          <artwork><![CDATA[   s.ceb % DIVOPT = 1
-         d.ceb = (1461 + 2^24 - 1) % 2^24
-               = 1460
-         s.ceb = 33,554,433 + 1460
-               = 33,555,893
-]]></artwork>
+          <sourcecode><![CDATA[   s.ceb % DIVOPT = 1
+   d.ceb = (1461 + 2^24 - 1) % 2^24
+         = 1460
+   s.ceb = 33,554,433 + 1460
+         = 33,555,893
+]]></sourcecode>
         </figure>
 
         <t>In practice an implementation might use heuristics to guess the
@@ -2989,17 +2985,14 @@ even though it uses existing TCP fields in unorthodox ways.
         <section title="Safety Algorithm without the AccECN Option">
           <t>It is assumed that each local packet counter is a sufficiently
           sized unsigned integer (probably 32b) and that the following
-          constant has been assigned:<list style="empty">
-              <t>DIVACE = 2^3</t>
-            </list></t>
+          constant has been assigned:</t>
+          <sourcecode><![CDATA[   DIVACE = 2^3]]></sourcecode>
 
           <t>Every time an Acceptable CE marked packet arrives (<xref
           target="accecn_sec_ACE_feedback"/>), the Data Receiver increments
           its local value of r.cep by 1. It repeats the same value of ACE in
-          every subsequent ACK until the next CE marking arrives, where<list
-              style="empty">
-              <t>ACE = r.cep % DIVACE.</t>
-            </list></t>
+          every subsequent ACK until the next CE marking arrives, where</t>
+          <sourcecode><![CDATA[   ACE = r.cep % DIVACE.]]></sourcecode>
 
           <t>If the Data Sender received an earlier value of the counter that
           had been delayed due to ACK reordering, it might incorrectly
@@ -3011,12 +3004,8 @@ even though it uses existing TCP fields in unorthodox ways.
           superseded, the Data Sender calculates the minimum difference d.cep
           between the ACE field and its local s.cep counter, using modulo
           arithmetic as follows:</t>
-
-          <figure>
-            <artwork><![CDATA[   if ((newlyAckedB > 0) || (newlyAckedT > 0))
-       d.cep = (ACE + DIVACE - (s.cep % DIVACE)) % DIVACE
-]]></artwork>
-          </figure>
+            <sourcecode><![CDATA[   if ((newlyAckedB > 0) || (newlyAckedT > 0))
+       d.cep = (ACE + DIVACE - (s.cep % DIVACE)) % DIVACE]]></sourcecode>
 
           <t><xref target="accecn_ACE_Safety"/> expects the Data Sender to
           assume that the ACE field cycled if it is the safest likely case
@@ -3043,10 +3032,7 @@ even though it uses existing TCP fields in unorthodox ways.
           the Data Sender could assume that this acknowledges newlyAckedPkt
           full-sized segments, where newlyAckedPkt = newlyAckedB/MSS. Then it
           could assume that the ACE field incremented by</t>
-
-          <figure>
-            <artwork><![CDATA[    dSafer.cep = newlyAckedPkt - ((newlyAckedPkt - d.cep) % DIVACE),]]></artwork>
-          </figure>
+            <sourcecode><![CDATA[    dSafer.cep = newlyAckedPkt - ((newlyAckedPkt - d.cep) % DIVACE),]]></sourcecode>
 
           <t>For example, imagine an ACK acknowledges newlyAckedPkt=9 more
           full-size segments than any previous ACK, and that ACE increments by
@@ -3083,9 +3069,8 @@ even though it uses existing TCP fields in unorthodox ways.
           of prevailing conditions and it would still be safe if, for example,
           segments were on average at least 5% of full-sized as long as ECN
           marking was 5% or less. Assuming it was used, the Data Sender would
-          increment its packet counter as follows:<list style="empty">
-              <t>s.cep += dSafer.cep</t>
-            </list></t>
+          increment its packet counter as follows:</t>
+            <sourcecode><![CDATA[   s.cep += dSafer.cep]]></sourcecode>
 
           <t>If missing acknowledgement numbers arrive later (due to
           reordering), <xref target="accecn_ACE_Safety"/> says "the Data
@@ -3113,9 +3098,8 @@ See emails 3/1/20.-->
           newly CE-marked bytes - see <xref
           target="accecn_Algo_Option_Coding"/>). Specifically, it could use
           the following algorithm:</t>
-
           <figure>
-            <artwork><![CDATA[   SAFETY_FACTOR = 2
+            <sourcecode><![CDATA[   SAFETY_FACTOR = 2
    if (dSafer.cep > d.cep) {
        if (d.ceb <= MSS * d.cep) {  % Same as (s <= MSS), but no DBZ
           sSafer = d.ceb/dSafer.cep
@@ -3125,7 +3109,7 @@ See emails 3/1/20.-->
            % No need for else; dSafer.cep is already correct, 
            % because d.cep must have been too small
    }
-]]></artwork>
+]]></sourcecode>
           </figure>
 
           <t>The chart below shows when the above algorithm will consider
@@ -3192,17 +3176,19 @@ MSS/SAFETY_FACTOR+--------------+    safest
         and recalculate s_ave on every ACK. However it would be simpler to
         merely maintain a counter packets_in_flight for the number of packets
         in flight (including control packets), which is reset once per RTT.
-        Either way, it would estimate s_ave as:<list style="empty">
-            <t>s_ave ~= flightsize / packets_in_flight,</t>
-          </list>where flightsize is the variable that TCP already maintains
+        Either way, it would estimate s_ave as:</t>
+        <sourcecode><![CDATA[   s_ave ~= flightsize / packets_in_flight,]]></sourcecode>
+
+        <t>where flightsize is the variable that TCP already maintains
         for the number of bytes in flight. To avoid floating point arithmetic,
         it could right-bit-shift by lg(packets_in_flight), where lg() means
         log base 2.</t>
 
         <t>An alternative would be to maintain an exponentially weighted
-        moving average (EWMA) of the segment size:<list style="empty">
-            <t>s_ave = a * s + (1-a) * s_ave,</t>
-          </list>where a is the decay constant for the EWMA. However, then it
+        moving average (EWMA) of the segment size:</t>
+        <sourcecode><![CDATA[   s_ave = a * s + (1-a) * s_ave,]]></sourcecode>
+
+        <t>where a is the decay constant for the EWMA. However, then it
         is necessary to choose a good value for this constant, which ought to
         depend on the number of packets in flight. Also the decay constant
         needs to be power of two to avoid floating point arithmetic.</t>
