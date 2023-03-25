@@ -2913,14 +2913,18 @@ even though it uses existing TCP fields in unorthodox ways.
         greater than 24b (probably 32b), and that the following constant has
         been assigned:</t>
 
-        <sourcecode><![CDATA[   DIVOPT = 2^24]]></sourcecode>
+        <sourcecode><![CDATA[
+   DIVOPT = 2^24]]>
+        </sourcecode>
 
         <t>Every time a CE marked data segment arrives, the Data Receiver
         increments its local value of r.ceb by the size of the TCP Data.
         Whenever it sends an ACK with an AccECN Option, the value it writes
         into the ECEB field is</t>
 
-        <sourcecode><![CDATA[   ECEB = r.ceb % DIVOPT]]></sourcecode>
+        <sourcecode><![CDATA[
+   ECEB = r.ceb % DIVOPT]]>
+        </sourcecode>
 
         <t>where '%' is the remainder operator.</t>
 
@@ -2940,23 +2944,25 @@ even though it uses existing TCP fields in unorthodox ways.
         follows:</t>
 
         <figure>
-          <sourcecode><![CDATA[   if ((newlyAckedB > 0) || (newlyAckedT > 0)) {
+          <sourcecode><![CDATA[
+   if ((newlyAckedB > 0) || (newlyAckedT > 0)) {
        d.ceb = (ECEB + DIVOPT - (s.ceb % DIVOPT)) % DIVOPT
        s.ceb += d.ceb
-   }
-]]></sourcecode>
+   }]]>
+          </sourcecode>
         </figure>
 
         <t>For example, if s.ceb is 33,554,433 and ECEB is 1461 (both
         decimal), then</t>
 
         <figure>
-          <sourcecode><![CDATA[   s.ceb % DIVOPT = 1
+          <sourcecode><![CDATA[
+   s.ceb % DIVOPT = 1
    d.ceb = (1461 + 2^24 - 1) % 2^24
          = 1460
    s.ceb = 33,554,433 + 1460
-         = 33,555,893
-]]></sourcecode>
+         = 33,555,893]]>
+          </sourcecode>
         </figure>
 
         <t>In practice an implementation might use heuristics to guess the
@@ -2988,14 +2994,18 @@ even though it uses existing TCP fields in unorthodox ways.
           sized unsigned integer (probably 32b) and that the following
           constant has been assigned:</t>
 
-          <sourcecode><![CDATA[   DIVACE = 2^3]]></sourcecode>
+            <sourcecode><![CDATA[
+   DIVACE = 2^3]]>
+            </sourcecode>
 
           <t>Every time an Acceptable CE marked packet arrives (<xref
           target="accecn_sec_ACE_feedback"/>), the Data Receiver increments
           its local value of r.cep by 1. It repeats the same value of ACE in
           every subsequent ACK until the next CE marking arrives, where</t>
 
-          <sourcecode><![CDATA[   ACE = r.cep % DIVACE.]]></sourcecode>
+            <sourcecode><![CDATA[
+   ACE = r.cep % DIVACE.]]>
+            </sourcecode>
 
           <t>If the Data Sender received an earlier value of the counter that
           had been delayed due to ACK reordering, it might incorrectly
@@ -3008,8 +3018,10 @@ even though it uses existing TCP fields in unorthodox ways.
           between the ACE field and its local s.cep counter, using modulo
           arithmetic as follows:</t>
 
-            <sourcecode><![CDATA[   if ((newlyAckedB > 0) || (newlyAckedT > 0))
-       d.cep = (ACE + DIVACE - (s.cep % DIVACE)) % DIVACE]]></sourcecode>
+            <sourcecode><![CDATA[
+   if ((newlyAckedB > 0) || (newlyAckedT > 0))
+       d.cep = (ACE + DIVACE - (s.cep % DIVACE)) % DIVACE]]>
+            </sourcecode>
 
           <t><xref target="accecn_ACE_Safety"/> expects the Data Sender to
           assume that the ACE field cycled if it is the safest likely case
@@ -3037,7 +3049,9 @@ even though it uses existing TCP fields in unorthodox ways.
           full-sized segments, where newlyAckedPkt = newlyAckedB/MSS. Then it
           could assume that the ACE field incremented by</t>
 
-            <sourcecode><![CDATA[    dSafer.cep = newlyAckedPkt - ((newlyAckedPkt - d.cep) % DIVACE),]]></sourcecode>
+            <sourcecode><![CDATA[
+    dSafer.cep = newlyAckedPkt - ((newlyAckedPkt - d.cep) % DIVACE),]]>
+            </sourcecode>
 
           <t>For example, imagine an ACK acknowledges newlyAckedPkt=9 more
           full-size segments than any previous ACK, and that ACE increments by
@@ -3076,7 +3090,9 @@ even though it uses existing TCP fields in unorthodox ways.
           marking was 5% or less. Assuming it was used, the Data Sender would
           increment its packet counter as follows:</t>
 
-            <sourcecode><![CDATA[   s.cep += dSafer.cep]]></sourcecode>
+            <sourcecode><![CDATA[
+   s.cep += dSafer.cep]]>
+            </sourcecode>
 
           <t>If missing acknowledgement numbers arrive later (due to
           reordering), <xref target="accecn_ACE_Safety"/> says "the Data
@@ -3106,7 +3122,8 @@ See emails 3/1/20.-->
           the following algorithm:</t>
 
           <figure>
-            <sourcecode><![CDATA[   SAFETY_FACTOR = 2
+            <sourcecode><![CDATA[
+   SAFETY_FACTOR = 2
    if (dSafer.cep > d.cep) {
        if (d.ceb <= MSS * d.cep) {  % Same as (s <= MSS), but no DBZ
           sSafer = d.ceb/dSafer.cep
@@ -3115,9 +3132,9 @@ See emails 3/1/20.-->
        } % else
            % No need for else; dSafer.cep is already correct, 
            % because d.cep must have been too small
-   }
-]]></sourcecode>
-         </figure>
+   }]]>
+            </sourcecode>
+          </figure>
 
           <t>The chart below shows when the above algorithm will consider
           d.cep can replace dSafer.cep as a safe enough estimate of the number
@@ -3185,7 +3202,9 @@ MSS/SAFETY_FACTOR+--------------+    safest
         in flight (including control packets), which is reset once per RTT.
         Either way, it would estimate s_ave as:</t>
 
-        <sourcecode><![CDATA[   s_ave ~= flightsize / packets_in_flight,]]></sourcecode>
+          <sourcecode><![CDATA[
+   s_ave ~= flightsize / packets_in_flight,]]>
+          </sourcecode>
 
         <t>where flightsize is the variable that TCP already maintains for the
         number of bytes in flight and '~=' means 'approximately equal to'. To
@@ -3195,7 +3214,9 @@ MSS/SAFETY_FACTOR+--------------+    safest
         <t>An alternative would be to maintain an exponentially weighted
         moving average (EWMA) of the segment size:</t>
 
-        <sourcecode><![CDATA[   s_ave = a * s + (1-a) * s_ave,]]></sourcecode>
+          <sourcecode><![CDATA[
+   s_ave = a * s + (1-a) * s_ave,]]>
+          </sourcecode>
 
         <t>where a is the decay constant for the EWMA. However, then it is
         necessary to choose a good value for this constant, which ought to
