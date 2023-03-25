@@ -481,8 +481,8 @@
         <t>Each ACK carries the three least significant bits (LSBs) of the
         packet-based CE counter using the ECN bits in the TCP header, now
         renamed the Accurate ECN (ACE) field (see <xref
-        target="accecn_Fig_ACE_ACK"/> later). The 24 LSBs of each byte counter
-        are carried in the AccECN Option.</t>
+        target="accecn_Fig_ACE_ACK"/> later). The 24 LSBs of some or all of
+        the byte counters can be optionally carried in an AccECN Option.</t>
       </section>
 
       <section title="Delayed ACKs and Resilience Against ACK Loss">
@@ -3179,10 +3179,10 @@ MSS/SAFETY_FACTOR+--------------+    safest
         Either way, it would estimate s_ave as:</t>
         <sourcecode><![CDATA[   s_ave ~= flightsize / packets_in_flight,]]></sourcecode>
 
-        <t>where flightsize is the variable that TCP already maintains
-        for the number of bytes in flight. To avoid floating point arithmetic,
-        it could right-bit-shift by lg(packets_in_flight), where lg() means
-        log base 2.</t>
+        <t>where flightsize is the variable that TCP already maintains for the
+        number of bytes in flight and '~=' means 'approximately equal to'. To
+        avoid floating point arithmetic, it could right-bit-shift by
+        lg(packets_in_flight), where lg() means log base 2.</t>
 
         <t>An alternative would be to maintain an exponentially weighted
         moving average (EWMA) of the segment size:</t>
