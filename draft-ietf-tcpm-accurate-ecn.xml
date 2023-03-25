@@ -415,12 +415,12 @@
           IP-ECN field. This provides more accuracy than classic ECN feedback,
           but limited resilience against ACK loss;</t>
 
-          <t>a supplementary part using a new AccECN TCP Option that provides
-          additional feedback on the number of bytes that arrive marked with
-          each of the three ECN codepoints in the IP-ECN field (not just CE
-          marks). This provides greater resilience against ACK loss than the
-          essential feedback, but it is more likely to suffer from middlebox
-          interference. </t>
+          <t>a supplementary part using one of two new alternative AccECN TCP
+          Options that provide additional feedback on the number of bytes that
+          arrive marked with each of the three ECN codepoints in the IP-ECN
+          field (not just CE marks). This provides greater resilience against
+          ACK loss than the essential feedback, but it is more likely to
+          suffer from middlebox interference.</t>
         </list>The two part design was necessary, given limitations on the
       space available for TCP options and given the possibility that certain
       incorrectly designed middleboxes prevent TCP using any new options.</t>
@@ -459,19 +459,18 @@
         recent variant of ECN feedback that it supports. Then the client falls
         back to the same variant of ECN feedback.</t>
 
-        <t>An AccECN TCP client does not send the new AccECN Option on the SYN
-        as SYN option space is limited. The TCP server sends the AccECN Option
-        on the SYN/ACK and the client sends it on the first ACK to test
-        whether the network path forwards the option correctly.</t>
+        <t>An AccECN TCP client does not send an AccECN Option on the SYN as
+        SYN option space is limited. The TCP server sends an AccECN Option on
+        the SYN/ACK and the client sends one on the first ACK to test whether
+        the network path forwards these options correctly.</t>
       </section>
 
       <section title="Feedback Mechanism">
         <t>A Data Receiver maintains four counters initialized at the start of
         the half-connection. Three count the number of arriving payload bytes
-        respectively marked CE, ECT(1) and ECT(0) in the IP-ECN field. The
-        fourth counts the number of packets arriving marked with a CE
-        codepoint (including control packets without payload if they are
-        CE-marked).</t>
+        marked CE, ECT(1) and ECT(0) in the IP-ECN field. The fourth counts
+        the number of packets arriving marked with a CE codepoint (including
+        control packets without payload if they are CE-marked).</t>
 
         <t>The Data Sender maintains four equivalent counters for the half
         connection, and the AccECN protocol is designed to ensure they will
@@ -502,14 +501,14 @@
         Sender because a whole sequence of ACKs carrying intervening values of
         the field might all be lost or delayed in transit.</t>
 
-        <t>The fields in the AccECN Option are larger, but they will increment
+        <t>The fields in an AccECN Option are larger, but they will increment
         in larger steps because they count bytes not packets. Nonetheless,
         their size has been chosen such that a whole cycle of the field would
         never occur between ACKs unless there had been an infeasibly long
-        sequence of ACK losses. Therefore, as long as the AccECN Option is
+        sequence of ACK losses. Therefore, as long as an AccECN Option is
         available, it can be treated as a dependable feedback channel.</t>
 
-        <t>If the AccECN Option is not available, e.g.&nbsp;it is being
+        <t>If an AccECN Option is not available, e.g.&nbsp;it is being
         stripped by a middlebox, the AccECN protocol will only feed back
         information on CE markings (using the ACE field). Although not ideal,
         this will be sufficient, because it is envisaged that neither ECT(0)
@@ -535,14 +534,15 @@ deliberately to reduce complexity.-->
 
       <section title="Feedback Metrics">
         <t>The CE packet counter in the ACE field and the CE byte counter in
-        the AccECN Option both provide feedback on received CE-marks. The CE
+        AccECN Options both provide feedback on received CE-marks. The CE
         packet counter includes control packets that do not have payload data,
         while the CE byte counter solely includes marked payload bytes. If
-        both are present, the byte counter in the option will provide the more
-        accurate information needed for modern congestion control and policing
-        schemes, such as L4S, DCTCP or ConEx. If the option is stripped, a
-        simple algorithm to estimate the number of marked bytes from the ACE
-        field is given in <xref target="accecn_Algo_ACE_Bytes"/>.</t>
+        both are present, the byte counter in an AccECN Option will provide
+        the more accurate information needed for modern congestion control and
+        policing schemes, such as L4S, DCTCP or ConEx. If AccECN Options are
+        stripped, a simple algorithm to estimate the number of marked bytes
+        from the ACE field is given in <xref
+        target="accecn_Algo_ACE_Bytes"/>.</t>
 
         <t>Feedback in bytes is provided in order to protect against the
         receiver using attacks similar to 'ACK-Division' to artificially
@@ -1031,13 +1031,12 @@ deliberately to reduce complexity.-->
             point in the IP ECN field, including CE marked control packets but
             excluding CE on SYN packets (SYN=1; ACK=0).</t>
 
-            <t>A Data Receiver that supports sending of the AccECN TCP Option
+            <t>A Data Receiver that supports sending of AccECN TCP Options
             MUST increment the r.ceb, r.e0b or r.e1b byte counters by the
-            number of TCP payload octets in Acceptable packets marked
-            respectively with the CE, ECT(0) and ECT(1) codepoint in their
-            IP-ECN field, including any payload octets on control packets, but
-            not including any payload octets on SYN packets (SYN=1;
-            ACK=0).</t>
+            number of TCP payload octets in Acceptable packets marked with the
+            CE, ECT(0) and ECT(1) codepoint in their IP-ECN field, including
+            any payload octets on control packets, but not including any
+            payload octets on SYN packets (SYN=1; ACK=0).</t>
           </list></t>
 
         <t>Each Data Sender of each half connection maintains four counters,
@@ -1539,7 +1538,7 @@ it MUST continue the connection even if the data sender does not disable sending
                   than 3. In either case, 'n' MUST be no greater than 7.</t>
                 </list>The above rules for when to send an ACK are designed to
               be complemented by those in <xref
-              target="accecn_option_usage"/>, which concern whether the AccECN
+              target="accecn_option_usage"/>, which concern whether an AccECN
               TCP Option ought to be included on ACKs.</t>
 
               <t>If the arrivals of a number of data packets are all processed
@@ -1637,7 +1636,7 @@ it MUST continue the connection even if the data sender does not disable sending
         </section>
 
         <section anchor="accecn_option" title="The AccECN Option">
-          <t>The AccECN Option is defined as shown in <xref
+          <t>Two alternative AccECN Options are defined as shown in <xref
           target="accecn_Fig_TCPopt"/>. The initial 'E' of each field name
           stands for 'Echo'.</t>
 
@@ -1735,14 +1734,14 @@ it MUST continue the connection even if the data sender does not disable sending
           within the length and ignore the remainder of the option, treating
           it as padding.</t>
 
-          <t>The AccECN Option has to be optional to implement, because both
-          sender and receiver have to be able to cope without the option
-          anyway - in cases where it does not traverse a network path. It is
-          RECOMMENDED to implement both sending and receiving of the AccECN
-          Option. Support for the AccECN Option is particularly valuable over
+          <t>AccECN Options have to be optional to implement, because both
+          sender and receiver have to be able to cope without options anyway -
+          in cases where they do not traverse a network path. It is
+          RECOMMENDED to implement both sending and receiving of AccECN
+          Options. Support for AccECN Options is particularly valuable over
           paths that introduce a high degree of ACK filtering, where the 3-bit
           ACE counter alone might sometimes be insufficient, when it is
-          ambiguous whether it has wrapped. If sending of the AccECN Option is
+          ambiguous whether it has wrapped. If sending of AccECN Options is
           implemented, the fall-backs described in this document will need to
           be implemented as well (unless solely for a controlled environment
           where path traversal is not considered a problem). Even if a
@@ -1754,7 +1753,7 @@ it MUST continue the connection even if the data sender does not disable sending
           The logic to send AccECN Options is the simpler to implement of the
           two sides.</t>
 
-          <t>If a Data Receiver intends to send the AccECN Option at any time
+          <t>If a Data Receiver intends to send an AccECN Option at any time
           during the rest of the connection it is RECOMMENDED to also test
           path traversal of the AccECN Option as specified in <xref
           target="accecn_Mbox_Interference"/>.</t>
@@ -1779,12 +1778,12 @@ it MUST continue the connection even if the data sender does not disable sending
 
             <t><xref target="accecn_Algo_Option_Coding"/> gives an example
             algorithm for the Data Receiver to encode its byte counters into
-            the AccECN Option, and for the Data Sender to decode the AccECN
+            an AccECN Option, and for the Data Sender to decode the AccECN
             Option fields into its byte counters.</t>
 
             <t>Note that, as specified in <xref target="accecn_feedback"/>,
             any data on the SYN (SYN=1, ACK=0) is not included in any of the
-            byte counters held locally for each ECN marking nor in the AccECN
+            byte counters held locally for each ECN marking nor in an AccECN
             Option on the wire.</t>
           </section>
 
@@ -1794,7 +1793,7 @@ it MUST continue the connection even if the data sender does not disable sending
 
             <section anchor="accecn_AccECN_Option_3WHS"
                      title="Testing the AccECN Option during the Handshake">
-              <t>The TCP client MUST NOT include the AccECN TCP Option on the
+              <t>The TCP client MUST NOT include an AccECN TCP Option on the
               SYN. If there is somehow an AccECN Option on a SYN, it MUST be
               ignored when forwarded or received. (A fall-back strategy for
               the loss of the SYN, possibly due to middlebox interference, is
@@ -1811,7 +1810,7 @@ it MUST continue the connection even if the data sender does not disable sending
               TCP client SHOULD also include an AccECN Option on the first
               data segment it sends (if it ever sends one).</t>
 
-              <t>A host MAY omit the AccECN Option in any of the above three
+              <t>A host MAY omit an AccECN Option in any of the above three
               cases due to insufficient option space or if it has cached
               knowledge that the packet would be likely to be blocked on the
               path to the other host if it included an AccECN Option.</t>
@@ -1823,24 +1822,24 @@ it MUST continue the connection even if the data sender does not disable sending
               SYN/ACK after the normal TCP timeout or it receives a second SYN
               with a request for AccECN support, then either the SYN/ACK might
               just have been lost, e.g.&nbsp;due to congestion, or a middlebox
-              might be blocking the AccECN Option. To expedite connection
-              setup, the TCP server SHOULD retransmit the SYN/ACK repeating
-              the same AE, CWR and ECE TCP flags as on the original SYN/ACK
-              but with no AccECN Option. If this retransmission times out, to
-              expedite connection setup, the TCP server SHOULD disable AccECN
-              and ECN for this connection by retransmitting the SYN/ACK with
+              might be blocking AccECN Options. To expedite connection setup,
+              the TCP server SHOULD retransmit the SYN/ACK repeating the same
+              AE, CWR and ECE TCP flags as on the original SYN/ACK but with no
+              AccECN Option. If this retransmission times out, to expedite
+              connection setup, the TCP server SHOULD disable AccECN and ECN
+              for this connection by retransmitting the SYN/ACK with
               AE=CWR=ECE=0 and no AccECN Option.</t>
 
               <t>This approach limits any interference by middleboxes that
               might drop packets with unknown options, even though it is more
               likely that SYN/ACK loss is due to congestion. The TCP server
-              MAY try to send another packet with the AccECN Option at a later
+              MAY try to send another packet with an AccECN Option at a later
               point during the connection but it ought to monitor if that
               packet got lost as well, in which case it SHOULD disable the
-              sending of the AccECN Option for this half-connection.</t>
+              sending of AccECN Options for this half-connection.</t>
 
               <t>Implementers MAY use other fall-back strategies if they are
-              found to be more effective (e.g.&nbsp;retrying the AccECN Option
+              found to be more effective (e.g.&nbsp;retrying an AccECN Option
               for a second time before fall-back - most appropriate during
               high levels of congestion). However, other fall-back strategies
               will need to follow all the rules in <xref
@@ -1849,13 +1848,13 @@ it MUST continue the connection even if the data sender does not disable sending
               feedback have been sent within the same connection.</t>
 
               <t>If the TCP client detects that the first data segment it sent
-              with the AccECN Option was lost, it SHOULD fall back to no
-              AccECN Option on the retransmission. Again, implementers MAY use
-              other fall-back strategies such as attempting to retransmit a
-              second segment with the AccECN Option before fall-back, and/or
-              caching whether the AccECN Option is blocked for subsequent
-              connections. <xref target="RFC9040"/> further discusses caching
-              of TCP parameters and status information.</t>
+              with an AccECN Option was lost, it SHOULD fall back to no AccECN
+              Option on the retransmission. Again, implementers MAY use other
+              fall-back strategies such as attempting to retransmit a second
+              segment with an AccECN Option before fall-back, and/or caching
+              whether AccECN Options are blocked for subsequent connections.
+              <xref target="RFC9040"/> further discusses caching of TCP
+              parameters and status information.</t>
 
               <t>If a middlebox is dropping packets with options it does not
               recognize, a host that is sending little or no data but mostly
@@ -1865,12 +1864,11 @@ it MUST continue the connection even if the data sender does not disable sending
               retransmission. In such cases, the host SHOULD disable the
               sending of the AccECN Option for this half-connection.</t>
 
-              <t>If a host falls back to not sending the AccECN Option, it
-              will continue to process any incoming AccECN Options as
-              normal.</t>
+              <t>If a host falls back to not sending AccECN Options, it will
+              continue to process any incoming AccECN Options as normal.</t>
 
-              <t>Either host MAY include the AccECN Option in a subsequent
-              segment or segments to retest whether the AccECN Option can
+              <t>Either host MAY include AccECN Options in a subsequent
+              segment or segments to retest whether AccECN Options can
               traverse the path.</t>
 
               <t>Similarly, an AccECN end-point MAY separately memorize which
@@ -1898,17 +1896,17 @@ it MUST continue the connection even if the data sender does not disable sending
               interpretation of the ACE field discussed in <xref
               target="accecn_ACE_Safety"/>. However, it cannot make any
               assumption about support of outgoing AccECN Options on the other
-              half connection, so it SHOULD continue to send the AccECN Option
-              itself (unless it has established that sending the AccECN Option
-              is causing packets to be blocked as in <xref
+              half connection, so it SHOULD continue to send AccECN Options
+              itself (unless it has established that sending AccECN Options is
+              causing packets to be blocked as in <xref
               target="accecn_AccECN_Option_Loss"/>).</t>
 
               <t>If a host is in the mode that assumes incoming AccECN Options
               are not available, but it receives an AccECN Option at any later
-              point during the connection, this clearly indicates that the
-              AccECN Option is not blocked on the respective path, and the
-              AccECN endpoint MAY switch out of the mode that assumes the
-              AccECN Option is not available for this half connection.</t>
+              point during the connection, this clearly indicates that AccECN
+              Options are no longer blocked on the respective path, and the
+              AccECN endpoint MAY switch out of the mode that assumes AccECN
+              Options are not available for this half connection.</t>
             </section>
 
             <section anchor="accecn_sec_zero_option"
@@ -1919,7 +1917,7 @@ it MUST continue the connection even if the data sender does not disable sending
               <t><xref target="accecn_init_counters"/> required the Data
               Receiver to initialize the r.e0b and r.e1b counters to a
               non-zero value. Therefore, in either direction the initial value
-              of the EE0B field or EE1B field in the AccECN Option (if one
+              of the EE0B field or EE1B field in an AccECN Option (if one
               exists) ought to be non-zero. If AccECN has been
               negotiated:<list style="symbols">
                   <t>the TCP server MAY check that the initial value of the
@@ -1927,21 +1925,21 @@ it MUST continue the connection even if the data sender does not disable sending
                   segment that acknowledges sequence space that at least
                   covers the ISN plus 1. If it runs a test and either initial
                   value is zero, the server will switch into a mode that
-                  ignores the AccECN Option for this half connection.</t>
+                  ignores AccECN Options for this half connection.</t>
 
                   <t>the TCP client MAY check the initial value of the EE0B
                   field or the EE1B field is non-zero on the SYN/ACK. If it
                   runs a test and either initial value is zero, the client
-                  will switch into a mode that ignores the AccECN Option for
-                  this half connection.</t>
+                  will switch into a mode that ignores AccECN Options for this
+                  half connection.</t>
                 </list></t>
 
-              <t>While a host is in the mode that ignores the AccECN Option it
+              <t>While a host is in the mode that ignores AccECN Options it
               MUST adopt the conservative interpretation of the ACE field
               discussed in <xref target="accecn_ACE_Safety"/>.</t>
 
               <t>Note that the Data Sender MUST NOT test whether the arriving
-              byte counters in the initial AccECN Option have been initialized
+              byte counters in an initial AccECN Option have been initialized
               to specific valid values - the above checks solely test whether
               these fields have been incorrectly zeroed. This allows hosts to
               use different initial values as an additional signalling channel
@@ -1953,23 +1951,23 @@ it MUST continue the connection even if the data sender does not disable sending
             </section>
 
             <section title="Consistency between AccECN Feedback Fields">
-              <t>When the AccECN Option is available it ought to provide more
-              unambiguous feedback. However, it supplements but does not
+              <t>When AccECN Options are available they ought to provide more
+              unambiguous feedback. However, they supplement but do not
               replace the ACE field. An endpoint using AccECN feedback MUST
               always reconcile the information provided in the ACE field with
               that in any AccECN Option, so that the state of the ACE-related
               packet counter can be relied on if future feedback does not
-              carry the AccECN Option.</t>
+              carry an AccECN Option.</t>
 
-              <t>If the AccECN option is present, the s.cep counter might
+              <t>If an AccECN Option is present, the s.cep counter might
               increase more than expected from the increase of the s.ceb
               counter (e.g.&nbsp;due to a CE-marked control packet). The
               sender's response to such a situation is out of scope, and needs
               to be dealt with in a specification that uses ECN-capable
               control packets. Theoretically, this situation could also occur
-              if a middlebox mangled the AccECN Option but not the ACE field.
-              However, the Data Sender has to assume that the integrity of the
-              AccECN Option is sound, based on the above test of the
+              if a middlebox mangled an AccECN Option but not the ACE field.
+              However, the Data Sender has to assume that the integrity of
+              AccECN Options is sound, based on the above test of the
               well-known initial values and optionally other integrity tests
               (<xref target="accecn_Integrity"/>).</t>
 
@@ -1989,8 +1987,8 @@ even if the data sender does not disable sending ECN-capable packets."--></t>
 
           <section anchor="accecn_option_usage"
                    title="Usage of the AccECN TCP Option">
-            <t>If a Data Receiver in AccECN mode intends to use the AccECN TCP
-            Option to provide feedback, the rules below determine when it
+            <t>If a Data Receiver in AccECN mode intends to use AccECN TCP
+            Options to provide feedback, the rules below determine when it
             includes an AccECN TCP Option, and which fields to include, given
             other options might be competing for limited option space:<list
                 style="hanging">
@@ -2094,9 +2092,9 @@ even if the data sender does not disable sending ECN-capable packets."--></t>
 
             <t><xref target="accecn_Algo_ACE_Bytes"/> gives an example
             algorithm to estimate the number of marked bytes from the ACE
-            field alone, if the AccECN Option is not available.</t>
+            field alone, if AccECN Options are not available.</t>
 
-            <t>If a host has determined that segments with the AccECN Option
+            <t>If a host has determined that segments with AccECN Options
             always seem to be discarded somewhere along the path, it is no
             longer obliged to follow any of the rules in this section.</t>
           </section>
@@ -2127,7 +2125,7 @@ even if the data sender does not disable sending ECN-capable packets."--></t>
           <t>A middlebox that is not normalizing the TCP protocol and does not
           itself act as a back-to-back pair of TCP endpoints (i.e.&nbsp;a
           middlebox that intends to be transparent or invisible at the
-          transport layer) ought to forward the AccECN TCP Option unaltered,
+          transport layer) ought to forward AccECN TCP Options unaltered,
           whether or not the length value matches one of those specified in
           <xref target="accecn_option"/>, and whether or not the initial
           values of the byte-counter fields match those in <xref
@@ -2141,7 +2139,7 @@ even if the data sender does not disable sending ECN-capable packets."--></t>
           do not match one of those specified in <xref
           target="accecn_option"/> or <xref target="accecn_init_counters"/>.
           However, to comply with the present AccECN specification, a
-          middlebox MUST NOT change the ACE field; or those fields of the
+          middlebox MUST NOT change the ACE field; or those fields of an
           AccECN Option that are currently specified in <xref
           target="accecn_option"/>; or any AccECN field covered by integrity
           protection (e.g.&nbsp;<xref target="RFC5925"/>).</t>
@@ -2186,7 +2184,7 @@ even though it uses existing TCP fields in unorthodox ways.
               feedback about a run of received packets that were all
               ECN-marked, the ACE field will wrap every 8 acknowledged
               packets. ACE field wrap might be of less concern if packets also
-              carry the AccECN TCP Option. However, note that logic to read an
+              carry AccECN TCP Options. However, note that logic to read an
               AccECN TCP Option is optional to implement (albeit recommended
               &mdash; see <xref target="accecn_option"/>). So one end writing
               an AccECN TCP Option into a packet does not necessarily imply
@@ -2437,15 +2435,15 @@ even though it uses existing TCP fields in unorthodox ways.
           <t hangText="Accuracy:">From each ACK, the Data Sender can infer the
           number of new CE marked segments since the previous ACK. This
           provides better accuracy on CE feedback than classic ECN. In
-          addition if the AccECN Option is present (not blocked by the network
+          addition if an AccECN Option is present (not blocked by the network
           path) the number of bytes marked with CE, ECT(1) and ECT(0) are
           provided.</t>
 
           <t hangText="Overhead:">The AccECN scheme is divided into two parts.
           The essential part reuses the 3 flags already assigned to ECN in the
           TCP header. The supplementary part adds an additional TCP option
-          consuming up to 11 bytes. However, no TCP option is consumed in the
-          SYN.</t>
+          consuming up to 11 bytes. However, no TCP option space is consumed
+          in the SYN.</t>
 
           <t hangText="Ordering:">The order in which marks arrive at the Data
           Receiver is preserved in AccECN feedback, because the Data Receiver
@@ -2462,8 +2460,8 @@ even though it uses existing TCP fields in unorthodox ways.
           capturing the timing of transitions but not wasting resources while
           the state of the signalling system is stable. Within the constraints
           of the change-triggered ACK rules, the receiver can control how
-          frequently it sends the AccECN TCP Option and therefore to some
-          extent it can control the overhead induced by AccECN.</t>
+          frequently it sends AccECN TCP Options and therefore to some extent
+          it can control the overhead induced by AccECN.</t>
 
           <t hangText="Resilience:">All information is provided based on
           counters. Therefore if ACKs are lost, the counters on the first ACK
@@ -2489,7 +2487,7 @@ even though it uses existing TCP fields in unorthodox ways.
           <t hangText="Resilience vs Timeliness and Ordering:">Ordering
           information and the timing of transitions cannot be communicated in
           three cases: i) during ACK loss; ii) if something on the path strips
-          the AccECN Option; or iii) if the Data Receiver is unable to support
+          AccECN Options; or iii) if the Data Receiver is unable to support
           Change-Triggered ACKs. Following ACK reordering, the Data Sender can
           reconstruct the order in which feedback was sent, but not until all
           the missing feedback has arrived.</t>
@@ -2505,21 +2503,20 @@ even though it uses existing TCP fields in unorthodox ways.
           execute.</t>
 
           <t hangText="Integrity:">AccECN is compatible with at least three
-          approaches that can assure the integrity of ECN feedback. If the
-          AccECN Option is stripped the resolution of the feedback is
-          degraded, but the integrity of this degraded feedback can still be
-          assured.</t>
+          approaches that can assure the integrity of ECN feedback. If AccECN
+          Options are stripped the resolution of the feedback is degraded, but
+          the integrity of this degraded feedback can still be assured.</t>
 
           <t hangText="Backward Compatibility:">If only one endpoint supports
           the AccECN scheme, it will fall-back to the most advanced ECN
           feedback scheme supported by the other end.<vspace
-          blankLines="1"/>If the AccECN Option is stripped by a middlebox,
+          blankLines="1"/>If AccECN Options are stripped by a middlebox,
           AccECN still provides basic congestion feedback in the ACE field.
           Further, AccECN can be used to detect mangling of the IP ECN field;
           mangling of the TCP ECN flags; blocking of ECT-marked segments; and
-          blocking of segments carrying the AccECN Option. It can detect these
+          blocking of segments carrying an AccECN Option. It can detect these
           conditions during TCP's 3WHS so that it can fall back to operation
-          without ECN and/or operation without the AccECN Option.</t>
+          without ECN and/or operation without AccECN Options.</t>
 
           <t hangText="Forward Compatibility:">The behaviour of endpoints and
           middleboxes is carefully defined for all reserved or currently
@@ -2554,7 +2551,7 @@ even though it uses existing TCP fields in unorthodox ways.
 
         <c>AE (Accurate ECN)</c>
 
-        <c>RFC XXXX </c>
+        <c>RFC XXXX</c>
 
         <c>Previously used as NS (Nonce Sum) by [RFC3540], which is now
         historic [RFC8311]</c>
@@ -2627,18 +2624,18 @@ even though it uses existing TCP fields in unorthodox ways.
 
     <section anchor="accecn_Security_Considerations"
              title="Security Considerations">
-      <t>If ever the supplementary part of AccECN based on the new AccECN TCP
-      Option is unusable (due for example to middlebox interference) the
-      essential part of AccECN's congestion feedback offers only limited
-      resilience to long runs of ACK loss (see <xref
+      <t>If ever the supplementary part of AccECN based on one of the new
+      AccECN TCP Options is unusable (due for example to middlebox
+      interference) the essential part of AccECN's congestion feedback offers
+      only limited resilience to long runs of ACK loss (see <xref
       target="accecn_ACE_Safety"/>). These problems are unlikely to be due to
       malicious intervention (because if an attacker could strip a TCP option
       or discard a long run of ACKs it could wreak other arbitrary havoc).
       However, it would be of concern if AccECN's resilience could be
       indirectly compromised during a flooding attack. AccECN is still
-      considered safe though, because if the option is not present, the AccECN
-      Data Sender is then required to switch to more conservative assumptions
-      about wrap of congestion indication counters (see <xref
+      considered safe though, because if AccECN Options are not present, the
+      AccECN Data Sender is then required to switch to more conservative
+      assumptions about wrap of congestion indication counters (see <xref
       target="accecn_ACE_Safety"/> and <xref
       target="accecn_Algo_ACE_Wrap"/>).</t>
 
@@ -2650,20 +2647,20 @@ even though it uses existing TCP fields in unorthodox ways.
       particularly because a misbehaving Data Receiver could increase its own
       throughput at the expense of others. AccECN is compatible with the three
       schemes known to assure the integrity of ECN feedback (see <xref
-      target="accecn_Integrity"/> for details). If the AccECN Option is
-      stripped by an incorrectly implemented middlebox, the resolution of the
-      feedback will be degraded, but the integrity of this degraded
-      information can still be assured. Assuring that Data Senders respond
-      appropriately to ECN feedback is possible, but the scope of the present
-      document is confined to the feedback protocol, and excludes the response
-      to this feedback.</t>
+      target="accecn_Integrity"/> for details). If AccECN Options are stripped
+      by an incorrectly implemented middlebox, the resolution of the feedback
+      will be degraded, but the integrity of this degraded information can
+      still be assured. Assuring that Data Senders respond appropriately to
+      ECN feedback is possible, but the scope of the present document is
+      confined to the feedback protocol, and excludes the response to this
+      feedback.</t>
 
       <t>In <xref target="accecn_option"/> a Data Sender is allowed to ignore
       an unrecognized TCP AccECN Option length and read as many whole 3-octet
       fields from it as possible up to a maximum of 3, treating the remainder
       as padding. This opens up a potential covert channel of up to 29B (40 -
-      (2+3*3))B. However, it is really an overt channel (not hidden) and it is
-      no different to the use of unknown TCP options with unknown option
+      (2+3*3)) B. However, it is really an overt channel (not hidden) and it
+      is no different to the use of unknown TCP options with unknown option
       lengths in general. Therefore, where this is of concern, it can already
       be adequately mitigated by regular TCP normalizer technology (see <xref
       target="accecn_middlebox_transparent_normalizers"/>).</t>
@@ -2676,7 +2673,7 @@ even though it uses existing TCP fields in unorthodox ways.
       techniques are available to close them off.</t>
 
       <t>There is a potential concern that a Data Receiver could deliberately
-      omit the AccECN Option pretending that it had been stripped by a
+      omit AccECN Options pretending that they had been stripped by a
       middlebox. No known way can yet be contrived for a receiver to take
       advantage of this behaviour, which seems to always degrade its own
       performance. However, the concern is mentioned here for
@@ -2906,21 +2903,23 @@ even though it uses existing TCP fields in unorthodox ways.
                title="Example Algorithm to Encode/Decode the AccECN Option">
         <t><!--ToDo: Example code to check the AccECN Option fields are consistent with the ACE field.-->The
         example algorithms below show how a Data Receiver in AccECN mode could
-        encode its CE byte counter r.ceb into the ECEB field within the AccECN
+        encode its CE byte counter r.ceb into the ECEB field within an AccECN
         TCP Option, and how a Data Sender in AccECN mode could decode the ECEB
         field into its byte counter s.ceb. The other counters for bytes marked
-        ECT(0) and ECT(1) in the AccECN Option would be similarly encoded and
+        ECT(0) and ECT(1) in an AccECN Option would be similarly encoded and
         decoded.</t>
 
         <t>It is assumed that each local byte counter is an unsigned integer
         greater than 24b (probably 32b), and that the following constant has
         been assigned:</t>
+
         <sourcecode><![CDATA[   DIVOPT = 2^24]]></sourcecode>
 
         <t>Every time a CE marked data segment arrives, the Data Receiver
         increments its local value of r.ceb by the size of the TCP Data.
-        Whenever it sends an ACK with the AccECN Option, the value it writes
-        into the ECEB field is </t>
+        Whenever it sends an ACK with an AccECN Option, the value it writes
+        into the ECEB field is</t>
+
         <sourcecode><![CDATA[   ECEB = r.ceb % DIVOPT]]></sourcecode>
 
         <t>where '%' is the remainder operator.</t>
@@ -2939,6 +2938,7 @@ even though it uses existing TCP fields in unorthodox ways.
         calculates the minimum non-negative difference d.ceb between the ECEB
         field and its local s.ceb counter, using modulo arithmetic as
         follows:</t>
+
         <figure>
           <sourcecode><![CDATA[   if ((newlyAckedB > 0) || (newlyAckedT > 0)) {
        d.ceb = (ECEB + DIVOPT - (s.ceb % DIVOPT)) % DIVOPT
@@ -2949,6 +2949,7 @@ even though it uses existing TCP fields in unorthodox ways.
 
         <t>For example, if s.ceb is 33,554,433 and ECEB is 1461 (both
         decimal), then</t>
+
         <figure>
           <sourcecode><![CDATA[   s.ceb % DIVOPT = 1
    d.ceb = (1461 + 2^24 - 1) % 2^24
@@ -2976,22 +2977,24 @@ even though it uses existing TCP fields in unorthodox ways.
         field of the next ACK to arrive.</t>
 
         <t>Two variants of the algorithm are given: i) a more conservative
-        variant for a Data Sender to use if it detects that the AccECN Option
-        is not available (see <xref target="accecn_ACE_Safety"/> and <xref
+        variant for a Data Sender to use if it detects that AccECN Options are
+        not available (see <xref target="accecn_ACE_Safety"/> and <xref
         target="accecn_Mbox_Interference"/>); and ii) a less conservative
         variant that is feasible when complementary information is available
-        from the AccECN Option.</t>
+        from AccECN Options.</t>
 
         <section title="Safety Algorithm without the AccECN Option">
           <t>It is assumed that each local packet counter is a sufficiently
           sized unsigned integer (probably 32b) and that the following
           constant has been assigned:</t>
+
           <sourcecode><![CDATA[   DIVACE = 2^3]]></sourcecode>
 
           <t>Every time an Acceptable CE marked packet arrives (<xref
           target="accecn_sec_ACE_feedback"/>), the Data Receiver increments
           its local value of r.cep by 1. It repeats the same value of ACE in
           every subsequent ACK until the next CE marking arrives, where</t>
+
           <sourcecode><![CDATA[   ACE = r.cep % DIVACE.]]></sourcecode>
 
           <t>If the Data Sender received an earlier value of the counter that
@@ -3004,6 +3007,7 @@ even though it uses existing TCP fields in unorthodox ways.
           superseded, the Data Sender calculates the minimum difference d.cep
           between the ACE field and its local s.cep counter, using modulo
           arithmetic as follows:</t>
+
             <sourcecode><![CDATA[   if ((newlyAckedB > 0) || (newlyAckedT > 0))
        d.cep = (ACE + DIVACE - (s.cep % DIVACE)) % DIVACE]]></sourcecode>
 
@@ -3032,6 +3036,7 @@ even though it uses existing TCP fields in unorthodox ways.
           the Data Sender could assume that this acknowledges newlyAckedPkt
           full-sized segments, where newlyAckedPkt = newlyAckedB/MSS. Then it
           could assume that the ACE field incremented by</t>
+
             <sourcecode><![CDATA[    dSafer.cep = newlyAckedPkt - ((newlyAckedPkt - d.cep) % DIVACE),]]></sourcecode>
 
           <t>For example, imagine an ACK acknowledges newlyAckedPkt=9 more
@@ -3070,6 +3075,7 @@ even though it uses existing TCP fields in unorthodox ways.
           segments were on average at least 5% of full-sized as long as ECN
           marking was 5% or less. Assuming it was used, the Data Sender would
           increment its packet counter as follows:</t>
+
             <sourcecode><![CDATA[   s.cep += dSafer.cep]]></sourcecode>
 
           <t>If missing acknowledgement numbers arrive later (due to
@@ -3087,10 +3093,10 @@ even though it uses existing TCP fields in unorthodox ways.
           <!--ToDo: Ilpo says this algo is useless, 'cos (I think) you don't have the state of d.ceb and d.cep at the same time.
 See emails 3/1/20.-->
 
-          <t>When the AccECN Option is available on the ACKs before and after
+          <t>When AccECN Options are available on the ACKs before and after
           the possible sequence of ACK losses, if the Data Sender only needs
-          CE-marked bytes, it will have sufficient information in the AccECN
-          Option without needing to process the ACE field. If for some reason
+          CE-marked bytes, it will have sufficient information in AccECN
+          Options without needing to process the ACE field. If for some reason
           it needs CE-marked packets, if dSafer.cep is different from d.cep,
           it can determine whether d.cep is likely to be a safe enough
           estimate by checking whether the average marked segment size (s =
@@ -3098,6 +3104,7 @@ See emails 3/1/20.-->
           newly CE-marked bytes - see <xref
           target="accecn_Algo_Option_Coding"/>). Specifically, it could use
           the following algorithm:</t>
+
           <figure>
             <sourcecode><![CDATA[   SAFETY_FACTOR = 2
    if (dSafer.cep > d.cep) {
@@ -3110,7 +3117,7 @@ See emails 3/1/20.-->
            % because d.cep must have been too small
    }
 ]]></sourcecode>
-          </figure>
+         </figure>
 
           <t>The chart below shows when the above algorithm will consider
           d.cep can replace dSafer.cep as a safe enough estimate of the number
@@ -3162,7 +3169,7 @@ MSS/SAFETY_FACTOR+--------------+    safest
 
       <section anchor="accecn_Algo_ACE_Bytes"
                title="Example Algorithm to Estimate Marked Bytes from Marked Packets">
-        <t>If the AccECN Option is not available, the Data Sender can only
+        <t>If AccECN Options are not available, the Data Sender can only
         decode CE-marking from the ACE field in packets. Every time an ACK
         arrives, to convert this into an estimate of CE-marked bytes, it needs
         an average of the segment size, s_ave. Then it can add or subtract
@@ -3177,6 +3184,7 @@ MSS/SAFETY_FACTOR+--------------+    safest
         merely maintain a counter packets_in_flight for the number of packets
         in flight (including control packets), which is reset once per RTT.
         Either way, it would estimate s_ave as:</t>
+
         <sourcecode><![CDATA[   s_ave ~= flightsize / packets_in_flight,]]></sourcecode>
 
         <t>where flightsize is the variable that TCP already maintains for the
@@ -3186,10 +3194,11 @@ MSS/SAFETY_FACTOR+--------------+    safest
 
         <t>An alternative would be to maintain an exponentially weighted
         moving average (EWMA) of the segment size:</t>
+
         <sourcecode><![CDATA[   s_ave = a * s + (1-a) * s_ave,]]></sourcecode>
 
-        <t>where a is the decay constant for the EWMA. However, then it
-        is necessary to choose a good value for this constant, which ought to
+        <t>where a is the decay constant for the EWMA. However, then it is
+        necessary to choose a good value for this constant, which ought to
         depend on the number of packets in flight. Also the decay constant
         needs to be power of two to avoid floating point arithmetic.</t>
       </section>
@@ -3246,18 +3255,18 @@ MSS/SAFETY_FACTOR+--------------+    safest
         can fall back to the highest version of feedback protocol that both
         ends support, as explained in <xref target="accecn_Negotiation"/>.</t>
 
-        <t>If AccECN had used the more orthodox approach of a TCP option, it
-        would still have had to set the two ECN flags in the main TCP header,
-        in order to be able to fall back to Classic RFC 3168 ECN, or to
-        disable ECN support, without another round of negotiation. Then AccECN
-        would also have had to handle all the different ways that servers
-        currently respond to settings of the ECN flags in the main TCP header,
-        including all the conflicting cases where a server might have said it
-        supported one approach in the flags and another approach in the new
-        TCP option. And AccECN would have had to deal with all the additional
-        possibilities where a middlebox might have mangled the ECN flags, or
-        removed the TCP option. Thus, usage of the 3rd reserved TCP header
-        flag simplified the protocol.</t>
+        <t>If AccECN capability negotiation had used the more orthodox approach
+        of a TCP option, it would still have had to set the two ECN
+        flags in the main TCP header, in order to be able to fall back to
+        Classic RFC 3168 ECN, or to disable ECN support, without another round
+        of negotiation. Then AccECN would also have had to handle all the
+        different ways that servers currently respond to settings of the ECN
+        flags in the main TCP header, including all the conflicting cases
+        where a server might have said it supported one approach in the flags
+        and another approach in a new TCP option. And AccECN would have had to
+        deal with all the additional possibilities where a middlebox might
+        have mangled the ECN flags, or removed TCP options. Thus, usage of the
+        3rd reserved TCP header flag simplified the protocol.</t>
 
         <t>The third flag was used in a way that could be distinguished from
         the ECN nonce, in case any nonce deployment was encountered. Previous
@@ -3331,12 +3340,12 @@ MSS/SAFETY_FACTOR+--------------+    safest
             than 'negotiate' because, at this late stage in the 3WHS, it would
             be too late for a negotiation between the endpoints to be
             completed. A similar requirement not to reject unexpected initial
-            values in the TCP option (<xref target="accecn_sec_zero_option"/>)
-            is for the same purpose. If traversal of the TCP option were
-            reliable, this would have enabled a far wider range of future
-            variation of the whole AccECN protocol. Nonetheless, it could be
-            used to reliably negotiate a wide range of variation in the
-            semantics of the AccECN Option.</t>
+            values in AccECN TCP Options (<xref
+            target="accecn_sec_zero_option"/>) is for the same purpose. If
+            traversal of AccECN TCP Options were reliable, this would have
+            enabled a far wider range of future variation of the whole AccECN
+            protocol. Nonetheless, it could be used to reliably negotiate a
+            wide range of variation in the semantics of the AccECN Option.</t>
 
             <t hangText="Future non-AccECN variants:">Five codepoints out of
             the 8 possible in the 3 TCP header flags used by AccECN are unused
