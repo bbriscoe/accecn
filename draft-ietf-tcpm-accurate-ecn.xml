@@ -2704,41 +2704,6 @@ even though it uses existing TCP fields in unorthodox ways.
       completeness.</t>
     </section>
 
-    <!-- ================================================================ -->
-
-    <section anchor="accecn_Acknowledgements" numbered="true"
-             title="Acknowledgements">
-      <t>We want to thank Koen De Schepper, Praveen Balasubramanian, Michael
-      Welzl, Gorry Fairhurst, David Black, Spencer Dawkins, Michael Scharf,
-      Michael T&uuml;xen, Yuchung Cheng, Kenjiro Cho, Olivier Tilmans, Ilpo
-      J&auml;rvinen, Neal Cardwell, Yoshifumi Nishida, Martin Duke, Jonathan
-      Morton, Vidhi Goel and Alex Burr for their input and discussion. The
-      idea of using the three ECN-related TCP flags as one field for more
-      accurate TCP-ECN feedback was first introduced in the re-ECN protocol
-      that was the ancestor of ConEx.</t>
-
-      <t>Bob Briscoe was part-funded by the Comcast Innovation Fund, the
-      European Community under its Seventh Framework Programme through the
-      Reducing Internet Transport Latency (RITE) project (ICT-317700) and
-      through the Trilogy 2 project (ICT-317756), and the Research Council of
-      Norway through the TimeIn project. The views expressed here are solely
-      those of the authors.</t>
-
-      <t>Mirja K&uuml;hlewind was partly supported by the European Commission
-      under Horizon 2020 grant agreement no. 688421 Measurement and
-      Architecture for a Middleboxed Internet (MAMI), and by the Swiss State
-      Secretariat for Education, Research, and Innovation under contract no.
-      15.0268. This support does not imply endorsement.</t>
-    </section>
-
-    <!-- ================================================================ -->
-
-    <section anchor="accecn_Comments_Solicited" numbered="true"
-             removeInRFC="true" title="Comments Solicited">
-      <t>Comments and questions are encouraged and very welcome. They can be
-      addressed to the IETF TCP maintenance and minor modifications working
-      group mailing list &lt;tcpm@ietf.org&gt;, and/or to the authors.</t>
-    </section>
   </middle>
 
   <back>
@@ -3416,6 +3381,41 @@ MSS/SAFETY_FACTOR+--------------+    safest
             combination of fields yet to be invented.</t>
           </list></t>
       </section>
+    </section>
+    <!-- ================================================================ -->
+
+    <section anchor="accecn_Acknowledgements" numbered="false"
+             title="Acknowledgements">
+      <t>We want to thank Koen De Schepper, Praveen Balasubramanian, Michael
+      Welzl, Gorry Fairhurst, David Black, Spencer Dawkins, Michael Scharf,
+      Michael T&uuml;xen, Yuchung Cheng, Kenjiro Cho, Olivier Tilmans, Ilpo
+      J&auml;rvinen, Neal Cardwell, Yoshifumi Nishida, Martin Duke, Jonathan
+      Morton, Vidhi Goel and Alex Burr for their input and discussion. The
+      idea of using the three ECN-related TCP flags as one field for more
+      accurate TCP-ECN feedback was first introduced in the re-ECN protocol
+      that was the ancestor of ConEx.</t>
+
+      <t>Bob Briscoe was part-funded by the Comcast Innovation Fund, the
+      European Community under its Seventh Framework Programme through the
+      Reducing Internet Transport Latency (RITE) project (ICT-317700) and
+      through the Trilogy 2 project (ICT-317756), and the Research Council of
+      Norway through the TimeIn project. The views expressed here are solely
+      those of the authors.</t>
+
+      <t>Mirja K&uuml;hlewind was partly supported by the European Commission
+      under Horizon 2020 grant agreement no. 688421 Measurement and
+      Architecture for a Middleboxed Internet (MAMI), and by the Swiss State
+      Secretariat for Education, Research, and Innovation under contract no.
+      15.0268. This support does not imply endorsement.</t>
+    </section>
+
+    <!-- ================================================================ -->
+
+    <section anchor="accecn_Comments_Solicited" numbered="false"
+             removeInRFC="true" title="Comments Solicited">
+      <t>Comments and questions are encouraged and very welcome. They can be
+      addressed to the IETF TCP maintenance and minor modifications working
+      group mailing list &lt;tcpm@ietf.org&gt;, and/or to the authors.</t>
     </section>
   </back>
 </rfc>
