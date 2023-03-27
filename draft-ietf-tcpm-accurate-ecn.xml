@@ -1634,8 +1634,8 @@ it MUST continue the connection even if the data sender does not disable sending
               estimate how many segments could have been acknowledged. An
               example algorithm to implement this policy is given in <xref
               target="accecn_Algo_ACE_Wrap"/>. An implementation MAY use an
-              alternative algorithm as long as it satisfies these
-              requirements.</t>
+              alternative algorithm as long as it satisfies the requirements
+              in this subsection.</t>
 
               <t>If missing acknowledgement numbers arrive later (reordering)
               and prove that the counter did not cycle, the Data Sender MAY
