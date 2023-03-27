@@ -300,7 +300,8 @@
             <t hangText="Data Sender:">The endpoint of a TCP half-connection
             that sends data and receives AccECN feedback.</t>
           </list>
-        </t>
+          In a mild abuse of terminology, this document sometimes refers to 'TCP
+          packets' instead of 'TCP segments'.</t>
 
         <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
         "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
@@ -429,9 +430,9 @@
 
       <t>The essential part overloads the previous definition of the three
       flags in the TCP header that had been assigned for use by ECN. This
-      design choice deliberately replaces the classic ECN feedback protocol,
-      rather than leaving classic ECN feedback intact and adding more accurate
-      feedback separately because:<list style="symbols">
+      design choice deliberately allows AccECN peers to replace the classic ECN
+      feedback protocol, rather than leaving classic ECN feedback intact and
+      adding more accurate feedback separately because:<list style="symbols">
           <t>this efficiently reuses scarce TCP header space, given TCP option
           space is approaching saturation;</t>
 
@@ -879,10 +880,12 @@ deliberately to reduce complexity.-->
                  title="Forward Compatibility">
           <t>If a TCP Server that implements AccECN receives a SYN with the
           three TCP header flags (AE, CWR and ECE) set to any combination
-          other than 000, 011 or 111, it MUST negotiate the use of AccECN as
-          if they had been set to 111. This ensures that future uses of the
+          other than 000, 011 or 111 and it does not have logic specific to such
+          a combination, it MUST negotiate the use of AccECN as
+          if the three flags had been set to 111. This ensures that future uses of the
           other combinations on a SYN can rely on consistent behaviour from
-          the installed base of AccECN servers.</t>
+          the installed base of AccECN servers. See
+          <xref target="accecn_space_evolution"/> for related discussion.</t>
 
           <aside>
           <t>For the avoidance of doubt, the behaviour described in the
@@ -1586,41 +1589,32 @@ it MUST continue the connection even if the data sender does not disable sending
               sender is in slow-start, then to implement change-triggered ACKs
               while the sender is in slow-start, and offload otherwise.</t>
 
-              <t>With ECN-capable pure ACKs <xref
-              target="I-D.ietf-tcpm-generalized-ecn"/>, the
-              'Increment-Triggered ACKs' rule could cause ECN-marked pure ACKs
-              to trigger further ACKs. Although TCP normally only ACKs newly
-              delivered data, in this case the ACKs of ACKs would feed back
-              new congestion state. The minimum of 3 for 'n' in this case
-              ensures that, even if there is pathological congestion in both
-              directions, any resulting ping-pong of ACKs will be rapidly
-              damped.</t>
+              <t>In a unidirectional data scenario from host A to B where both
+              hosts support AccECN, if the Data Receiver (B) has chosen to use
+              ECN-capable pure ACKs <xref
+              target="I-D.ietf-tcpm-generalized-ecn"/> and enough of these
+              ACKs become CE-marked, then the 'Increment-Triggered ACKs' rule
+              ensures that the Data Sender (A) gives B sufficient feedback
+              about this congestion. Normally, the Data Sender (A) can piggyback
+              that feedback on its data. But if A stops sending data, the second
+              part of the 'Increment-Triggered ACKs' rule ensures that A emits a
+              pure ACK for at least every third CE-marked incoming ACK over the
+              subsequent round trip.</t>
 
-              <t>These ACKs of ACKs could be misidentified as duplicate ACKs
-              in certain circumstances described below. Therefore, a host in
-              AccECN mode that is sending ECN-capable pure ACKs SHOULD add one
-              of the following additional checks when it tests whether an
-              incoming pure ACK is a duplicate:<list style="symbols">
-                  <t>If SACK has been negotatiated for the connection, but
-                  there is no SACK option on the incoming pure ACK, it is not
-                  a duplicate;</t>
+              <t>Although TCP normally only ACKs newly delivered data, in this
+              case it is mandatory for A to emit ACKs of ACKs because they feed
+              back new congestion state (useful in case B starts sending). The
+              minimum of 3 for 'n' in this case ensures that, even if A also
+              uses ECN-capable pure ACKs, and even if there is pathological
+              congestion in both directions, any resulting ping-pong of ACKs
+              will be rapidly damped.</t>
 
-                  <t>If timestamps are in use, and the incoming pure ACK
-                  echoes a timestamp older than the oldest unacknowledged
-                  data, it is not a duplicate.</t>
-                </list>In the unlikely event that neither SACK nor timestamps
-              are in use, or if the implementation has opted not to include
-              either of the above two checks, it SHOULD NOT send ECN-capable
-              pure ACKs. If it does, it could lead to false detection of
-              duplicate ACKs, causing spurious retransmission(s) with a
-              resulting unnecessary reduction in congestion window; but only
-              in certain circumstances. Specifically, if TCP peer A has been
-              sending data, then receiving, then within one round trip it
-              starts sending again, and the ECN-capable pure ACKs it sent in
-              the previous round encounter heavy enough congestion to trigger
-              peer B to invoke the above 'n'-CE-mark rule. Also note that
-              falsely considering these ACKs as duplicates would incorrectly
-              imply that data left the network.</t>
+              <t>Certain measures are necessary to prevent incoming ACKs of ACKs
+              being mistaken for duplicate ACKs in some circumstances. However,
+              ACKs of ACKs can only arise if the original ACKs are ECN-capable.
+              Therefore the necessary measures are specified in
+              [I-D.ietf-tcpm-generalized-ecn] as a prerequisite for sending
+              ECN-capable ACKs in the first place.</t>
             </section>
 
             <section anchor="accecn_ACE_Safety_S"
