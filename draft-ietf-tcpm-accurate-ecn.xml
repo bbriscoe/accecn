@@ -386,7 +386,7 @@
         <?rfc needLines="8" ?>
 
         <figure align="center" anchor="accecn_Fig_TCPHdr"
-                title="The (post-ECN Nonce) definition of the TCP header flags">
+                title="TCP header flags as defined before the NS flag reverted to Reserved">
           <artwork align="center"><![CDATA[             
   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
 +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
@@ -618,7 +618,7 @@ deliberately to reduce complexity.-->
           <xref target="accecn_IANA_Considerations"/>.</t>
 
           <figure align="center" anchor="accecn_Fig_TCPHdr_AE"
-                  title="The (post-AccECN) definition of the TCP header flags                  during the TCP handshake">
+                  title="The new definition of the TCP header flags during the TCP handshake">
             <artwork align="center"><![CDATA[             
   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
 +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
