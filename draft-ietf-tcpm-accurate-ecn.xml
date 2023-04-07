@@ -386,7 +386,7 @@
         <?rfc needLines="8" ?>
 
         <figure align="center" anchor="accecn_Fig_TCPHdr"
-                title="TCP header flags as defined before the NS flag reverted to Reserved">
+                title="TCP header flags as defined before the Nonce Sum flag reverted to Reserved">
           <artwork align="center"><![CDATA[             
   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
 +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
