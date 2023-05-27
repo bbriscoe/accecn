@@ -265,8 +265,7 @@
       </section>
 
       <section anchor="accecn_Terminology" title="Terminology">
-        <t>
-          <list style="hanging">
+        <t><list style="hanging">
             <t hangText="AccECN:">The more accurate ECN feedback scheme will
             be called AccECN for short.</t>
 
@@ -299,9 +298,8 @@
 
             <t hangText="Data Sender:">The endpoint of a TCP half-connection
             that sends data and receives AccECN feedback.</t>
-          </list>
-          In a mild abuse of terminology, this document sometimes refers to 'TCP
-          packets' instead of 'TCP segments'.</t>
+          </list> In a mild abuse of terminology, this document sometimes
+        refers to 'TCP packets' instead of 'TCP segments'.</t>
 
         <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
         "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
@@ -430,9 +428,10 @@
 
       <t>The essential part overloads the previous definition of the three
       flags in the TCP header that had been assigned for use by ECN. This
-      design choice deliberately allows AccECN peers to replace the classic ECN
-      feedback protocol, rather than leaving classic ECN feedback intact and
-      adding more accurate feedback separately because:<list style="symbols">
+      design choice deliberately allows AccECN peers to replace the classic
+      ECN feedback protocol, rather than leaving classic ECN feedback intact
+      and adding more accurate feedback separately because:<list
+          style="symbols">
           <t>this efficiently reuses scarce TCP header space, given TCP option
           space is approaching saturation;</t>
 
@@ -648,8 +647,6 @@ deliberately to reduce complexity.-->
           combination of flags on the SYN/ACK unless the preceding SYN
           requested support for AccECN as above.</t>
 
-          <t/>
-
           <t>Once a TCP Client (A) has sent the above SYN to declare that it
           supports AccECN, and once it has received the above SYN/ACK segment
           that confirms that the TCP Server supports AccECN, the TCP Client
@@ -662,8 +659,8 @@ deliberately to reduce complexity.-->
           <t>The procedure for the TCP Client to follow if a SYN/ACK does not
           arrive before its retransmission timer expires is given in <xref
           target="accecn_sec_SYN_rexmt"/>. If more than one SYN arrives at the
-          TCP Server (B), the above requirement to set the TCP flags on the
-          SYN/ACK MUST feed back the IP-ECN field on the latest SYN to
+          TCP Server (B), the above requirement means the TCP flags it sets on
+          the SYN/ACK MUST feed back the IP-ECN field on the latest SYN to
           arrive.</t>
         </section>
 
@@ -671,7 +668,7 @@ deliberately to reduce complexity.-->
                  title="Backward Compatibility">
           <t>The three flags set to 1 to indicate AccECN support on the SYN
           have been carefully chosen to enable natural fall-back to prior
-          stages in the evolution of ECN, as above. <xref
+          stages in the evolution of ECN. <xref
           target="accecn_Tab_Negotiation"/> tabulates all the negotiation
           possibilities for ECN-related capabilities that involve at least one
           AccECN-capable host. The entries in the first two columns have been
@@ -880,29 +877,30 @@ deliberately to reduce complexity.-->
                  title="Forward Compatibility">
           <t>If a TCP Server that implements AccECN receives a SYN with the
           three TCP header flags (AE, CWR and ECE) set to any combination
-          other than 000, 011 or 111 and it does not have logic specific to such
-          a combination, it MUST negotiate the use of AccECN as
-          if the three flags had been set to 111. This ensures that future uses of the
-          other combinations on a SYN can rely on consistent behaviour from
-          the installed base of AccECN servers. See
-          <xref target="accecn_space_evolution"/> for related discussion.</t>
+          other than 000, 011 or 111 and it does not have logic specific to
+          such a combination, it MUST negotiate the use of AccECN as if the
+          three flags had been set to 111. This ensures that future uses of
+          the other combinations on a SYN can rely on consistent behaviour
+          from the installed base of AccECN servers. See <xref
+          target="accecn_space_evolution"/> for related discussion.</t>
 
           <aside>
-          <t>For the avoidance of doubt, the behaviour described in the
-          present specification applies whether or not the three remaining
-          reserved TCP header flags are zero.</t>
+            <t>For the avoidance of doubt, the behaviour described in the
+            present specification applies whether or not the three remaining
+            reserved TCP header flags are zero.</t>
           </aside>
         </section>
 
         <section anchor="accecn_sec_SYN_rexmt"
                  title="Retransmission of the SYN">
-          <t>If the sender of an AccECN SYN times out before receiving the
-          SYN/ACK, the sender SHOULD attempt to negotiate the use of AccECN at
-          least one more time by continuing to set all three TCP ECN flags on
-          the first retransmitted SYN (using the usual retransmission
+          <t>If the sender of an AccECN SYN (the TCP client) times out before
+          receiving the SYN/ACK, it SHOULD attempt to negotiate the use of
+          AccECN at least one more time by continuing to set all three TCP ECN
+          flags on the first retransmitted SYN (using the usual retransmission
           time-outs). If this first retransmission also fails to be
-          acknowledged, the sender SHOULD send subsequent retransmissions of
-          the SYN with the three TCP-ECN flags cleared (AE=CWR=ECE=0). A
+          acknowledged, the TCP client SHOULD send subsequent retransmissions
+          of the SYN with the three TCP-ECN flags cleared (AE=CWR=ECE=0, which
+          is termed a non-ECN-setup SYN <xref target="RFC3168"/>). A
           retransmitted SYN MUST use the same ISN as the original SYN.</t>
 
           <t>Retrying once before fall-back adds delay in the case where a
@@ -937,6 +935,85 @@ deliberately to reduce complexity.-->
           <t>The fall-back procedure if the TCP Server receives no ACK to
           acknowledge a SYN/ACK that tried to negotiate AccECN is specified in
           <xref target="accecn_Mbox_Interference"/>.</t>
+
+          <section title="Feedback Mode with Mixed Types of SYN">
+            <t>When a TCP client that has sent both AccECN and non-ECN-setup
+            SYNs (<xref target="accecn_sec_SYN_rexmt"/>) eventually receives a
+            SYN/ACK, it follows the rules below, which also cater for the
+            possibility of reordering:<list style="symbols">
+                <t>Whether such a TCP client receives an AccECN SYN/ACK or a
+                non-ECN-setup SYN/ACK (as defined in <xref
+                target="RFC3168"/>), the TCP client MUST enter AccECN feedback
+                mode and stay in AccECN mode, irrespective of whether it later
+                receives more SYN/ACKs of either of these two types;<list
+                    style="symbols">
+                    <t>if the TCP client has received at least one AccECN
+                    SYN/ACK, it MAY set ECT on outgoing packets for the rest
+                    of the connection;</t>
+
+                    <t>otherwise, if the TCP client has not received any
+                    AccECN SYN/ACKs, it MUST NOT set ECT on any outgoing
+                    packets for the rest of the connection.</t>
+                  </list></t>
+
+                <t>If such a TCP client receives an ECN-setup SYN/ACK (as
+                defined in <xref target="RFC3168"/>), it must enter ECN
+                feedback mode and subsequently follow <xref target="RFC3168"/>
+                for the rest of the connection.</t>
+              </list></t>
+          </section>
+
+          <section title="Feedback Mode with Mixed Types of SYN/ACK">
+            <t>A TCP server can have to send multiple SYN/ACKs indicating
+            different feedback modes. For instance, when falling back to
+            sending a non-ECN-setup SYN/ACK (as defined in <xref
+            target="RFC3168"/>) after previous AccECN SYN/ACKs have timed out
+            (<xref target="accecn_AccECN_Option_Loss"/>); or because
+            retransmissions of the SYN arrive that have fallen back from
+            AccECN to non-ECN <xref target="accecn_sec_SYN_rexmt"/>. The
+            following rules address such cases, including the possibility that
+            retransmissions of the SYN arrive out of order.</t>
+
+            <t>If a TCP server that supports AccECN first receives an AccECN
+            SYN, it will enter AccECN feedback mode and send an AccECN SYN/ACK
+            according to <xref target="accecn_Tab_Negotiation"/>. If
+            subsequently a TCP server in AccECN mode receives a non-ECN-setup
+            SYN, :<list style="symbols">
+                <t>it MUST send a non-ECN-setup SYN/ACK;</t>
+              </list></t>
+
+            <t>If a TCP server in AccECN mode sends a non-ECN-setup SYN/ACK
+            for this or any other reason, e.g. as a fall-back after a
+            retransmission time-out, then:<list style="symbols">
+                <t>it MUST stay in AccECN feedback mode;</t>
+
+                <t>and it SHOULD NOT set ECT on any non-ECN-setup SYN/ACKs it
+                sends (even if taking part in an <xref target="RFC8311"/>
+                experiment that allows this);</t>
+
+                <t>but it MAY set ECT on other packets for the rest of the
+                connection.</t>
+              </list></t>
+
+            <t>If a TCP server that supports AccECN first receives a
+            non-ECN-setup SYN, it will enter not ECN feedback mode and send a
+            non-ECN-setup SYN/ACK according to <xref
+            target="accecn_Tab_Negotiation"/>. If subsequently this TCP
+            server:<list style="symbols">
+                <t>receives an AccECN SYN, it MUST still send a non-ECN-setup
+                SYN/ACK (i.e., it MUST NOT send an AccECN SYN/ACK), then:<list
+                    style="symbols">
+                    <t>it MUST stay in not ECN feedback mode;</t>
+
+                    <t>and it MUST NOT set ECT on any packet in the
+                    connection.</t>
+                  </list></t>
+              </list></t>
+
+            <t><xref target="accecn_implications_accecn_mode"/> gives the full
+            set of requirements generalized from the above specific cases for
+            any host in AccECN feedback mode.</t>
+          </section>
         </section>
 
         <section anchor="accecn_implications_accecn_mode"
@@ -946,8 +1023,8 @@ deliberately to reduce complexity.-->
           server.</t>
 
           <t>A host in AccECN mode has the rights and obligations concerning
-          the use of ECN defined below, which build on those in <xref
-          target="RFC3168"/> as updated by <xref target="RFC8311"/>.</t>
+          the use of ECN defined below, which update those in Section 6.1.1 of
+          <xref target="RFC3168"/>.</t>
 
           <t>Switching feedback negotiation (e.g.&nbsp;fall-back):<list
               style="symbols">
@@ -970,9 +1047,15 @@ deliberately to reduce complexity.-->
                   connection;</t>
 
                   <t>SHOULD NOT set ECT on any packet if it has received at
-                  least one valid SYN or Acceptable SYN/ACK with AE=CWR=ECE=0.
-                  A "valid SYN" has the same port numbers and the same ISN as
-                  the SYN that caused the server to enter AccECN mode;</t>
+                  least one valid SYN or Acceptable SYN/ACK with AE=CWR=ECE=0
+                  (as specified in Section 6.1 of <xref target="RFC3168"/>). A
+                  "valid SYN" has the same port numbers and the same ISN as
+                  the SYN that caused the server to enter AccECN mode.<vspace
+                  blankLines="1"/>Nonetheless, it MUST still remain in AccECN
+                  mode and, as Data Receiver of the other half-connection, it
+                  MUST still feed back the information in the IP-ECN field of
+                  incoming packets using Accurate ECN feedback, as specified
+                  in <xref target="accecn_feedback"/>;</t>
                 </list>The above rules are necessary because, if one peer were
               to negotiate the feedback mode in two different types of
               handshake, it would not be possible for the other peer to know
@@ -993,26 +1076,39 @@ deliberately to reduce complexity.-->
                   <t>does not have to set ECT on any packet (for instance if
                   it has reason to believe such a packet would be
                   blocked).</t>
+                </list>A Data Sender:<list style="symbols">
+                  <t>MUST NOT set ECT unless:<list style="symbols">
+                      <t>it is in AccECN mode;</t>
+
+                      <t>it has fallen back to Classic ECN feedback mode (when
+                      <xref target="RFC3168"/> applies - see <xref
+                      target="accecn_sec_backward_compat"/>);</t>
+
+                      <t>or it complies with an RFC that specifies that ECT
+                      can be set on a SYN (see Section 4.3 of <xref
+                      target="RFC8311"/>).</t>
+                    </list></t>
                 </list></t>
             </list></t>
 
           <t>Congestion response:<list style="symbols">
               <t>A Data Sender in AccECN mode:<list style="symbols">
-                  <t>is still obliged to respond appropriately to AccECN
-                  feedback that indicates there were ECN marks on packets it
-                  had previously sent, as defined in Section 6.1 of <xref
+                  <t>is obliged to respond appropriately to AccECN feedback
+                  that indicates there were ECN marks on packets it had
+                  previously sent, as defined in Section 6.1 of <xref
                   target="RFC3168"/> and updated by Sections 2.1 and 4.1 of
                   <xref target="RFC8311"/>.<vspace blankLines="1"/>In general,
-                  a Data Sender is obliged to respond to congestion feedback
-                  even when it is solely sending non-ECN-capable packets (for
-                  rationale, some examples and some exceptions see <xref
-                  target="accecn_sec_ecn-mangling"/>, <xref
+                  a Data Sender is still obliged to respond to congestion
+                  feedback even when it is solely sending non-ECN-capable
+                  packets (for rationale, some examples and some exceptions
+                  see <xref target="accecn_sec_ecn-mangling"/>, <xref
                   target="accecn_sec_ACE_init_invalid"/>).</t>
 
                   <t>commits to respond appropriately to incoming indications
-                  of congestion, even if it sends a SYN packet with
-                  AE=CWR=ECE=0 in a later transmission within the same TCP
-                  connection;</t>
+                  of congestion, even if it sends or receives a non-ECN-setup
+                  SYN or non-ECN-setup SYN/ACK packet with AE=CWR=ECE=0 in a
+                  later transmission within the same TCP connection, as
+                  defined in Section 6.1 of <xref target="RFC3168"/>;</t>
 
                   <t>MUST NOT set CWR to indicate it has received and
                   responded to indications of congestion.<vspace
@@ -1027,7 +1123,7 @@ deliberately to reduce complexity.-->
               <t>A Data Receiver in AccECN mode:<list style="symbols">
                   <t>MUST feed back the information in the IP-ECN field of
                   incoming packets using Accurate ECN feedback, as specified
-                  in <xref target="accecn_feedback"/> below.</t>
+                  in <xref target="accecn_feedback"/>;</t>
 
                   <t>MUST NOT use reception of packets with ECT set in the
                   IP-ECN field as an implicit signal that the peer is
@@ -1145,9 +1241,6 @@ deliberately to reduce complexity.-->
             to the rule that the ACE field carries the 3 least significant
             bits of the r.cep counter on packets with SYN=0.</t>
 
-            <t>The TCP Client MUST also use the handshake encoding for the
-            pure ACK of any retransmitted SYN/ACK.</t>
-
             <t>Normally, a TCP Client acknowledges a SYN/ACK with an ACK that
             satisfies the above conditions anyway (SYN=0, no data, no SACK
             blocks). If an AccECN TCP Client intends to acknowledge the
@@ -1159,6 +1252,15 @@ deliberately to reduce complexity.-->
             SYN/ACK. A valid exception to this "SHOULD" would be where the
             implementation will only be used in an environment where mangling
             of the ECN field is unlikely.</t>
+
+            <t>The TCP Client MUST also use the handshake encoding for the
+            pure ACK of any retransmitted SYN/ACK that confirms that the TCP
+            server supports AccECN. If more than one SYN/ACK arrives at the
+            TCP Client (A), it MUST feed back the IP-ECN field on the latest
+            SYN/ACK to arrive. The procedure for the TCP Server to follow if
+            the final ACK of the handshake does not arrive before its
+            retransmission timer expires is given in <xref
+            target="accecn_AccECN_Option_Loss"/>.</t>
 
             <texttable anchor="accecn_Tab_SYN-ACK_fb2"
                        title="The encoding of the ACE field in the ACK of the SYN-ACK to reflect the SYN-ACK's IP-ECN field">
@@ -1433,10 +1535,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
             remainder of the half-connection, the Data Sender ought to send
             non-ECN-capable packets and it is advised not to respond to any
             feedback of CE markings. The Data Sender might occasionally test
-            whether it can resume sending ECN-capable packets. As always, once
-            a host has entered AccECN mode, it MUST remain in the same
-            feedback mode and it MUST continue to feed back any ECN markings
-            on arriving packets.</t>
+            whether it can resume sending ECN-capable packets.</t>
 
             <t>The above advice on switching to sending non-ECN-capable
             packets but still responding to CE-markings unless they become
@@ -1444,6 +1543,14 @@ even if the server does not disable sending ECN-capable packets"--></t>
             best strategy might depend on experience of the most likely types
             of mangling, which can only be known at the time of
             deployment.</t>
+
+            <t>As always, once a host has entered AccECN mode, it MUST remain
+            in the same feedback mode and it MUST continue to feed back any
+            ECN markings on arriving packets. This is stated normatively (in
+            capitals) because an AccECN Data Receiver is meant to
+            mechanistically reflect whatever it receives. Then the Data Sender
+            can deal with any unexpected network behavour without also having
+            to guess what the Data Receiver might have decided to do.</t>
 
             <t>The ACK of the SYN/ACK is not reliably delivered (nonetheless,
             the count of CE marks is still eventually delivered reliably). If
@@ -1595,24 +1702,24 @@ it MUST continue the connection even if the data sender does not disable sending
               target="I-D.ietf-tcpm-generalized-ecn"/> and enough of these
               ACKs become CE-marked, then the 'Increment-Triggered ACKs' rule
               ensures that the Data Sender (A) gives B sufficient feedback
-              about this congestion. Normally, the Data Sender (A) can piggyback
-              that feedback on its data. But if A stops sending data, the second
-              part of the 'Increment-Triggered ACKs' rule ensures that A emits a
-              pure ACK for at least every third CE-marked incoming ACK over the
-              subsequent round trip.</t>
+              about this congestion. Normally, the Data Sender (A) can
+              piggyback that feedback on its data. But if A stops sending
+              data, the second part of the 'Increment-Triggered ACKs' rule
+              ensures that A emits a pure ACK for at least every third
+              CE-marked incoming ACK over the subsequent round trip.</t>
 
               <t>Although TCP normally only ACKs newly delivered data, in this
-              case it is mandatory for A to emit ACKs of ACKs because they feed
-              back new congestion state (useful in case B starts sending). The
-              minimum of 3 for 'n' in this case ensures that, even if A also
-              uses ECN-capable pure ACKs, and even if there is pathological
-              congestion in both directions, any resulting ping-pong of ACKs
-              will be rapidly damped.</t>
+              case it is mandatory for A to emit ACKs of ACKs because they
+              feed back new congestion state (useful in case B starts
+              sending). The minimum of 3 for 'n' in this case ensures that,
+              even if A also uses ECN-capable pure ACKs, and even if there is
+              pathological congestion in both directions, any resulting
+              ping-pong of ACKs will be rapidly damped.</t>
 
-              <t>Certain measures are necessary to prevent incoming ACKs of ACKs
-              being mistaken for duplicate ACKs in some circumstances. However,
-              ACKs of ACKs can only arise if the original ACKs are ECN-capable.
-              Therefore the necessary measures are specified in
+              <t>Certain measures are necessary to prevent incoming ACKs of
+              ACKs being mistaken for duplicate ACKs in some circumstances.
+              However, ACKs of ACKs can only arise if the original ACKs are
+              ECN-capable. Therefore the necessary measures are specified in
               [I-D.ietf-tcpm-generalized-ecn] as a prerequisite for sending
               ECN-capable ACKs in the first place.</t>
             </section>
@@ -2697,7 +2804,6 @@ even though it uses existing TCP fields in unorthodox ways.
       performance. However, the concern is mentioned here for
       completeness.</t>
     </section>
-
   </middle>
 
   <back>
@@ -2898,18 +3004,14 @@ even though it uses existing TCP fields in unorthodox ways.
         greater than 24b (probably 32b), and that the following constant has
         been assigned:</t>
 
-        <sourcecode><![CDATA[
-   DIVOPT = 2^24]]>
-        </sourcecode>
+        <sourcecode>DIVOPT = 2^24</sourcecode>
 
         <t>Every time a CE marked data segment arrives, the Data Receiver
         increments its local value of r.ceb by the size of the TCP Data.
         Whenever it sends an ACK with an AccECN Option, the value it writes
         into the ECEB field is</t>
 
-        <sourcecode><![CDATA[
-   ECEB = r.ceb % DIVOPT]]>
-        </sourcecode>
+        <sourcecode>ECEB = r.ceb % DIVOPT</sourcecode>
 
         <t>where '%' is the remainder operator.</t>
 
@@ -2929,25 +3031,17 @@ even though it uses existing TCP fields in unorthodox ways.
         follows:</t>
 
         <figure>
-          <sourcecode><![CDATA[
-   if ((newlyAckedB > 0) || (newlyAckedT > 0)) {
-       d.ceb = (ECEB + DIVOPT - (s.ceb % DIVOPT)) % DIVOPT
-       s.ceb += d.ceb
-   }]]>
-          </sourcecode>
+          <sourcecode>if ((newlyAckedB &gt; 0) || (newlyAckedT &gt; 0)) {
+          d.ceb = (ECEB + DIVOPT - (s.ceb % DIVOPT)) % DIVOPT s.ceb += d.ceb
+          }</sourcecode>
         </figure>
 
         <t>For example, if s.ceb is 33,554,433 and ECEB is 1461 (both
         decimal), then</t>
 
         <figure>
-          <sourcecode><![CDATA[
-   s.ceb % DIVOPT = 1
-   d.ceb = (1461 + 2^24 - 1) % 2^24
-         = 1460
-   s.ceb = 33,554,433 + 1460
-         = 33,555,893]]>
-          </sourcecode>
+          <sourcecode>s.ceb % DIVOPT = 1 d.ceb = (1461 + 2^24 - 1) % 2^24 =
+          1460 s.ceb = 33,554,433 + 1460 = 33,555,893</sourcecode>
         </figure>
 
         <t>In practice an implementation might use heuristics to guess the
@@ -2979,18 +3073,14 @@ even though it uses existing TCP fields in unorthodox ways.
           sized unsigned integer (probably 32b) and that the following
           constant has been assigned:</t>
 
-            <sourcecode><![CDATA[
-   DIVACE = 2^3]]>
-            </sourcecode>
+          <sourcecode>DIVACE = 2^3</sourcecode>
 
           <t>Every time an Acceptable CE marked packet arrives (<xref
           target="accecn_sec_ACE_feedback"/>), the Data Receiver increments
           its local value of r.cep by 1. It repeats the same value of ACE in
           every subsequent ACK until the next CE marking arrives, where</t>
 
-            <sourcecode><![CDATA[
-   ACE = r.cep % DIVACE.]]>
-            </sourcecode>
+          <sourcecode>ACE = r.cep % DIVACE.</sourcecode>
 
           <t>If the Data Sender received an earlier value of the counter that
           had been delayed due to ACK reordering, it might incorrectly
@@ -3003,10 +3093,8 @@ even though it uses existing TCP fields in unorthodox ways.
           between the ACE field and its local s.cep counter, using modulo
           arithmetic as follows:</t>
 
-            <sourcecode><![CDATA[
-   if ((newlyAckedB > 0) || (newlyAckedT > 0))
-       d.cep = (ACE + DIVACE - (s.cep % DIVACE)) % DIVACE]]>
-            </sourcecode>
+          <sourcecode>if ((newlyAckedB &gt; 0) || (newlyAckedT &gt; 0)) d.cep
+          = (ACE + DIVACE - (s.cep % DIVACE)) % DIVACE</sourcecode>
 
           <t><xref target="accecn_ACE_Safety"/> expects the Data Sender to
           assume that the ACE field cycled if it is the safest likely case
@@ -3034,9 +3122,8 @@ even though it uses existing TCP fields in unorthodox ways.
           full-sized segments, where newlyAckedPkt = newlyAckedB/MSS. Then it
           could assume that the ACE field incremented by</t>
 
-            <sourcecode><![CDATA[
-    dSafer.cep = newlyAckedPkt - ((newlyAckedPkt - d.cep) % DIVACE),]]>
-            </sourcecode>
+          <sourcecode>dSafer.cep = newlyAckedPkt - ((newlyAckedPkt - d.cep) %
+          DIVACE),</sourcecode>
 
           <t>For example, imagine an ACK acknowledges newlyAckedPkt=9 more
           full-size segments than any previous ACK, and that ACE increments by
@@ -3075,9 +3162,7 @@ even though it uses existing TCP fields in unorthodox ways.
           marking was 5% or less. Assuming it was used, the Data Sender would
           increment its packet counter as follows:</t>
 
-            <sourcecode><![CDATA[
-   s.cep += dSafer.cep]]>
-            </sourcecode>
+          <sourcecode>s.cep += dSafer.cep</sourcecode>
 
           <t>If missing acknowledgement numbers arrive later (due to
           reordering), <xref target="accecn_ACE_Safety"/> says "the Data
@@ -3107,18 +3192,12 @@ See emails 3/1/20.-->
           the following algorithm:</t>
 
           <figure>
-            <sourcecode><![CDATA[
-   SAFETY_FACTOR = 2
-   if (dSafer.cep > d.cep) {
-       if (d.ceb <= MSS * d.cep) {  % Same as (s <= MSS), but no DBZ
-          sSafer = d.ceb/dSafer.cep
-          if (sSafer < MSS/SAFETY_FACTOR)
-              dSafer.cep = d.cep    % d.cep is a safe enough estimate
-       } % else
-           % No need for else; dSafer.cep is already correct, 
-           % because d.cep must have been too small
-   }]]>
-            </sourcecode>
+            <sourcecode>SAFETY_FACTOR = 2 if (dSafer.cep &gt; d.cep) { if
+            (d.ceb &lt;= MSS * d.cep) { % Same as (s &lt;= MSS), but no DBZ
+            sSafer = d.ceb/dSafer.cep if (sSafer &lt; MSS/SAFETY_FACTOR)
+            dSafer.cep = d.cep % d.cep is a safe enough estimate } % else % No
+            need for else; dSafer.cep is already correct, % because d.cep must
+            have been too small }</sourcecode>
           </figure>
 
           <t>The chart below shows when the above algorithm will consider
@@ -3187,9 +3266,7 @@ MSS/SAFETY_FACTOR+--------------+    safest
         in flight (including control packets), which is reset once per RTT.
         Either way, it would estimate s_ave as:</t>
 
-          <sourcecode><![CDATA[
-   s_ave ~= flightsize / packets_in_flight,]]>
-          </sourcecode>
+        <sourcecode>s_ave ~= flightsize / packets_in_flight,</sourcecode>
 
         <t>where flightsize is the variable that TCP already maintains for the
         number of bytes in flight and '~=' means 'approximately equal to'. To
@@ -3199,9 +3276,7 @@ MSS/SAFETY_FACTOR+--------------+    safest
         <t>An alternative would be to maintain an exponentially weighted
         moving average (EWMA) of the segment size:</t>
 
-          <sourcecode><![CDATA[
-   s_ave = a * s + (1-a) * s_ave,]]>
-          </sourcecode>
+        <sourcecode>s_ave = a * s + (1-a) * s_ave,</sourcecode>
 
         <t>where a is the decay constant for the EWMA. However, then it is
         necessary to choose a good value for this constant, which ought to
@@ -3376,6 +3451,7 @@ MSS/SAFETY_FACTOR+--------------+    safest
           </list></t>
       </section>
     </section>
+
     <!-- ================================================================ -->
 
     <section anchor="accecn_Acknowledgements" numbered="false"
@@ -3384,10 +3460,10 @@ MSS/SAFETY_FACTOR+--------------+    safest
       Welzl, Gorry Fairhurst, David Black, Spencer Dawkins, Michael Scharf,
       Michael T&uuml;xen, Yuchung Cheng, Kenjiro Cho, Olivier Tilmans, Ilpo
       J&auml;rvinen, Neal Cardwell, Yoshifumi Nishida, Martin Duke, Jonathan
-      Morton, Vidhi Goel, Alex Burr, Markku Kojo and Grenville Armitage for their input and discussion. The
-      idea of using the three ECN-related TCP flags as one field for more
-      accurate TCP-ECN feedback was first introduced in the re-ECN protocol
-      that was the ancestor of ConEx.</t>
+      Morton, Vidhi Goel, Alex Burr, Markku Kojo and Grenville Armitage for
+      their input and discussion. The idea of using the three ECN-related TCP
+      flags as one field for more accurate TCP-ECN feedback was first
+      introduced in the re-ECN protocol that was the ancestor of ConEx.</t>
 
       <t>Bob Briscoe was part-funded by the Comcast Innovation Fund, the
       European Community under its Seventh Framework Programme through the
