@@ -1434,9 +1434,13 @@ deliberately to reduce complexity.-->
               <c>5</c>
             </texttable>
 
-            <t>{Note 1}: If the server is in AccECN mode, the value of zero
-            raises suspicion of zeroing of the ACE field on the path (see
-            <xref target="accecn_sec_ACE_init_invalid"/>).</t>
+            <t>{Note 1}: If the server is in AccECN mode {ToDo: and has not
+            subsequently sent a SYN/ACK with (AE,CWR,ECE) = (0,0,0)}}, the
+            value of zero raises suspicion of zeroing of the ACE field on the
+            path (see <xref target="accecn_sec_ACE_init_invalid"/>). {ToDo: If
+            a server in AccECN mode has subsequently sent a SYN/ACK with
+            (AE,CWR,ECE) = (0,0,0)}, it follows the rules in <xref
+            target="accecn_implications_accecn_mode"/>.}</t>
 
             <t>{Note 2}: If the server is in AccECN mode, these values are
             Currently Unused but the AccECN server's behaviour is still
@@ -1663,18 +1667,20 @@ even if the server does not disable sending ECN-capable packets"--></t>
             either direction the initial value of the ACE counter ought to be
             non-zero.</t>
 
-            <t>If AccECN has been successfully negotiated, the Data Sender
-            SHOULD check the value of the ACE counter in the first packet
-            (with or without data) that arrives with SYN=0. If the value of
-            this ACE field is zero (0b000), for the remainder of the
-            half-connection the Data Sender ought to send non-ECN-capable
-            packets and it is advised not to respond to any feedback of CE
-            markings. Reason: the symptoms imply either potential mangling of
-            the ECN fields in both the IP and TCP headers, or a broken remote
-            TCP implementation. This advice is not stated normatively (in
-            capitals), because the best strategy might depend on experience of
-            the most likely types of mangling, which can only be known at the
-            time of deployment.<!--There is no need to say the following for forward compatibility:
+            <t>If AccECN has been successfully negotiated, and the Data Sender
+            has not subsequently sent a SYN/ACK with (AE,CWR,ECE) = (0,0,0)
+            {ToDo: check this addition is relevant once fall-back handshake
+            protocol is finalized}, it SHOULD check the value of the ACE
+            counter in the first packet (with or without data) that arrives
+            with SYN=0. If the value of this ACE field is zero (0b000), for
+            the remainder of the half-connection the Data Sender ought to send
+            non-ECN-capable packets and it is advised not to respond to any
+            feedback of CE markings. Reason: the symptoms imply either
+            potential mangling of the ECN fields in both the IP and TCP
+            headers, or a broken remote TCP implementation. This advice is not
+            stated normatively (in capitals), because the best strategy might
+            depend on experience of the most likely types of mangling, which
+            can only be known at the time of deployment.<!--There is no need to say the following for forward compatibility:
 "If a data receiver negotiates AccECN but then zeros the ACE field in its first segment with SYN=0, 
 it MUST continue the connection even if the data sender does not disable sending ECN-capable packets."--></t>
 
