@@ -316,7 +316,7 @@
         Data Sender for either half-connection can set two possible codepoints
         (ECT(0) or ECT(1)) in the IP header of a data packet to indicate an
         ECN-capable transport (ECT). If the ECN codepoint is 0b00, the packet
-        is considered to have been sent by a Not-ECN-capable Transport
+        is considered to have been sent by a Not ECN-capable Transport
         (Not-ECT). When a network node experiences congestion, it will
         occasionally either drop or mark a packet, with the choice depending
         on the packet's ECN codepoint. If the codepoint is Not-ECT, only drop
@@ -681,7 +681,7 @@ deliberately to reduce complexity.-->
               <t hangText="ECN:">Supports 'Classic' ECN feedback <xref
               target="RFC3168"/></t>
 
-              <t hangText="No ECN:">Not-ECN-capable. Implicit congestion
+              <t hangText="No ECN:">Not ECN-capable. Implicit congestion
               notification using packet drop.</t>
             </list></t>
 
@@ -1460,9 +1460,15 @@ even if the server does not disable sending ECN-capable packets"--></t>
             of mangling, which can only be known at the time of
             deployment.</t>
 
-            <t>As always, once a host has entered AccECN mode, it MUST remain
-            in the same feedback mode and it MUST continue to feed back any
-            ECN markings on arriving packets.</t>
+            <t>As always, once a host has entered AccECN mode, it follows the
+            general mandatory requirement (<xref
+            target="accecn_implications_accecn_mode"/>) to remain in the same
+            feedback mode and to continue feeding back any ECN markings on
+            arriving packets using AccECN feedback. This follows the general
+            approach where an AccECN Data Receiver mechanistically reflects
+            whatever it receives, leaving the Data Sender to deal with any
+            unexpected network behavour without also having to guess what the
+            Data Receiver might have decided to do.</t>
 
             <t>The ACK of the SYN/ACK is not reliably delivered (nonetheless,
             the count of CE marks is still eventually delivered reliably). If
@@ -1505,17 +1511,18 @@ even if the server does not disable sending ECN-capable packets"--></t>
             either direction the initial value of the ACE counter ought to be
             non-zero.</t>
 
-            <t>If AccECN has been successfully negotiated, it SHOULD check the
-            value of the ACE counter in the first packet (with or without
-            data) that arrives with SYN=0. If the value of this ACE field is
-            zero (0b000), for the remainder of the half-connection the Data
-            Sender ought to send non-ECN-capable packets and it is advised not
-            to respond to any feedback of CE markings. Reason: the symptoms
-            imply either potential mangling of the ECN fields in both the IP
-            and TCP headers, or a broken remote TCP implementation. This
-            advice is not stated normatively (in capitals), because the best
-            strategy might depend on experience of the most likely types of
-            mangling, which can only be known at the time of deployment.<!--There is no need to say the following for forward compatibility:
+            <t>If AccECN has been successfully negotiated, the Data Sender
+            SHOULD check the value of the ACE counter in the first packet
+            (with or without data) that arrives with SYN=0. If the value of
+            this ACE field is zero (0b000), for the remainder of the
+            half-connection the Data Sender ought to send non-ECN-capable
+            packets and it is advised not to respond to any feedback of CE
+            markings. Reason: the symptoms imply either potential mangling of
+            the ECN fields in both the IP and TCP headers, or a broken remote
+            TCP implementation. This advice is not stated normatively (in
+            capitals), because the best strategy might depend on experience of
+            the most likely types of mangling, which can only be known at the
+            time of deployment.<!--There is no need to say the following for forward compatibility:
 "If a data receiver negotiates AccECN but then zeros the ACE field in its first segment with SYN=0, 
 it MUST continue the connection even if the data sender does not disable sending ECN-capable packets."--></t>
 
@@ -1673,7 +1680,7 @@ it MUST continue the connection even if the data sender does not disable sending
 
           <figure align="center" anchor="accecn_Fig_TCPopt"
                   title="The AccECN TCP Option">
-            <artwork><![CDATA[ 0                   1                   2                   3
+            <artwork align="center"><![CDATA[ 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |  Kind = 172   |  Length = 11  |          EE0B field           |
@@ -2902,6 +2909,9 @@ even though it uses existing TCP fields in unorthodox ways.
       protocol. However, implementers are free to choose other ways to
       implement the requirements.</t>
 
+      <!--ToDo: Note to RFC Editor: Pls change all bare <artwork> elements (without any keywords like align) to <sourcecode>.
+Reason My XML editor doesn't support the <sourcecode> element, so it mangles line breaks within sourcecode, ignoring even CDATA protection.-->
+
       <section anchor="accecn_Algo_Option_Coding"
                title="Example Algorithm to Encode/Decode the AccECN Option">
         <t><!--ToDo: Example code to check the AccECN Option fields are consistent with the ACE field.-->The
@@ -3128,8 +3138,8 @@ See emails 3/1/20.-->
           d.cep can replace dSafer.cep as a safe enough estimate of the number
           of CE-marked packets:</t>
 
-          <figure>
-            <artwork><![CDATA[                 ^
+          <figure align="left">
+            <artwork align="left"><![CDATA[                 ^
            sSafer|
                  |
               MSS+
