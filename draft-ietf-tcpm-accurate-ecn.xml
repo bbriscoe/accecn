@@ -286,7 +286,8 @@
 
             <t hangText="Acceptable packet / segment:">A packet or segment
             that passes the acceptability tests in <xref target="RFC9293"/>
-            and <xref target="RFC5961"/>.</t>
+            and <xref target="RFC5961"/>, or that has passed other tests with
+            equivalent protection.</t>
 
             <t hangText="TCP Client:">The TCP stack that originates a
             connection.</t>
