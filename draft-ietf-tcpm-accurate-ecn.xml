@@ -881,23 +881,28 @@ deliberately to reduce complexity.-->
           <t>If a TCP Server that implements AccECN receives a SYN with the
           three TCP header flags (AE,CWR,ECE) set to any combination other
           than (0,0,0), (0,1,1) or (1,1,1) and it does not have logic specific
-          to such a combination, it MUST negotiate the use of AccECN as if the
-          three flags had been set to (1,1,1). </t>
+          to such a combination, the Server MUST negotiate the use of AccECN
+          as if the three flags had been set to (1,1,1). However, an AccECN
+          Client implementation MUST NOT send a SYN with any combination other
+          than the three listed.</t>
 
           <t>If a TCP Client that implements AccECN receives a SYN/ACK with
           the three TCP header flags (AE,CWR,ECE) set to (1,0,1) and it does
-          not have logic specific to such a combination, it MUST negotiate the
-          use of AccECN as if the three flags had been set to (?,?,?) {ToDo}.
-          </t>
+          not have logic specific to such a combination, the Client MUST
+          enable AccECN mode as if the SYN/ACK confirmed that the Server
+          supported AccECN and as if it fed back that the IP/ECN field on the
+          SYN had arrived unchanged. However, an AccECN Server implementation
+          MUST NOT send a SYN/ACK with the reserved combination (AE,CWR,ECE) =
+          (1,0,1).</t>
 
           <t>For the avoidance of doubt, the behaviour described in the
           present specification applies whether or not the three remaining
           reserved TCP header flags are zero.</t>
 
-          <t>These requirements ensure that future uses of all the Reserved
-          combinations on a SYN or SYN/ACK can rely on consistent behaviour
-          from the installed base of AccECN implementations. See <xref
-          target="accecn_space_evolution"/> for related discussion.</t>
+          <t>All these requirements ensure that future uses of all the
+          Reserved combinations on a SYN or SYN/ACK can rely on consistent
+          behaviour from the installed base of AccECN implementations. See
+          <xref target="accecn_space_evolution"/> for related discussion.</t>
         </section>
 
         <section anchor="accecn_sec_multiple_SYNs_or_SYN-ACKs"
