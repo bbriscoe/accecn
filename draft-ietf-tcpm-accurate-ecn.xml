@@ -213,11 +213,11 @@
 
       <t>It is RECOMMENDED that the AccECN protocol is implemented alongside
       SACK <xref target="RFC2018"/> and the experimental ECN++ protocol <xref
-      target="I-D.ietf-tcpm-generalized-ecn"/>, which allows the ECN
-      capability to be used on TCP control packets. Therefore, this
-      specification does not discuss implementing AccECN alongside <xref
-      target="RFC5562"/>, which was an earlier experimental protocol with
-      narrower scope than ECN++.</t>
+      target="I-D.ietf-tcpm-generalized-ecn"/> or any equivalent future
+      protocol that allows the ECN capability to be used on TCP control
+      packets. Therefore, this specification does not discuss implementing
+      AccECN alongside <xref target="RFC5562"/>, which was an earlier
+      experimental protocol with narrower scope than ECN++.</t>
 
       <section title="Document Roadmap">
         <t>The following introductory section outlines the goals of AccECN
@@ -653,7 +653,9 @@ deliberately to reduce complexity.-->
           <t>Once a TCP Client (A) has sent the above SYN to declare that it
           supports AccECN, and once it has received the above SYN/ACK segment
           that confirms that the TCP Server supports AccECN, the TCP Client
-          MUST set both its half connections into AccECN mode.</t>
+          MUST set both its half connections into AccECN mode. The TCP Client
+          MUST not enter AccECN mode (or any feedback mode) before it has
+          received the first SYN/ACK.</t>
 
           <t>Once in AccECN mode, a TCP Client or Server has the rights and
           obligations to participate in the ECN protocol defined in <xref
@@ -1801,32 +1803,38 @@ it MUST continue the connection even if the data sender does not disable sending
               sender is in slow-start, then to implement change-triggered ACKs
               while the sender is in slow-start, and offload otherwise.</t>
 
-              <t>In a unidirectional data scenario from host A to B where both
-              hosts support AccECN, if the Data Receiver (B) has chosen to use
-              ECN-capable pure ACKs <xref
-              target="I-D.ietf-tcpm-generalized-ecn"/> and enough of these
-              ACKs become CE-marked, then the 'Increment-Triggered ACKs' rule
-              ensures that the Data Sender (A) gives B sufficient feedback
-              about this congestion. Normally, the Data Sender (A) can
-              piggyback that feedback on its data. But if A stops sending
-              data, the second part of the 'Increment-Triggered ACKs' rule
-              ensures that A emits a pure ACK for at least every third
-              CE-marked incoming ACK over the subsequent round trip.</t>
+              <t>In a scenario where both endpoints support AccECN, if the
+              Data Receiver (B) has chosen to use ECN-capable pure ACKs (as
+              allowed in <xref target="RFC8311"/> experiments) and enough of
+              these ACKs become CE-marked, then the 'Increment-Triggered ACKs'
+              rule ensures that the Data Sender (A) gives B sufficient
+              feedback about this congestion on the ACKs from B to A.
+              Normally, for instance in a unidirectional data scenario from
+              host A to B, the Data Sender (A) can piggyback that feedback on
+              its data. But if A stops sending data, the second part of the
+              'Increment-Triggered ACKs' rule requires A to emit a pure ACK
+              for at least every third CE-marked incoming ACK over the
+              subsequent round trip.</t>
 
               <t>Although TCP normally only ACKs newly delivered data, in this
-              case it is mandatory for A to emit ACKs of ACKs because they
-              feed back new congestion state (useful in case B starts
-              sending). The minimum of 3 for 'n' in this case ensures that,
-              even if A also uses ECN-capable pure ACKs, and even if there is
-              pathological congestion in both directions, any resulting
-              ping-pong of ACKs will be rapidly damped.</t>
+              case the increment-triggered ACK rule makes it mandatory for A
+              to emit ACKs of ACKs. This is justifiable because the ACKs in
+              this case are ECN-capable and so, even though the ACKs of these
+              ACKs do not acknowledge new data, they feed back new congestion
+              state (useful in case B starts sending). The minimum of 3 for
+              'n' in this case ensures that, even if A also uses ECN-capable
+              pure ACKs, and even if there is pathological congestion in both
+              directions, any resulting ping-pong of ACKs will be rapidly
+              damped.</t>
 
               <t>Certain measures are necessary to prevent incoming ACKs of
               ACKs being mistaken for duplicate ACKs in some circumstances.
               However, ACKs of ACKs can only arise if the original ACKs are
-              ECN-capable. Therefore the necessary measures are specified in
-              [I-D.ietf-tcpm-generalized-ecn] as a prerequisite for sending
-              ECN-capable ACKs in the first place.</t>
+              ECN-capable. Therefore, it is not appropriate to define those
+              measures here. Instead any spec that allows ECN-capable pure
+              ACKs MUST make sending them conditional on measures to
+              distinguish ACKs of ACKs from DupACKs (see for example <xref
+              target="I-D.ietf-tcpm-generalized-ecn"/>).</t>
             </section>
 
             <section anchor="accecn_ACE_Safety_S"
