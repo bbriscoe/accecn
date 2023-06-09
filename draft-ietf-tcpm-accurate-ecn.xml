@@ -882,24 +882,22 @@ deliberately to reduce complexity.-->
           three TCP header flags (AE,CWR,ECE) set to any combination other
           than (0,0,0), (0,1,1) or (1,1,1) and it does not have logic specific
           to such a combination, it MUST negotiate the use of AccECN as if the
-          three flags had been set to (1,1,1).</t>
+          three flags had been set to (1,1,1). </t>
 
           <t>If a TCP Client that implements AccECN receives a SYN/ACK with
           the three TCP header flags (AE,CWR,ECE) set to (1,0,1) and it does
           not have logic specific to such a combination, it MUST negotiate the
-          use of AccECN as if the three flags had been set to (?,?,?)
-          {ToDo}.</t>
+          use of AccECN as if the three flags had been set to (?,?,?) {ToDo}.
+          </t>
 
-          <t>This ensures that future uses of these Reserved combinations on a
-          SYN or SYN/ACK can rely on consistent behaviour from the installed
-          base of AccECN implementations. See <xref
+          <t>For the avoidance of doubt, the behaviour described in the
+          present specification applies whether or not the three remaining
+          reserved TCP header flags are zero.</t>
+
+          <t>These requirements ensure that future uses of all the Reserved
+          combinations on a SYN or SYN/ACK can rely on consistent behaviour
+          from the installed base of AccECN implementations. See <xref
           target="accecn_space_evolution"/> for related discussion.</t>
-
-          <aside>
-            <t>For the avoidance of doubt, the behaviour described in the
-            present specification applies whether or not the three remaining
-            reserved TCP header flags are zero.</t>
-          </aside>
         </section>
 
         <section anchor="accecn_sec_multiple_SYNs_or_SYN-ACKs"
@@ -1379,13 +1377,12 @@ deliberately to reduce complexity.-->
               <c>6</c>
             </texttable>
 
-            <t>When an AccECN server in SYN-RCVD state {ToDo: that has not
-            sent or received a SYN or SYN/ACK with (AE,CWR,ECE) = (0,0,0)}
-            receives a pure ACK with SYN=0 and no SACK blocks, instead of
-            treating the ACE field as a counter, it MUST infer the meaning of
-            each possible value of the ACE field from <xref
-            target="accecn_Tab_SYN-ACK_fb"/>, which also shows the value that
-            an AccECN server MUST set s.cep to as a result.</t>
+            <t>When an AccECN server in SYN-RCVD state receives a pure ACK
+            with SYN=0 and no SACK blocks, instead of treating the ACE field
+            as a counter, it MUST infer the meaning of each possible value of
+            the ACE field from <xref target="accecn_Tab_SYN-ACK_fb"/>, which
+            also shows the value that an AccECN server MUST set s.cep to as a
+            result.</t>
 
             <t>Given this encoding of the ACE field on the ACK of a SYN/ACK is
             exceptional, an AccECN server using large receive offload (LRO)
@@ -1404,7 +1401,7 @@ deliberately to reduce complexity.-->
 
               <c>{Notes 1, 3}</c>
 
-              <c>Disable ECN</c>
+              <c>Disable sending ECT</c>
 
               <c>0b001</c>
 
@@ -1449,14 +1446,20 @@ deliberately to reduce complexity.-->
               <c>5</c>
             </texttable>
 
-            <t>{Note 1}: If the server is in AccECN mode {ToDo: (and has not
-            subsequently sent or received a SYN/ACK with (AE,CWR,ECE) =
-            (0,0,0))}, the value of zero in the ACK of the SYN/ACK raises
-            suspicion of zeroing of the ACE field on the path (see <xref
-            target="accecn_sec_ACE_init_invalid"/>). {ToDo: If a server in
-            AccECN mode has subsequently sent a SYN/ACK with (AE,CWR,ECE) =
-            (0,0,0)}, it follows the rules in <xref
-            target="accecn_implications_accecn_mode"/>.}</t>
+            <t>{Note 1}: If the Server is in AccECN mode, a value of zero in
+            the ACK of the SYN/ACK:<list style="symbols">
+                <t>either raises suspicion of zeroing of the ACE field on the
+                path (see <xref target="accecn_sec_ACE_init_invalid"/>);</t>
+
+                <t>or the TCP Client has somehow entered No ECN feedback mode
+                (the more likely case if the Server received a SYN or sent a
+                SYN/ACK with (AE,CWR,ECE) = (0,0,0) after entering AccECN
+                mode, but possible even if it didn't).</t>
+              </list>Whatever the cause of the zero ACK, the Server MUST NOT
+            set ECT on outgoing packets for the rest of the connection.
+            However, as a Data Receiver, such a Server MUST continue to feed
+            back the IP/ECN field in incoming packets using AccECN (see <xref
+            target="accecn_implications_accecn_mode"/>).</t>
 
             <t>{Note 2}: If the server is in AccECN mode, these values are
             Currently Unused but the AccECN server's behaviour is still
@@ -1685,20 +1688,22 @@ even if the server does not disable sending ECN-capable packets"--></t>
             either direction the initial value of the ACE counter ought to be
             non-zero.</t>
 
-            <t>If AccECN has been successfully negotiated, {ToDo: and the Data
-            Sender has not subsequently sent a SYN/ACK with (AE,CWR,ECE) =
-            (0,0,0) [check this addition is relevant once fall-back handshake
-            protocol is finalized]}, the Data Sender SHOULD check the value of
-            the ACE counter in the first feedback packet (with or without
-            data) that arrives with SYN=0. If the value of this ACE field is
-            zero (0b000), for the remainder of the half-connection the Data
-            Sender ought to send non-ECN-capable packets and it is advised not
-            to respond to any feedback of CE markings. Reason: the symptoms
-            imply either potential mangling of the ECN fields in both the IP
-            and TCP headers, or a broken remote TCP implementation. This
-            advice is not stated normatively (in capitals), because the best
-            strategy might depend on experience of the most likely types of
-            mangling, which can only be known at the time of deployment.<!--There is no need to say the following for forward compatibility:
+            <t>If AccECN has been successfully negotiated, {ToDo: and if the
+            Data Sender is the Server, it has not subsequently received a SYN
+            or sent a SYN/ACK with (AE,CWR,ECE) = (0,0,0) [check this addition
+            is relevant once fall-back handshake protocol is finalized]}, the
+            Data Sender SHOULD check the value of the ACE counter in the first
+            feedback packet (with or without data {ToDo: whether handshake
+            encoding or ACE}) that arrives with SYN=0. If the value of this
+            ACE field is zero (0b000), for the remainder of the
+            half-connection the Data Sender ought to send non-ECN-capable
+            packets and it is advised not to respond to any feedback of CE
+            markings. Reason: the symptoms imply either potential mangling of
+            the ECN fields in both the IP and TCP headers, or a broken remote
+            TCP implementation. This advice is not stated normatively (in
+            capitals), because the best strategy might depend on experience of
+            the most likely types of mangling, which can only be known at the
+            time of deployment.<!--There is no need to say the following for forward compatibility:
 "If a data receiver negotiates AccECN but then zeros the ACE field in its first segment with SYN=0, 
 it MUST continue the connection even if the data sender does not disable sending ECN-capable packets."--></t>
 
