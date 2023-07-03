@@ -200,24 +200,25 @@
       Receiver to a Data Sender. It is completely independent of how TCP might
       respond to congestion feedback, which is out of scope, but ultimately
       the motivation for accurate ECN feedback. Like Classic ECN feedback,
-      AccECN can be used by standard Reno congestion control <xref
-      target="RFC5681"/> to respond to the existence of at least one
-      congestion notification within a round trip. Or, unlike Reno, AccECN can
-      be used to respond to the extent of congestion notification over a round
-      trip, as for example DCTCP does in controlled environments <xref
-      target="RFC8257"/>. For congestion response, this specification refers
-      to RFC 3168, or ECN experiments such as those referred to in <xref
-      target="RFC8311"/>, namely: a TCP-based Low Latency Low Loss Scalable
-      (L4S) congestion control <xref target="RFC9330"/>; or Alternative
-      Backoff with ECN (ABE) <xref target="RFC8511"/>.</t>
+      AccECN can be used by standard Reno or CUBIC congestion control <xref
+      target="RFC5681"/> <xref target="I-D.ietf-tcpm-rfc8312bis"/> to respond
+      to the existence of at least one congestion notification within a round
+      trip. Or, unlike Reno or CUBIC, AccECN can be used to respond to the
+      extent of congestion notification over a round trip, as for example
+      DCTCP does in controlled environments <xref target="RFC8257"/>. For
+      congestion response, this specification refers to RFC 3168, or ECN
+      experiments such as those referred to in <xref target="RFC8311"/>,
+      namely: a TCP-based Low Latency Low Loss Scalable (L4S) congestion
+      control <xref target="RFC9330"/>; or Alternative Backoff with ECN (ABE)
+      <xref target="RFC8511"/>.</t>
+
+      <t><xref target="accecn_Interaction_Other"/> explains how AccECN is
+      compatible with current commonly used TCP options, and a number of
+      current experimental modifications to TCP, as well as SYN cookies.</t>
 
       <t>It is RECOMMENDED that the AccECN protocol is implemented alongside
-      SACK <xref target="RFC2018"/> and the experimental ECN++ protocol <xref
-      target="I-D.ietf-tcpm-generalized-ecn"/> or any equivalent future
-      protocol that allows the ECN capability to be used on TCP control
-      packets. Therefore, this specification does not discuss implementing
-      AccECN alongside <xref target="RFC5562"/>, which was an earlier
-      experimental protocol with narrower scope than ECN++.</t>
+      SACK <xref target="RFC2018"/>, and time-stamps <xref target="RFC7323"/>
+      can also be useful.</t>
 
       <section title="Document Roadmap">
         <t>The following introductory section outlines the goals of AccECN
@@ -981,7 +982,7 @@ deliberately to reduce complexity.-->
                 (AE,CWR,ECE) = (0,0,0), it is still allowed to set ECT on
                 packets for the rest of the connection. Note that this rule is
                 different to that of a Server in an equivalent position (<xref
-                target="accecn_implications_accecn_mode"/> explains). </t>
+                target="accecn_implications_accecn_mode"/> explains).</t>
 
                 <t>Having entered AccECN mode, in general a TCP Client commits
                 to respond to any incoming congestion feedback, whether or not
@@ -1085,7 +1086,7 @@ deliberately to reduce complexity.-->
                   one SYN/ACK have successfully been delivered. And all the
                   rules for handshake fall-back are designed to work based on
                   those packets that successfully traverse the path, whatever
-                  other handshake packets are lost or delayed. </t>
+                  other handshake packets are lost or delayed.</t>
 
                   <t>MUST NOT send a 'Classic' ECN-setup SYN <xref
                   target="RFC3168"/> with (AE,CWR,ECE) = (0,1,1) and a SYN
@@ -1120,7 +1121,7 @@ deliberately to reduce complexity.-->
                   or acceptable SYN/ACK to arrive.</t>
                 </list></t>
 
-              <t>A TCP server in AccECN mode:<list style="symbols">
+              <t>A TCP server already in AccECN mode:<list style="symbols">
                   <t>SHOULD acknowledge a valid SYN arriving with (AE,CWR,ECE)
                   = (0,0,0) by emitting an AccECN SYN/ACK (with the
                   appropriate combination of TCP-ECN flags to feed back the
@@ -1139,7 +1140,7 @@ deliberately to reduce complexity.-->
               In either case, the TCP server remains in AccECN feedback mode
               (according to the earlier requirement not to switch modes).</t>
 
-              <t>An AccECN-capable TCP server in Not ECN mode:<list
+              <t>An AccECN-capable TCP server already in Not ECN mode:<list
                   style="symbols">
                   <t>SHOULD respond to any subsequent valid SYN using a
                   SYN/ACK with (AE,CWR,ECE) = (0,0,0), even if the SYN is
@@ -1485,7 +1486,7 @@ deliberately to reduce complexity.-->
                 target="accecn_Interaction_Other"/>) and some might have been
                 CE-marked. Then ACE on the first ACK seen by the Server might
                 be zero, due to previous ACks experiencing an unfortunate
-                pattern of loss or delay. </t>
+                pattern of loss or delay.</t>
 
                 <t>Some form of non-compliance at the TCP Client or on the
                 path (see <xref target="accecn_sec_ACE_init_invalid"/>).</t>
@@ -1716,12 +1717,12 @@ even if the server does not disable sending ECN-capable packets"--></t>
             <t><xref target="accecn_ACE"/> required the Data Receiver to
             initialize the r.cep counter to a non-zero value. Therefore, in
             either direction the initial value of the ACE counter ought to be
-            non-zero. </t>
+            non-zero.</t>
 
             <t>This section does not concern the case where the ACE field is
             zero when the handshake encoding has been used on the ACK of the
             SYN/ACK under the carefully worded conditions in <xref
-            target="accecn_ACE_3rdACK"/>. </t>
+            target="accecn_ACE_3rdACK"/>.</t>
 
             <t>If AccECN has been successfully negotiated, the Data Sender MAY
             check the value of the ACE counter in the first feedback packet
@@ -1751,7 +1752,7 @@ it MUST continue the connection even if the data sender does not disable sending
             precise to have specified the first packet in sequence order,
             which would not necessarily be the first ACE counter that the Data
             Receiver fed back anyway, given it might have been a
-            retransmission. </t>
+            retransmission.</t>
 
             <t>The possibility of re-ordering means that there is a small
             chance that the ACE field on the first packet to arrive is
@@ -2273,11 +2274,11 @@ even if the data sender does not disable sending ECN-capable packets."--></t>
                 congestion control, which implementations SHOULD generally
                 prioritize over other TCP options when there is insufficient
                 space for all the options in use.<vspace blankLines="1"/>If
-                SACK has been negotiated, and the smallest recommended AccECN
-                Option would leave insufficient space for two SACK blocks on a
-                particular ACK, the Data Receiver MUST give precedence to the
-                SACK option (total 18 octets), because loss feedback is more
-                critical.</t>
+                SACK has been negotiated <xref target="RFC2018"/>, and the
+                smallest recommended AccECN Option would leave insufficient
+                space for two SACK blocks on a particular ACK, the Data
+                Receiver MUST give precedence to the SACK option (total 18
+                octets), because loss feedback is more critical.</t>
 
                 <t hangText="Recommended Simple Scheme:">The Data Receiver
                 SHOULD include an AccECN TCP Option on every scheduled ACK if
@@ -2651,6 +2652,19 @@ even though it uses existing TCP fields in unorthodox ways.
         target="accecn_feedback"/>, any data on the SYN (SYN=1, ACK=0) is not
         included in any of the byte counters held locally for each ECN
         marking, nor in the AccECN Option on the wire.</t>
+
+        <t>AccECN feedback is compatible with the ECN++ <xref
+        target="I-D.ietf-tcpm-generalized-ecn"/> experiment, which allows TCP
+        control packets and retransmissions to be ECN-capable (<xref
+        target="RFC3168"/> was updated by <xref target="RFC8311"/> to permit
+        such experiments). AccECN is likely to inherently support any
+        experiment with ECN-capable packets, because it feeds back the
+        contents of the ECN field mechanistically, without judging whether a
+        packet ought to use the ECN capability or not (<xref
+        target="accecn_demb_reflector"/>). This specification does not discuss
+        implementing AccECN alongside <xref target="RFC5562"/>, which was an
+        earlier experimental protocol with narrower scope than ECN++ and a
+        5-way handshake.</t>
       </section>
 
       <section anchor="accecn_Integrity"
@@ -2969,18 +2983,20 @@ even though it uses existing TCP fields in unorthodox ways.
     <references title="Normative References">
       <?rfc include="reference.RFC.9293" ?>
 
+      <?rfc include="reference.RFC.2018" ?>
+
       <?rfc include="reference.RFC.2119" ?>
 
       <?rfc include="reference.RFC.3168" ?>
 
       <?rfc include="reference.RFC.5681" ?>
 
+      <?rfc include="reference.RFC.7323" ?>
+
       <?rfc include="reference.RFC.8174" ?>
     </references>
 
     <references title="Informative References">
-      <?rfc include="reference.RFC.2018" ?>
-
       <?rfc include="reference.RFC.3449" ?>
 
       <?rfc include="reference.RFC.3540" ?>
@@ -3010,6 +3026,8 @@ even though it uses existing TCP fields in unorthodox ways.
       <?rfc include="reference.RFC.8311" ?>
 
       <?rfc include="reference.I-D.ietf-tcpm-generalized-ecn" ?>
+
+      <?rfc include="reference.I-D.ietf-tcpm-rfc8312bis" ?>
 
       <?rfc include="reference.RFC.9040" ?>
 
@@ -3178,17 +3196,17 @@ Reason My XML editor doesn't support the <sourcecode> element, so it mangles lin
         <t>On the arrival of an AccECN Option, the Data Sender first makes
         sure the ACK has not been superseded in order to avoid winding the
         s.ceb counter backwards. It uses the TCP acknowledgement number and
-        any SACK options to calculate newlyAckedB, the amount of new data that
-        the ACK acknowledges in bytes (newlyAckedB can be zero but not
-        negative). If newlyAckedB is zero, either the ACK has been superseded
-        or CE-marked packet(s) without data could have arrived. To break the
-        tie for the latter case, the Data Sender could use timestamps (if
-        present) to work out newlyAckedT, the amount of new time that the ACK
-        acknowledges. If the Data Sender determines that the ACK has been
-        superseded it ignores the AccECN Option. Otherwise, the Data Sender
-        calculates the minimum non-negative difference d.ceb between the ECEB
-        field and its local s.ceb counter, using modulo arithmetic as
-        follows:</t>
+        any SACK options <xref target="RFC2018"/> to calculate newlyAckedB,
+        the amount of new data that the ACK acknowledges in bytes (newlyAckedB
+        can be zero but not negative). If newlyAckedB is zero, either the ACK
+        has been superseded or CE-marked packet(s) without data could have
+        arrived. To break the tie for the latter case, the Data Sender could
+        use time-stamps <xref target="RFC7323"/> (if present) to work out
+        newlyAckedT, the amount of new time that the ACK acknowledges. If the
+        Data Sender determines that the ACK has been superseded it ignores the
+        AccECN Option. Otherwise, the Data Sender calculates the minimum
+        non-negative difference d.ceb between the ECEB field and its local
+        s.ceb counter, using modulo arithmetic as follows:</t>
 
         <figure>
           <artwork><![CDATA[   if ((newlyAckedB > 0) || (newlyAckedT > 0)) {
@@ -3633,10 +3651,11 @@ MSS/SAFETY_FACTOR+--------------+    safest
       Welzl, Gorry Fairhurst, David Black, Spencer Dawkins, Michael Scharf,
       Michael T&uuml;xen, Yuchung Cheng, Kenjiro Cho, Olivier Tilmans, Ilpo
       J&auml;rvinen, Neal Cardwell, Yoshifumi Nishida, Martin Duke, Jonathan
-      Morton, Vidhi Goel, Alex Burr, Markku Kojo and Grenville Armitage for
-      their input and discussion. The idea of using the three ECN-related TCP
-      flags as one field for more accurate TCP-ECN feedback was first
-      introduced in the re-ECN protocol that was the ancestor of ConEx.</t>
+      Morton, Vidhi Goel, Alex Burr, Markku Kojo, Grenville Armitage and Wes
+      Eddy for their input and discussion. The idea of using the three
+      ECN-related TCP flags as one field for more accurate TCP-ECN feedback
+      was first introduced in the re-ECN protocol that was the ancestor of
+      ConEx.</t>
 
       <t>Bob Briscoe was part-funded by the Comcast Innovation Fund, the
       European Community under its Seventh Framework Programme through the
