@@ -586,7 +586,7 @@ deliberately to reduce complexity.-->
         markings (for instance <xref target="accecn_sec_ecn-mangling"/>, <xref
         target="accecn_sec_ACE_init_invalid"/> and <xref
         target="accecn_Mbox_Interference"/> of the present document and
-        paragraph 2 of Section 20.2 of <xref target="RFC3168"/>). </t>
+        paragraph 2 of Section 20.2 of <xref target="RFC3168"/>).</t>
 
         <t>The initial SYN and SYN/ACK are the most critical control packets,
         so AccECN feeds back their IP-ECN fields. Although RFC 3168 prohibits
@@ -3656,6 +3656,16 @@ MSS/SAFETY_FACTOR+--------------+    safest
       was first introduced in the re-ECN protocol that was the ancestor of
       ConEx.</t>
 
+      <t>The following contributed implementations of AccECN that validated
+      and helped to improve this specification:<list style="hanging">
+          <t hangText="Linux:">Mirja K&uuml;hlewind, Ilpo J&auml;rvinen, Neal
+          Cardwell and Chia-Yu Chang;</t>
+
+          <t hangText="FreeBSD:">Richard Scheffenegger;</t>
+
+          <t hangText="Apple OSs:">Vidhi Goel.</t>
+        </list></t>
+
       <t>Bob Briscoe was part-funded by Apple Inc, the Comcast Innovation
       Fund, the European Community under its Seventh Framework Programme
       through the Reducing Internet Transport Latency (RITE) project
@@ -3668,19 +3678,6 @@ MSS/SAFETY_FACTOR+--------------+    safest
       Architecture for a Middleboxed Internet (MAMI), and by the Swiss State
       Secretariat for Education, Research, and Innovation under contract no.
       15.0268. This support does not imply endorsement.</t>
-    </section>
-
-    <section anchor="accecn_Contributors" numbered="false"
-             title="Contributors">
-      <t>The following contributed implementations of AccECN that validated
-      and helped to improve this specification:<list style="hanging">
-          <t hangText="Linux:">Mirja K&uuml;hlewind, Ilpo J&auml;rvinen, Neal
-          Cardwell and Chia-Yu Chang;</t>
-
-          <t hangText="FreeBSD:">Richard Scheffenegger;</t>
-
-          <t hangText="Apple OSs:">Vidhi Goel.</t>
-        </list></t>
     </section>
 
     <!-- ================================================================ -->
