@@ -3415,7 +3415,7 @@ MSS/SAFETY_FACTOR+--------------+    safest
                  +-------------------->
                                MSS     s
 
-]]></sourcecode>
+]]></artwork>
           </figure>
 
           <t>The following examples give the reasoning behind the algorithm,
