@@ -1921,7 +1921,7 @@ it MUST continue the connection even if the data sender does not disable sending
 
           <figure align="center" anchor="accecn_Fig_TCPopt"
                   title="The Two Alternative AccECN TCP Options">
-            <artwork><![CDATA[ 0                   1                   2                   3
+            <artwork align="center"><![CDATA[ 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |  Kind = 172   |  Length = 11  |          EE0B field           |
