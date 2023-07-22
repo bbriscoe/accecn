@@ -1934,7 +1934,7 @@ it MUST continue the connection even if the data sender does not disable sending
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Kind = 173   |  Length = 11  |          EE1B field           |
+|  Kind = 174   |  Length = 11  |          EE1B field           |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 | EE1B (cont'd) |           ECEB field                          |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1952,7 +1952,7 @@ it MUST continue the connection even if the data sender does not disable sending
           the fields are in network byte order (big-endian).</t>
 
           <t>When a Data Receiver sends an AccECN Option, it MUST set the Kind
-          field to 172 if using Order 0, or to 173 if using Order 1. These two
+          field to 172 if using Order 0, or to 174 if using Order 1. These two
           new TCP Option Kinds are registered in <xref
           target="accecn_IANA_Considerations"/> and called respectively
           AccECN0 and AccECN1.</t>
@@ -2868,7 +2868,7 @@ even though it uses existing TCP fields in unorthodox ways.
       which is now historic [RFC8311]."]</t>
 
       <t>This document also defines two new TCP options for AccECN, assigned
-      values of 172 and 173 (decimal) from the TCP option space. These values
+      values of 172 and 174 (decimal) from the TCP option space. These values
       are defined as:</t>
 
       <texttable suppress-title="true" title="New TCP Option assignments">
@@ -2888,7 +2888,7 @@ even though it uses existing TCP fields in unorthodox ways.
 
         <c>RFC XXXX</c>
 
-        <c>173</c>
+        <c>174</c>
 
         <c>N</c>
 
@@ -2909,7 +2909,7 @@ even though it uses existing TCP fields in unorthodox ways.
       allocated in the IANA "TCP Experimental Option Experiment Identifiers
       (TCP ExIDs)" registry. Even earlier experimental implementations used
       the single magic number 0xACCE (16 bits). Uses of these experimental
-      options SHOULD migrate to use the new option kinds (172 &amp; 173).</t>
+      options SHOULD migrate to use the new option kinds (172 &amp; 174).</t>
 
       <t>[TO BE REMOVED: IANA is requested to replace the references for all
       three of the above experimental options (0xACC0, 0xACC1 and 0xACCE) with
