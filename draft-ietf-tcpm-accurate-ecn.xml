@@ -1970,12 +1970,12 @@ it MUST continue the connection even if the data sender does not disable sending
           MUST indicate which fields are present as follows:</t>
 
           <texttable suppress-title="true"
-                     title="Fields included in AccECN TCP Options of each length and type">
+                     title="Fields included in AccECN TCP Options of each length and order">
             <ttcol>Length</ttcol>
 
-            <ttcol>Type 0</ttcol>
+            <ttcol>Order 0</ttcol>
 
-            <ttcol>Type 1</ttcol>
+            <ttcol>Order 1</ttcol>
 
             <c>11</c>
 
