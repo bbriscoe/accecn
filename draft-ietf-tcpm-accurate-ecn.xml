@@ -1261,14 +1261,14 @@ deliberately to reduce complexity.-->
         r.cep, r.ceb, r.e0b and r.e1b:<list style="symbols">
             <t>The Data Receiver MUST increment the CE packet counter (r.cep),
             for every Acceptable packet that it receives with the CE code
-            point in the IP ECN field, including CE marked control packets but
+            point in the IP ECN field, including CE marked control packets and retransmissions but
             excluding CE on SYN packets (SYN=1; ACK=0).</t>
 
             <t>A Data Receiver that supports sending of AccECN TCP Options
             MUST increment the r.ceb, r.e0b or r.e1b byte counters by the
             number of TCP payload octets in Acceptable packets marked with the
             CE, ECT(0) and ECT(1) codepoint in their IP-ECN field, including
-            any payload octets on control packets, but not including any
+            any payload octets on control packets and retransmissions, but not including any
             payload octets on SYN packets (SYN=1; ACK=0).</t>
           </list></t>
 
@@ -1671,7 +1671,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
             later in the connection might get mangled.</t>
 
             <t>Once a Data Sender has entered AccECN mode it is advised to
-            check whether it is receiving continuous CE marking. Specifying
+            check whether it is receiving continuous feedback of CE. Specifying
             exactly how to do this is beyond the scope of the present
             specification, but the sender might check whether the feedback for
             every packet it sends for the first three or four rounds indicates
