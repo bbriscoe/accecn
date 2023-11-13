@@ -1873,14 +1873,19 @@ it MUST continue the connection even if the data sender does not disable sending
               directions, any resulting ping-pong of ACKs will be rapidly
               damped.</t>
 
-              <t>Certain measures are necessary to prevent incoming ACKs of
-              ACKs being mistaken for duplicate ACKs in some circumstances.
-              However, ACKs of ACKs can only arise if the original ACKs are
-              ECN-capable. Therefore, it is not appropriate to define those
-              measures here. Instead any spec that allows ECN-capable pure
-              ACKs MUST make sending them conditional on measures to
-              distinguish ACKs of ACKs from DupACKs (see for example <xref
-              target="I-D.ietf-tcpm-generalized-ecn"/>).</t>
+              <t>In the above bidirectional scenario, incoming ACKs of ACKs
+              could be mistaken for duplicate ACKs. But ACKs of ACKs can be
+              distinguished from duplicate ACKs because they do not contain any
+              SACK blocks even when SACK has been negotiated. It is outside the
+              scope of this AccECN spec to normatively specify this additional
+              test for DupACKs, because ACKs of ACKs can only arise if the
+              original ACKs are ECN-capable. Instead any spec that allows
+              ECN-capable pure ACKs MUST make sending ACKs of ACKs conditional
+              on measures to distinguish ACKs of ACKs from DupACKs (see for
+              example <xref target="I-D.ietf-tcpm-generalized-ecn"/>). All that
+              is necessary here is to require that these ACKs of ACKs MUST NOT
+              contain any SACK blocks (which would normally not happen
+              anyway).</t>
             </section>
 
             <section anchor="accecn_ACE_Safety_S"
