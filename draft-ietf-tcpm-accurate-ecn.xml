@@ -46,7 +46,7 @@
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
 <rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-27" submissionType="IETF"
-     ipr="trust200902" updates="3168">
+     ipr="pre5378Trust200902" updates="3168">
   <front>
     <title abbrev="Accurate TCP-ECN Feedback">More Accurate Explicit
     Congestion Notification (ECN) Feedback in TCP</title>
@@ -210,7 +210,7 @@
       respond to congestion feedback, which is out of scope, but ultimately
       the motivation for accurate ECN feedback. Like Classic ECN feedback,
       AccECN can be used by standard Reno or CUBIC congestion control <xref
-      target="RFC5681"/> <xref target="I-D.ietf-tcpm-rfc8312bis"/> to respond
+      target="RFC5681"/> <xref target="RFC9438"/> to respond
       to the existence of at least one congestion notification within a round
       trip. Or, unlike Reno or CUBIC, AccECN can be used to respond to the
       extent of congestion notification over a round trip, as for example
@@ -3033,7 +3033,7 @@ even though it uses existing TCP fields in unorthodox ways.
 
       <?rfc include="reference.I-D.ietf-tcpm-generalized-ecn" ?>
 
-      <?rfc include="reference.I-D.ietf-tcpm-rfc8312bis" ?>
+      <?rfc include="reference.RFC.9438" ?>
 
       <?rfc include="reference.RFC.9040" ?>
 
