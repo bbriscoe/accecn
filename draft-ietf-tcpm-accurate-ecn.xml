@@ -226,7 +226,8 @@
       current experimental modifications to TCP, as well as SYN cookies.</t>
 
       <t>It is RECOMMENDED that the AccECN protocol is implemented alongside
-      SACK <xref target="RFC2018"/>.</t>
+      SACK <xref target="RFC2018"/>. If SACK is implemented with AccECN, DSACK
+      <xref target="RFC2883"/> MUST also be implemented.</t>
 
       <section title="Document Roadmap">
         <t>The following introductory section outlines the goals of AccECN
