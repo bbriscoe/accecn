@@ -1797,8 +1797,8 @@ it MUST continue the connection even if the data sender does not disable sending
             ambiguity.</t>
 
             <section anchor="accecn_ACE_Safety_R"
-                     title="Data Receiver Safety Procedures">
-              <t>The following rules define when a Data Receiver in AccECN
+                     title="Packet Receiver Safety Procedures">
+              <t>The following rules define when the receiver of a packet in AccECN
               mode emits an ACK:<list style="hanging">
                   <t hangText="Change-Triggered ACKs:">An AccECN Data Receiver
                   SHOULD emit an ACK whenever a data packet marked CE arrives
@@ -1812,10 +1812,10 @@ it MUST continue the connection even if the data sender does not disable sending
                   arrive, but the comparison with the previous packet includes
                   any packet, not just data packets.</t>
 
-                  <t hangText="Increment-Triggered ACKs:">An AccECN Data
-                  Receiver MUST emit an ACK if 'n' CE marks have arrived since
-                  the previous ACK. If there is newly delivered data to
-                  acknowledge, 'n' SHOULD be 2. If there is no newly delivered
+                  <t hangText="Increment-Triggered ACKs:">An AccECN receiver of a packet
+                  MUST emit an ACK if 'n' CE marks have arrived since
+                  the previous ACK. If there is data to
+                  acknowledge, 'n' SHOULD be 2. If there is no
                   data to acknowledge, 'n' SHOULD be 3 and MUST be no less
                   than 3. In either case, 'n' MUST be no greater than 7.</t>
                 </list>The above rules for when to send an ACK are designed to
@@ -1850,11 +1850,11 @@ it MUST continue the connection even if the data sender does not disable sending
               sender is in slow-start, then to implement change-triggered ACKs
               while the sender is in slow-start, and offload otherwise.</t>
 
-              <t>In a scenario where both endpoints support AccECN, if the
-              Data Receiver (B) has chosen to use ECN-capable pure ACKs (as
+              <t>In a scenario where both endpoints support AccECN, if host B
+              has chosen to use ECN-capable pure ACKs (as
               allowed in <xref target="RFC8311"/> experiments) and enough of
               these ACKs become CE-marked, then the 'Increment-Triggered ACKs'
-              rule ensures that the Data Sender (A) gives B sufficient
+              rule ensures that its peer (host A) gives B sufficient
               feedback about this congestion on the ACKs from B to A.
               Normally, for instance in a unidirectional data scenario from
               host A to B, the Data Sender (A) can piggyback that feedback on
@@ -1863,7 +1863,7 @@ it MUST continue the connection even if the data sender does not disable sending
               for at least every third CE-marked incoming ACK over the
               subsequent round trip.</t>
 
-              <t>Although TCP normally only ACKs newly delivered data, in this
+              <t>Although TCP normally only ACKs data segments, in this
               case the increment-triggered ACK rule makes it mandatory for A
               to emit ACKs of ACKs. This is justifiable because the ACKs in
               this case are ECN-capable and so, even though the ACKs of these
@@ -2998,6 +2998,8 @@ even though it uses existing TCP fields in unorthodox ways.
       <?rfc include="reference.RFC.2018" ?>
 
       <?rfc include="reference.RFC.2119" ?>
+
+      <?rfc include="reference.RFC.2883" ?>
 
       <?rfc include="reference.RFC.3168" ?>
 
