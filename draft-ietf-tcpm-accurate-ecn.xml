@@ -1814,9 +1814,9 @@ it MUST continue the connection even if the data sender does not disable sending
 
                   <t hangText="Increment-Triggered ACKs:">An AccECN receiver of a packet
                   MUST emit an ACK if 'n' CE marks have arrived since
-                  the previous ACK. If there is data to
-                  acknowledge, 'n' SHOULD be 2. If there is no
-                  data to acknowledge, 'n' SHOULD be 3 and MUST be no less
+                  the previous ACK. If there is unacknowledged data at the
+                  receiver, 'n' SHOULD be 2. If there is no unacknowledged data
+                  at the receiver, 'n' SHOULD be 3 and MUST be no less
                   than 3. In either case, 'n' MUST be no greater than 7.</t>
                 </list>The above rules for when to send an ACK are designed to
               be complemented by those in <xref
