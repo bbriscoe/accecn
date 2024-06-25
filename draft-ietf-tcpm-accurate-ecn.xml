@@ -46,7 +46,7 @@
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
 <rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-29" submissionType="IETF"
-     ipr="pre5378Trust200902" updates="3168">
+     ipr="pre5378Trust200902" updates="3168" xmlns:xi="http://www.w3.org/2001/XInclude">
   <front>
     <title abbrev="Accurate TCP-ECN Feedback">More Accurate Explicit
     Congestion Notification (ECN) Feedback in TCP</title>
@@ -2506,6 +2506,30 @@ even though it uses existing TCP fields in unorthodox ways.
           large class of middleboxes (even though it is often a function of a
           host's network interface and rarely in its own 'box').</t>
 
+          <t>Offloading can happen in the transmit path, usually referred to as
+          TCP Segmentation Offload (TSO), and the receive path where it is called
+          Large Receive Offload (LRO).</t>
+
+          <t>In the transmit direction, all segments sent should retain the
+          same ACE field with Accurate ECN. Most TSO hardware currently available
+          may need some minor driver changes, to adjust the bitmask for first, middle
+          and last segment processed with TSO, when the hardware has <xref target="RFC3168"/>
+          support. For <xref target="RFC3168"/>, the CWR bit is usually masked out on
+          the middle and last segment. This would change the ACE field, and would be
+          interpreted as having received numerous CE marks in the receive direction.</t>
+
+          <t>Initially, when <xref target="RFC3168"/> and Accurate ECN flows coexist
+          on the same Offloading engine, this may cause some issues - and the host
+          software may need to work around incompatibilities (e.g. only global configurable
+          TSO TCP Flag bitmasks). One way around this could be to only negotiate for
+          Accurate ECN, but not offer a fall back to <xref target="RFC3168"/> ECN.
+          Another way could be to allow TSO only as long as the CWR flag in the TCP header
+          is not set - at the cost of more processing overhead while the ACE
+          field has this bit set.</t>
+
+          <t>For LRO in the receive direction, a different issue may get
+          exposed with <xref target="RFC3168"/> ECN supporting hardware.</t>
+
           <t>The ACE field changes with every received CE marking, so today's
           receive offloading could lead to many interrupts in high congestion
           situations. Although that would be useful (because congestion
@@ -2993,61 +3017,63 @@ even though it uses existing TCP fields in unorthodox ways.
     <!-- ================================================================ -->
 
     <references title="Normative References">
-      <?rfc include="reference.RFC.9293" ?>
 
-      <?rfc include="reference.RFC.2018" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9293.xml"/>
 
-      <?rfc include="reference.RFC.2119" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2018.xml"/>
 
-      <?rfc include="reference.RFC.2883" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
 
-      <?rfc include="reference.RFC.3168" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2883.xml"/>
 
-      <?rfc include="reference.RFC.5961" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3168.xml"/>
 
-      <?rfc include="reference.RFC.8174" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5961.xml"/>
+
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
+
     </references>
 
     <references title="Informative References">
-      <?rfc include="reference.RFC.3449" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3449.xml"/>
 
-      <?rfc include="reference.RFC.3540" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3540.xml"/>
 
-      <?rfc include="reference.RFC.4987" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4987.xml"/>
 
-      <?rfc include="reference.RFC.5562" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5562.xml"/>
 
-      <?rfc include="reference.RFC.5681" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5681.xml"/>
 
-      <?rfc include="reference.RFC.5690" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5690.xml"/>
 
-      <?rfc include="reference.RFC.5925" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5925.xml"/>
 
-      <?rfc include="reference.RFC.8684" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8684.xml"/>
 
-      <?rfc include="reference.RFC.6994" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6994.xml"/>
 
-      <?rfc include="reference.RFC.7323" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7323.xml"/>
 
-      <?rfc include="reference.RFC.7560" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7560.xml"/>
 
-      <?rfc include="reference.RFC.7413" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7413.xml"/>
 
-      <?rfc include="reference.RFC.7713" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7713.xml"/>
 
-      <?rfc include="reference.RFC.8257" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8257.xml"/>
 
-      <?rfc include="reference.RFC.8311" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8311.xml"/>
 
       <?rfc include="reference.I-D.ietf-tcpm-generalized-ecn" ?>
 
-      <?rfc include="reference.RFC.9438" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9438.xml"/>
 
-      <?rfc include="reference.RFC.9040" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9040.xml"/>
 
-      <?rfc include="reference.RFC.8511" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8511.xml"/>
 
-      <?rfc include="reference.RFC.9330" ?>
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9330.xml"/>
 
       <reference anchor="Mandalari18">
         <front>
