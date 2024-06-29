@@ -45,7 +45,7 @@
 <!-- HTML formatting control -->
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
-<rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-29" submissionType="IETF"
+<rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-30" submissionType="IETF"
      ipr="pre5378Trust200902" updates="3168" xmlns:xi="http://www.w3.org/2001/XInclude">
   <front>
     <title abbrev="Accurate TCP-ECN Feedback">More Accurate Explicit
@@ -2510,20 +2510,28 @@ even though it uses existing TCP fields in unorthodox ways.
           TCP Segmentation Offload (TSO), and the receive path where it is called
           Large Receive Offload (LRO).</t>
 
-          <t>In the transmit direction, all segments sent should retain the
-          same ACE field with Accurate ECN. Most TSO hardware currently available
-          may need some minor driver changes, to adjust the bitmask for first, middle
-          and last segment processed with TSO, when the hardware has <xref target="RFC3168"/>
-          support. For <xref target="RFC3168"/>, the CWR bit is usually masked out on
-          the middle and last segment. This would change the ACE field, and would be
-          interpreted as having received numerous CE marks in the receive direction.</t>
+          <t>In the transmit direction, with AccECN, all segments created from
+          the same super-segment should retain the same ACE field, which should
+          make TSO straighforward.</t>
 
-          <t>Initially, when <xref target="RFC3168"/> and Accurate ECN flows coexist
-          on the same Offloading engine, this may cause some issues - and the host
-          software may need to work around incompatibilities (e.g. only global configurable
-          TSO TCP Flag bitmasks). One way around this could be to only negotiate for
-          Accurate ECN, but not offer a fall back to <xref target="RFC3168"/> ECN.
-          Another way could be to allow TSO only as long as the CWR flag in the TCP header
+          <t>However, with TSO hardware that supports <xref target="RFC3168"/>,
+          the CWR bit is usually masked out on the middle and last segment.
+          If applied to an AccECN segment, this would change the ACE field, and
+          would be interpreted as having received numerous CE marks in the
+          receive direction. Therefore, currently available TSO hardware with
+          <xref target="RFC3168"/> support may need some minor driver changes,
+          to adjust the bitmask for the first, middle and last segment processed
+          with TSO.</t>
+
+          <t>Initially, when <xref target="RFC3168"/> and Accurate ECN flows
+          coexist on the same offloading engine, the host software may need to
+          work around incompatibilities (e.g. when only global configurable
+          TSO TCP Flag bitmasks are available), otherwise this would cause some
+          issues.</t>
+
+          <t>One way around this could be to only negotiate for Accurate ECN,
+          but not offer a fall back to <xref target="RFC3168"/> ECN. Another way
+          could be to allow TSO only as long as the CWR flag in the TCP header
           is not set - at the cost of more processing overhead while the ACE
           field has this bit set.</t>
 
