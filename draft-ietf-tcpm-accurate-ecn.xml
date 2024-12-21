@@ -45,7 +45,7 @@
 <!-- HTML formatting control -->
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
-<rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-30" submissionType="IETF"
+<rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-31" submissionType="IETF"
      ipr="pre5378Trust200902" updates="3168" xmlns:xi="http://www.w3.org/2001/XInclude">
   <front>
     <title abbrev="Accurate TCP-ECN Feedback">More Accurate Explicit
@@ -225,9 +225,6 @@
       compatible with current commonly used TCP options, and a number of
       current experimental modifications to TCP, as well as SYN cookies.</t>
 
-      <t>It is RECOMMENDED that the AccECN protocol is implemented alongside
-      SACK <xref target="RFC2018"/>. If SACK is implemented with AccECN, DSACK
-      <xref target="RFC2883"/> MUST also be implemented.</t>
 
       <section title="Document Roadmap">
         <t>The following introductory section outlines the goals of AccECN
@@ -323,8 +320,23 @@
 
       <section anchor="accecn_Recap"
                title="Recap of Existing ECN feedback in IP/TCP">
-        <t>ECN <xref target="RFC3168"/> uses a two bit field in the IP header.
-        Once ECN has been negotiated for a transport layer connection, the
+        <t>Explicit Congestion Notification (ECN) <xref target="RFC3168"/>
+        can be split into two parts conceptionally. In the forward direction,
+        alongside the data stream, it uses a two bit field in the IP header.
+        This is  referred to as IP-ECN later on. This signal carried in the
+        IP (Layer 3) header is exposed to network devices and may be modified
+        when such a device starts to expirience congestion (see <xref
+        target="accecn_Tab_ECN"/>). The second part is the feedback mechanism,
+        by which the original data sender is notified of the current congestion
+        state of the intermediate path. That returned signal is carried in a
+        protocol specific manner, and is not to be modified by intermediate
+        network devices. While ECN is in active use for protocols such as
+        QUIC <xref target="RFC9000"/>, SCTP <xref target="RFC9260"/>,
+        RTP <xref target="RFC6679"/> and Remote Direct Access Memory over
+        Converged Ethernet <xref target="RoCEv2"/>, this document only concerns
+        itself with the specific implementation for the TCP protocol.</t>
+
+        <t>Once ECN has been negotiated for a transport layer connection, the
         Data Sender for either half-connection can set two possible codepoints
         (ECT(0) or ECT(1)) in the IP header of a data packet to indicate an
         ECN-capable transport (ECT). If the ECN codepoint is 0b00, the packet
@@ -371,7 +383,8 @@
         </texttable>
 
         <t>In the TCP header the first two bits in byte 14 (the TCP header
-        flags at bit offsets 8 and 9 labelled CWR and ECE in <xref
+        flags at bit offsets 8 and 9 labelled Congestion Window Reduced (CWR)
+        and Explicit Congestion notification Echo (ECE) in <xref
         target="accecn_Fig_TCPHdr"/>) are defined as flags for the use of
         Classic ECN <xref target="RFC3168"/>. A TCP Client indicates that it
         supports Classic ECN feedback by setting (CWR,ECE) = (1,1) in the SYN,
@@ -433,9 +446,12 @@
           <t>a supplementary part using one of two new alternative AccECN TCP
           Options that provide additional feedback on the number of bytes that
           arrive marked with each of the three ECN codepoints in the IP-ECN
-          field (not just CE marks). This provides greater resilience against
-          ACK loss than the essential feedback, but it is currently more
-          likely to suffer from middlebox interference.</t>
+          field (not just CE marks). See <xref target="RFC7141"/> for the
+          rationale for conveying congested bytes is preferred over just
+          providing feedback about congested packets. This also provides
+          greater resilience against ACK loss than the essential feedback,
+          but it is currently more likely to suffer from middlebox
+          interference.</t>
         </list>The two part design was necessary, given limitations on the
       space available for TCP options and given the possibility that certain
       incorrectly designed middleboxes might prevent TCP using any new
@@ -451,7 +467,8 @@
           space is approaching saturation;</t>
 
           <t>a single upgrade path for the TCP protocol is preferable to a
-          fork in the design;</t>
+          fork in the design which modifies the TCP header to convey all
+          ECN feedback;</t>
 
           <t>otherwise Classic and accurate ECN feedback could give
           conflicting feedback about the same segment, which could open up new
@@ -686,6 +703,12 @@ deliberately to reduce complexity.-->
           <t>The procedures to follow for retransmission of SYNs or SYN/ACKs
           are given in <xref
           target="accecn_sec_multiple_SYNs_or_SYN-ACKs"/>.</t>
+
+          <t>It is RECOMMENDED that the AccECN protocol is implemented
+          alongside SACK <xref target="RFC2018"/>. If SACK is implemented
+          with AccECN, DSACK <xref target="RFC2883"/> MUST also be
+          implemented.</t>
+
         </section>
 
         <section anchor="accecn_sec_backward_compat"
@@ -947,8 +970,8 @@ deliberately to reduce complexity.-->
             deployment scenarios where AccECN path traversal might be
             problematic, the TCP Client SHOULD send subsequent retransmissions
             of the SYN with the three TCP-ECN flags cleared (AE,CWR,ECE) =
-            (0,0,0). Such a retransmitted SYN MUST use the same ISN as the
-            original SYN.</t>
+            (0,0,0). Such a retransmitted SYN MUST use the same initial
+            sequence number (ISN) as the original SYN.</t>
 
             <t>Retrying once before fall-back adds delay in the case where a
             middlebox drops an AccECN (or ECN) SYN deliberately. However,
@@ -1179,11 +1202,11 @@ deliberately to reduce complexity.-->
               <t>Any implementation that supports AccECN:<list style="symbols">
                   <t>MUST NOT set ECT if it is in Not ECN feedback mode.</t>
                 </list>A Data Sender in AccECN mode:<list style="symbols">
-                  <t>can set an ECT codepoint in the IP header of packets to
+                  <t>SHOULD set an ECT codepoint in the IP header of packets to
                   indicate to the network that the transport is capable and
                   willing to participate in ECN for this packet;</t>
 
-                  <t>does not have to set ECT on any packet (for instance if
+                  <t>MAY not set ECT on any packet (for instance if
                   it has reason to believe such a packet would be
                   blocked);</t>
                 </list>A TCP Server in AccECN mode:<list style="symbols">
@@ -1630,34 +1653,38 @@ deliberately to reduce complexity.-->
 
           <section anchor="accecn_sec_ecn-mangling"
                    title="Testing for Mangling of the IP/ECN Field">
-            <t>The value of the TCP-ECN flags on the SYN/ACK indicates the
-            value of the IP-ECN field when the SYN arrived at the Server. The
-            TCP Client can compare this with how it originally set the IP-ECN
-            field on the SYN. If this comparison implies an invalid transition
-            (defined below) of the IP-ECN field, for the remainder of the
-            half-connection the Client is advised to send non-ECN-capable
-            packets, but it still ought to respond to any feedback of CE
-            markings (explained below). However, the TCP Client MUST remain in
-            the AccECN feedback mode and it MUST continue to feed back any ECN
-            markings on arriving packets (in its role as Data Receiver). <!--There is no need to say the following for forward compatibility:
+            <t><list style="symbols">
+              <t>TCP Client side:<vspace
+              blankLines="1"/>The value of the TCP-ECN flags on the SYN/ACK indicates the
+              value of the IP-ECN field when the SYN arrived at the Server. The
+              TCP Client can compare this with how it originally set the IP-ECN
+              field on the SYN. If this comparison implies an invalid transition
+              (defined below) of the IP-ECN field, for the remainder of the
+              half-connection the Client is advised to send non-ECN-capable
+              packets, but it still ought to respond to any feedback of CE
+              markings (explained below). However, the TCP Client MUST remain in
+              the AccECN feedback mode and it MUST continue to feed back any ECN
+              markings on arriving packets (in its role as Data Receiver). <!--There is no need to say the following for forward compatibility:
 "If the server deliberately sends false feedback in the ACE field that implies an unsafe transition, 
 it MUST continue the connection 
 even if the client does not disable sending ECN-capable packets"--></t>
 
-            <t>The value of the ACE field on the last ACK of the 3WHS
-            indicates the value of the IP-ECN field when the SYN/ACK arrived
-            at the TCP Client. The Server can compare this with how it
-            originally set the IP-ECN field on the SYN/ACK. If this comparison
-            implies an invalid transition of the IP-ECN field, for the
-            remainder of the half-connection the Server is advised to send
-            non-ECN-capable packets, but it still ought to respond to any
-            feedback of CE markings (explained below). However, the Server
-            MUST remain in the AccECN feedback mode and it MUST continue to
-            feed back any ECN markings on arriving packets (in its role as
-            Data Receiver).<!--There is no need to say the following for forward compatibility:
+              <t>TCP Server side:<vspace
+              blankLines="1"/>The value of the ACE field on the last ACK of the three-way handshake (3WHS)
+              indicates the value of the IP-ECN field when the SYN/ACK arrived
+              at the TCP Client. The Server can compare this with how it
+              originally set the IP-ECN field on the SYN/ACK. If this comparison
+              implies an invalid transition of the IP-ECN field, for the
+              remainder of the half-connection the Server is advised to send
+              non-ECN-capable packets, but it still ought to respond to any
+              feedback of CE markings (explained below). However, the Server
+              MUST remain in the AccECN feedback mode and it MUST continue to
+              feed back any ECN markings on arriving packets (in its role as
+              Data Receiver).<!--There is no need to say the following for forward compatibility:
 "If the client deliberately sends false feedback in the ACE field that implies an unsafe transition, 
 it MUST continue the connection 
 even if the server does not disable sending ECN-capable packets"--></t>
+            </list></t>
 
             <t>If a Data Sender in AccECN mode starts sending non-ECN-capable
             packets because it has detected mangling, it is still advised to
@@ -1687,7 +1714,8 @@ even if the server does not disable sending ECN-capable packets"--></t>
             continuous is not stated normatively (in capitals), because the
             best strategy might depend on experience of the most likely types
             of mangling, which can only be known at the time of
-            deployment.</t>
+            deployment. The same is true for other forms of mangling (or resumption
+            of expected marking) during later stages of a connection.</t>
 
             <t>As always, once a host has entered AccECN mode, it follows the
             general mandatory requirements (<xref
@@ -1956,6 +1984,16 @@ it MUST continue the connection even if the data sender does not disable sending
           but in the opposite order. On each packet, the Data Receiver can use
           whichever order is more efficient. In either case, the bytes within
           the fields are in network byte order (big-endian).</t>
+
+          <t>The choice to use three bytes (24 bits) fields in the options was made to
+          strike a balance between TCP option space usage, and the required
+          fidelity of the counters to accomodate typical scenarios such as
+          hardware TCP segmentation offloading (TSO), and periods where no option may
+          be transmitted (e.g. SACK loss recovery). Providing only 2 bytes (16 bits)
+          for these counters could easily roll over within a single TSO transmission
+          or large/generic receive offload (LRO/GRO) event. Having two distinct
+          orderings further allows the transmission of the most pertinent changes
+          in an abbreviated option (see below).</t>
 
           <t>When a Data Receiver sends an AccECN Option, it MUST set the Kind
           field to 172 if using Order 0, or to 174 if using Order 1. These two
@@ -2963,7 +3001,7 @@ even though it uses existing TCP fields in unorthodox ways.
     <!-- ================================================================ -->
 
     <section anchor="accecn_Security_Considerations"
-             title="Security Considerations">
+             title="Security and Privacy Considerations">
       <t>If ever the supplementary part of AccECN based on one of the new
       AccECN TCP Options is unusable (due for example to middlebox
       interference) the essential part of AccECN's congestion feedback offers
@@ -3018,6 +3056,30 @@ even though it uses existing TCP fields in unorthodox ways.
       advantage of this behaviour, which seems to always degrade its own
       performance. However, the concern is mentioned here for
       completeness.</t>
+
+      <t>A generic privacy concern of any new protocol is that for a while
+      it will be used by a small population of hosts, and thus show up more
+      easily. However, it is expected that this option will become available
+      in operating systems over time, and eventually turned on by default
+      in them. Thus a individual identification of a particular user is
+      less of a concern than the fingerprinting of specific versions of
+      operation systems. However, the latter can be done using different
+      means independent of Accurate ECN.</t>
+
+      <t>As Accurate ECN exposes more bits in the TCP header which could
+      be tampered with without interfering with the transport excessively,
+      it may allow an additional way to identify specific
+      data streams across a virtual private network (VPN) to an attacker which
+      has access to the datastream before and after the VPN tunnel endpoints.
+      This may be achieved by injecting or modifying the ACE field in specific
+      patters that can be recognized.</t>
+
+      <t>Overall, Accurate ECN does not change the risk profile on privacy to
+      a user dramatically beyond what is already possible using classic ECN.
+      However, in order to prevent such attacks and means of easier identification
+      of flows, it is adviseable for privacy conscious users behind VPNs to
+      not enable the accurate ECN, or classic ECN for that matter.</t>
+
     </section>
   </middle>
 
@@ -3075,6 +3137,14 @@ even though it uses existing TCP fields in unorthodox ways.
 
       <?rfc include="reference.I-D.ietf-tcpm-generalized-ecn" ?>
 
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7141.xml"/>
+
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9260.xml"/>
+
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9000.xml"/>
+
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6679.xml"/>
+
       <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9438.xml"/>
 
       <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9040.xml"/>
@@ -3082,6 +3152,18 @@ even though it uses existing TCP fields in unorthodox ways.
       <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8511.xml"/>
 
       <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9330.xml"/>
+
+      <reference anchor="RoCEv2">
+        <front>
+          <title>InfiniBand Architecture Specification Volume 1, Release 1.4</title>
+          <author>
+            <organization>InfiniBand Trade Association</organization>
+          </author>
+          <date year="2020"/>
+        </front>
+        <format target="https://www.infinibandta.org/ibta-specification/" />
+        <!-- https://cw.infinibandta.org/document/dl/7781"/> --> 
+      </reference>
 
       <reference anchor="Mandalari18">
         <front>
