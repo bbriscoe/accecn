@@ -3556,7 +3556,7 @@ MSS/SAFETY_FACTOR+--------------+    safest
           </figure>
 
           <t>The following examples give the reasoning behind the algorithm,
-          assuming MSS=1460 [B]:<list style="symbols">
+          assuming MSS=1460 :<list style="symbols">
               <t>if d.cep=0, dSafer.cep=8 and d.ceb=1460, then s=infinity and
               sSafer=182.5.<vspace blankLines="0"/>Therefore even though the
               average size of 8 data segments is unlikely to have been as
