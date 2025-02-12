@@ -167,9 +167,13 @@
       an update to the ECN feedback scheme of RFC 3168 that provides more
       accurate information and could be used by these and potentially other
       future TCP extensions, while still also supporting the pre-existing TCP
-      congestion controllers that use just one feedback signal per round. A
-      fuller treatment of the motivation for this specification is given in
-      the associated requirements document <xref target="RFC7560"/>.</t>
+      congestion controllers that use just one feedback signal per round.
+      Congestion control is the term the IETF uses to describe data rate
+      management. It is the algorithm that a sender uses to optimize its
+      sending rate so that it transmits data as dast as the network can
+      carry it, but no faster. A fuller treatment of the motivation for
+      this specification is given in the associated requirements document
+      <xref target="RFC7560"/>.</t>
 
       <t>This document specifies a standards track scheme for ECN feedback in
       the TCP header to provide more than one feedback signal per RTT. It will
@@ -215,9 +219,10 @@
       trip. Or, unlike Reno or CUBIC, AccECN can be used to respond to the
       extent of congestion notification over a round trip, as for example
       DCTCP does in controlled environments <xref target="RFC8257"/>. For
-      congestion response, this specification refers to <xref
-      target="RFC3168"/>, as updated to allow ECN experiments like those
-      referred to in <xref target="RFC8311"/>, namely: a TCP-based Low Latency
+      congestion response, this specification refers to the original ECN
+      specificiation adopted in 2001 <xref target="RFC3168"/>, as updated
+      by the more relaxed rules introduced in 2018 to allow ECN experiments
+      <xref target="RFC8311"/>, namely: a TCP-based Low Latency
       Low Loss Scalable (L4S) congestion control <xref target="RFC9330"/>; or
       Alternative Backoff with ECN (ABE) <xref target="RFC8511"/>.</t>
 
@@ -444,10 +449,10 @@
           feedback, but limited resilience against ACK loss;</t>
 
           <t>a supplementary part using one of two new alternative AccECN TCP
-          Options that provide additional feedback on the number of bytes that
-          arrive marked with each of the three ECN codepoints in the IP-ECN
+          options that provide additional feedback on the number of payload bytes
+          that arrive marked with each of the three ECN codepoints in the IP-ECN
           field (not just CE marks). See <xref target="RFC7141"/> for the
-          rationale for conveying congested bytes is preferred over just
+          rationale for conveying congested payload bytes is preferred over just
           providing feedback about congested packets. This also provides
           greater resilience against ACK loss than the essential feedback,
           but it is currently more likely to suffer from middlebox
@@ -502,9 +507,11 @@
       <section title="Feedback Mechanism">
         <t>A Data Receiver maintains four counters initialized at the start of
         the half-connection. Three count the number of arriving payload bytes
-        marked CE, ECT(1) and ECT(0) in the IP-ECN field. The fourth counts
-        the number of packets arriving marked with a CE codepoint (including
-        control packets without payload if they are CE-marked).</t>
+        marked CE, ECT(1) and ECT(0) in the IP-ECN field. These byte counters
+        reflect only the TCP payload length, excluding the TCP header or TCP
+        options. The fourth counter counts the number of packets arriving
+        marked with a CE codepoint (including control packets without payload
+        if they are CE-marked).</t>
 
         <t>The Data Sender maintains four equivalent counters for the half
         connection, and the AccECN protocol is designed to ensure they will
@@ -1806,7 +1813,7 @@ it MUST continue the connection even if the data sender does not disable sending
             genuinely zero (without middlebox interference). This would cause
             a host to unnecessarily disable ECN for a half connection.
             Therefore, in environments where there is no evidence of the ACE
-            field being zeroed, implementations can skip this test.</t>
+            field being zeroed, implementations MAY skip this test.</t>
 
             <t>Note that the Data Sender MUST NOT test whether the arriving
             counter in the initial ACE field has been initialized to a
@@ -1855,7 +1862,7 @@ it MUST continue the connection even if the data sender does not disable sending
               as one event, e.g.&nbsp;using large receive offload (LRO) or
               generic receive offload (GRO), both the above rules SHOULD be
               interpreted as requiring multiple ACKs to be emitted
-              back-to-back (for each transition and for each repetition by 'n'
+              back-to-back (for each transition and for each sequence of 'n'
               CE marks). If this is problematic for high performance, either
               rule can be interpreted as requiring just a single ACK at the
               end of the whole receive event.</t>
@@ -2013,7 +2020,7 @@ it MUST continue the connection even if the data sender does not disable sending
           fields and includes any field that has changed. The length field
           MUST indicate which fields are present as follows:</t>
 
-          <texttable suppress-title="true"
+          <texttable suppress-title="true" anchor="accecn_Fig_TCPopttab"
                      title="Fields included in AccECN TCP Options of each length and order">
             <ttcol>Length</ttcol>
 
@@ -2359,18 +2366,24 @@ even if the data sender does not disable sending ECN-capable packets."--></t>
             importance, but the final decision has to be
             implementation-dependent, because tradeoffs will alter as new TCP
             options are defined and new use-cases arise.<list style="hanging">
-                <t hangText="Necessary Option Length:">The Data Receiver MUST
-                only include an AccECN TCP Option on a packet if it includes
-                all the counter(s) that have incremented since the previous
-                AccECN Option. It MUST only truncate unchanged fields from the
-                right-hand tail of the option to preserve the order of the
-                remaining fields (see <xref target="accecn_option"/>);</t>
+                <t hangText="Necessary Option Length:">When TCP option space
+                is limited, an AccECN TCP option MAY be truncated to omit one
+                or two fields from the end of the option, as indicated by the
+                permitted variants listed in
+                <xref target="accecn_Fig_TCPopttab"/>, provided that the
+                counter(s) that have changed since the previous AccECN TCP
+                option are not omitted.<vspace blankLines="1"/>
+                If there is insufficient space to include an AccECN TCP
+                option containing the counter(s) that have changed since
+                the previous AccECN TCP option, then the entire AccECN
+                TCP option MUST be omitted. (see <xref target="accecn_option"/>);</t>
 
                 <t hangText="Change-Triggered AccECN TCP Options:">If an
                 arriving packet increments a different byte counter to that
                 incremented by the previous packet, the Data Receiver SHOULD
                 feed it back in an AccECN Option on the next scheduled ACK.
-                <vspace blankLines="1"/>For the avoidance of doubt, this rule
+                <vspace blankLines="1"/>
+                For the avoidance of doubt, this rule
                 does not concern the arrival of control packets with no
                 payload, because they cannot alter any byte counters.</t>
 
@@ -2389,7 +2402,7 @@ even if the data sender does not disable sending ECN-capable packets."--></t>
                     counter is incrementing and it MAY include an AccECN
                     Option if r.ec0b or r.ec1b is incrementing</t>
 
-                    <t>It SHOULD, include each counter at least once for every
+                    <t>It SHOULD include each counter at least once for every
                     2^22 bytes incremented to prevent overflow during
                     continual repetition.</t>
                   </list></t>
@@ -2472,7 +2485,7 @@ even if the data sender does not disable sending ECN-capable packets."--></t>
           values of the byte-counter fields match those in <xref
           target="accecn_init_counters"/>. This is because blocking apparently
           invalid values prevents the standardized set of values being
-          extended in future (given outdated normalizers would block updated
+          extended in future (such outdated normalizers would block updated
           hosts from using the extended AccECN standard).</t>
 
           <t>A TCP normalizer is likely to block or alter an AccECN TCP Option
@@ -2539,7 +2552,7 @@ even though it uses existing TCP fields in unorthodox ways.
           loss during overload more generally.</t>
         </section>
 
-        <section title="Requirements for TCP Segmentation Offload">
+        <section title="Requirements for TCP Segmentation Offload and Large Receive Offload">
           <t>Hardware to offload certain TCP processing represents another
           large class of middleboxes (even though it is often a function of a
           host's network interface and rarely in its own 'box').</t>
@@ -2561,7 +2574,7 @@ even though it uses existing TCP fields in unorthodox ways.
           to adjust the bitmask for the first, middle and last segment processed
           with TSO.</t>
 
-          <t>Initially, when <xref target="RFC3168"/> and Accurate ECN flows
+          <t>Initially, when traditional ECN <xref target="RFC3168"/> and Accurate ECN flows
           coexist on the same offloading engine, the host software may need to
           work around incompatibilities (e.g. when only global configurable
           TSO TCP Flag bitmasks are available), otherwise this would cause some
