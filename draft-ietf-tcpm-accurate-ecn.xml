@@ -170,7 +170,7 @@
       congestion controllers that use just one feedback signal per round.
       Congestion control is the term the IETF uses to describe data rate
       management. It is the algorithm that a sender uses to optimize its
-      sending rate so that it transmits data as dast as the network can
+      sending rate so that it transmits data as fast as the network can
       carry it, but no faster. A fuller treatment of the motivation for
       this specification is given in the associated requirements document
       <xref target="RFC7560"/>.</t>
@@ -2574,7 +2574,7 @@ even though it uses existing TCP fields in unorthodox ways.
           to adjust the bitmask for the first, middle and last segment processed
           with TSO.</t>
 
-          <t>Initially, when traditional ECN <xref target="RFC3168"/> and Accurate ECN flows
+          <t>Initially, when classic ECN <xref target="RFC3168"/> and Accurate ECN flows
           coexist on the same offloading engine, the host software may need to
           work around incompatibilities (e.g. when only global configurable
           TSO TCP Flag bitmasks are available), otherwise this would cause some
