@@ -1755,7 +1755,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
             packets.</t>
 
             <t>Invalid transitions of the IP-ECN field are defined in section
-            18 of <xref target="RFC3168"/> and repeated here for
+            18 of the Classic ECN specification <xref target="RFC3168"/> and repeated here for
             convenience:<list style="symbols">
                 <t>the not-ECT codepoint changes;</t>
 
