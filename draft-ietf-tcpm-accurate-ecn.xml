@@ -457,7 +457,7 @@
           options that provide additional feedback on the number of payload bytes
           that arrive marked with each of the three ECN codepoints in the IP-ECN
           field (not just CE marks). See the BCP on Byte and Packet Congestion
-          Notification <xref target="RFC7141"/> for the rationale determining than
+          Notification <xref target="RFC7141"/> for the rationale determining that
           conveying congested payload bytes should be preferred over just
           providing feedback about congested packets. This also provides
           greater resilience against ACK loss than the essential feedback,
