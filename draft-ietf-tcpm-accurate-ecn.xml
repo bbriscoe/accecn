@@ -140,9 +140,7 @@
       bit previously assigned to the ECN-Nonce. It also overloads the two
       existing ECN flags in the TCP header. The resulting extra space is
       additionally exploited to feed back the IP-ECN field received during
-      the three-way handshake that is used to establish the TCP connection as
-      described in the TCP protocol specification RFC 9293 and the Classic ECN
-      specification RFC 3168.
+      the TCP connection establishment.
       Supplementary feedback information can optionally be
       provided in two new TCP option alternatives, which are never used on the
       TCP SYN. The document also specifies the treatment of this updated TCP
@@ -312,7 +310,8 @@
             connection request (the listener).</t>
 
             <t hangText="Three-way handshake:">The procedure used to establish
-            a TCP connection. Abbreviated as 3WHS in this document.</t>
+            a TCP connection as described in the TCP protocol specification
+            <xref target="RFC9293"/>.</t>
 
             <t hangText="Data Receiver:">The endpoint of a TCP half-connection
             that receives data and sends AccECN feedback.</t>
@@ -347,8 +346,7 @@
         Converged Ethernet <xref target="RoCEv2"/>, this document only concerns
         itself with the specific implementation for the TCP protocol.</t>
 
-        <t>Once ECN has been negotiated for a transport layer connection using
-        the three-way connection establishment protocol, the
+        <t>Once ECN has been negotiated for a transport layer connection, the
         Data Sender for either half-connection can set two possible codepoints
         (ECT(0) or ECT(1)) in the IP header of a data packet to indicate an
         ECN-capable transport (ECT). If the ECN codepoint is 0b00, the packet
@@ -1685,7 +1683,7 @@ it MUST continue the connection
 even if the client does not disable sending ECN-capable packets"--></t>
 
               <t>TCP Server side:<vspace
-              blankLines="1"/>The value of the ACE field on the last ACK of the three-way handshake (3WHS)
+              blankLines="1"/>The value of the ACE field on the last ACK of the three-way handshake
               indicates the value of the IP-ECN field when the SYN/ACK arrived
               at the TCP Client. The Server can compare this with how it
               originally set the IP-ECN field on the SYN/ACK. If this comparison
@@ -1788,7 +1786,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
 
             <t>If AccECN has been successfully negotiated, the Data Sender MAY
             check the value of the ACE counter in the first feedback packet
-            (with or without data) that arrives after the 3-way handshake.
+            (with or without data) that arrives after the three-way handshake.
             If the value of this ACE field is found to be zero (0b000), for the
             remainder of the half-connection the Data Sender ought to send
             non-ECN-capable packets and it is advised not to respond to any
@@ -2147,7 +2145,7 @@ it MUST continue the connection even if the data sender does not disable sending
 
               <t>A TCP Client that has successfully negotiated AccECN SHOULD
               include an AccECN Option in the first ACK at the end of the
-              3WHS. However, this first ACK is not delivered reliably, so the
+              three-way handshake. However, this first ACK is not delivered reliably, so the
               TCP Client SHOULD also include an AccECN Option on the first
               data segment it sends (if it ever sends one).</t>
 
@@ -2919,7 +2917,7 @@ even though it uses existing TCP fields in unorthodox ways.
           Further, AccECN can be used to detect mangling of the IP ECN field;
           mangling of the TCP ECN flags; blocking of ECT-marked segments; and
           blocking of segments carrying an AccECN Option. It can detect these
-          conditions during TCP's 3WHS so that it can fall back to operation
+          conditions during TCP's three-way handshake so that it can fall back to operation
           without ECN and/or operation without AccECN Options.</t>
 
           <t hangText="Forward Compatibility:">The behaviour of endpoints and
@@ -3744,7 +3742,7 @@ MSS/SAFETY_FACTOR+--------------+    safest
         completely different ECN feedback approach is needed:<list
             style="hanging">
             <t hangText="Future AccECN variants:">When the AccECN capability
-            is negotiated during TCP's 3WHS, the rows in <xref
+            is negotiated during TCP's three-way handshake, the rows in <xref
             target="accecn_Tab_Negotiation"/> tagged as 'Nonce' and 'Broken'
             in the column for the capability of node B are unused by any
             current protocol in the RFC series. These could be used by TCP
@@ -3768,7 +3766,7 @@ MSS/SAFETY_FACTOR+--------------+    safest
             SYN=0 data packet from the Client and 7 unused values on the first
             SYN=0 data packet from the Server could be used to declare future
             variants of the AccECN protocol. The word 'declare' is used rather
-            than 'negotiate' because, at this late stage in the 3WHS, it would
+            than 'negotiate' because, at this late stage in the three-way handshake, it would
             be too late for a negotiation between the endpoints to be
             completed. A similar requirement not to reject unexpected initial
             values in AccECN TCP Options (<xref
