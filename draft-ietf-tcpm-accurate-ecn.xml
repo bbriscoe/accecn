@@ -193,10 +193,10 @@
       intended to offer a complete replacement for Classic TCP/ECN feedback,
       not a fork in the design of TCP. AccECN feedback complements TCP's loss
       feedback and it can coexist alongside hosts using Classic TCP/ECN
-      feedback. So its applicability is intended to include all public and
-      private IP networks (and even any non-IP networks over which TCP is
-      used), whether or not any nodes on the path support ECN, of whatever
-      flavour.</t>
+      feedback. So its applicability is intended to include the public Internet
+      as well as private IP network such as data centres (and even any non-IP
+      networks over which TCP is used), whether or not any nodes on the path
+      support ECN, of whatever flavour.</t>
 
       <t>AccECN feedback overloads the two existing ECN flags in the TCP
       header and allocates the currently reserved flag (previously called NS)
@@ -1809,7 +1809,7 @@ even if the server does not disable sending ECN-capable packets"--></t>
 "If a data receiver negotiates AccECN but then zeros the ACE field in its first segment with SYN=0, 
 it MUST continue the connection even if the data sender does not disable sending ECN-capable packets."--></t>
 
-            <t>If reordering occurs, "the first packet ... that arrives" will
+            <t>If reordering occurs, the first feedback packet that arrives will
             not necessarily be the same as the first packet in sequence order.
             The test has been specified loosely like this to simplify
             implementation, and because it would not have been any more
