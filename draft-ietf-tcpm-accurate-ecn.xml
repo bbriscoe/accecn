@@ -160,6 +160,10 @@
       an ECN-capable transport protocol feed back this information to the
       sender. In RFC 3168, ECN was specified for TCP in such a way that only
       one feedback signal could be transmitted per Round-Trip Time (RTT).
+      This is sufficient for congestion control scheme like Reno <xref
+      target="RFC6582"/> and Cubic <xref target="RFC9438"/>, as those schemes
+      reduce their congestion window by a fixed factor if congestion occurs
+      within an RTT independent of the number of received congestion markings.
       Recently, proposed mechanisms like Congestion Exposure (ConEx <xref
       target="RFC7713"/>), DCTCP <xref target="RFC8257"/> or L4S <xref
       target="RFC9330"/> need to know when more than one marking is received
