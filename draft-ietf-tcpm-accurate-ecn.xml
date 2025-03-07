@@ -45,7 +45,7 @@
 <!-- HTML formatting control -->
 <?rfc emoticonic="yes" ?>
 <!-- Default emoticonic="no" Doesn't prettify HTML format -->
-<rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-33" submissionType="IETF"
+<rfc category="std" consensus="yes" docName="draft-ietf-tcpm-accurate-ecn-34" submissionType="IETF"
      ipr="pre5378Trust200902" updates="3168" xmlns:xi="http://www.w3.org/2001/XInclude">
   <front>
     <title abbrev="Accurate TCP-ECN Feedback">More Accurate Explicit
@@ -3154,6 +3154,8 @@ even though it uses existing TCP fields in unorthodox ways.
 
       <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6994.xml"/>
 
+      <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6582.xml"/>
+
       <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7323.xml"/>
 
       <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7560.xml"/>
@@ -3166,7 +3168,7 @@ even though it uses existing TCP fields in unorthodox ways.
 
       <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8311.xml"/>
 
-      <?rfc include="reference.I-D.ietf-tcpm-generalized-ecn" ?>
+      <xi:include href="https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-tcpm-generalized-ecn.xml"/>
 
       <xi:include href="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7141.xml"/>
 
